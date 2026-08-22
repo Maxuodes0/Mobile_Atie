@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen>
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: EdgeInsetsDirectional.fromSTEB(
                   22,
-                  topHeight - 32,
+                  math.max(0.0, topHeight - 32),
                   22,
                   24,
                 ),

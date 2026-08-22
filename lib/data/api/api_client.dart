@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../config/app_config.dart';
 import 'api_exception.dart';
@@ -24,19 +25,21 @@ class ApiClient {
         ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          final cookieHeader = _cookies.buildCookieHeader();
+        onRequest: (options, handler) async {
+          await _cookies.ready;
+          final cookieHeader = _cookies.buildCookieHeader(options.path);
           if (cookieHeader.isNotEmpty) {
             options.headers['cookie'] = cookieHeader;
           }
           handler.next(options);
         },
-        onResponse: (response, handler) {
-          _captureSetCookie(response.headers);
+        onResponse: (response, handler) async {
+          await _captureSetCookie(response.headers);
+          _capturePermissionsVersion(response.headers);
           handler.next(response);
         },
-        onError: (err, handler) {
-          _captureSetCookie(err.response?.headers);
+        onError: (err, handler) async {
+          await _captureSetCookie(err.response?.headers);
           handler.next(err);
         },
       ),
@@ -45,6 +48,7 @@ class ApiClient {
 
   final Dio _dio;
   final CookieStore _cookies;
+  final ValueNotifier<int?> permissionsVersion = ValueNotifier<int?>(null);
 
   Future<bool>? _refreshing;
   String? _csrfToken;
@@ -55,7 +59,7 @@ class ApiClient {
   String get baseUrl => _dio.options.baseUrl;
 
   void clearSession() {
-    _cookies.clear();
+    unawaited(_cookies.clear());
     _csrfToken = null;
     clearCache();
   }
@@ -86,12 +90,13 @@ class ApiClient {
     Map<String, dynamic>? query,
     Duration? cacheTtl,
     bool forceRefresh = false,
+    Map<String, dynamic>? headers,
   }) async {
     final key = _cacheKey(path, query);
 
     if (cacheTtl == null) {
       return _runGetWithInflight(key, () async {
-        final res = await _request('GET', path, query: query);
+        final res = await _request('GET', path, query: query, headers: headers);
         return res.data;
       });
     }
@@ -106,7 +111,7 @@ class ApiClient {
     }
 
     final data = await _runGetWithInflight(key, () async {
-      final res = await _request('GET', path, query: query);
+      final res = await _request('GET', path, query: query, headers: headers);
       return res.data;
     });
     _getCache[key] =
@@ -157,12 +162,16 @@ class ApiClient {
     Map<String, dynamic>? query,
     bool retryOnAuthFailure = true,
     bool retryOnCsrfFailure = true,
+    Map<String, dynamic>? headers,
   }) async {
-    final options = Options(method: method);
+    final options = Options(method: method, headers: headers);
     if (!_isSafeMethod(method)) {
       final csrf = await _ensureCsrfToken();
       if (csrf != null && csrf.isNotEmpty) {
-        options.headers = <String, dynamic>{'x-csrf-token': csrf};
+        options.headers = <String, dynamic>{
+          ...?headers,
+          'x-csrf-token': csrf,
+        };
       }
     }
 
@@ -186,6 +195,7 @@ class ApiClient {
           query: query,
           retryOnCsrfFailure: false,
           retryOnAuthFailure: retryOnAuthFailure,
+          headers: headers,
         );
       }
 
@@ -199,6 +209,7 @@ class ApiClient {
             query: query,
             retryOnAuthFailure: false,
             retryOnCsrfFailure: retryOnCsrfFailure,
+            headers: headers,
           );
         }
       }
@@ -261,13 +272,21 @@ class ApiClient {
     }
   }
 
-  void _captureSetCookie(Headers? headers) {
+  Future<void> _captureSetCookie(Headers? headers) async {
     if (headers == null) return;
     final setCookies = headers.map['set-cookie'];
     if (setCookies == null || setCookies.isEmpty) return;
-    _cookies.updateFromSetCookieHeaders(setCookies);
+    await _cookies.updateFromSetCookieHeaders(setCookies);
     final csrf = _cookies.get('csrf_token');
     if (csrf != null && csrf.isNotEmpty) _csrfToken = csrf;
+  }
+
+  void _capturePermissionsVersion(Headers headers) {
+    final raw = headers.value('x-permissions-version');
+    final parsed = raw == null ? null : int.tryParse(raw);
+    if (parsed != null && parsed != permissionsVersion.value) {
+      permissionsVersion.value = parsed;
+    }
   }
 
   static String _normalizeBaseUrl(String url) {

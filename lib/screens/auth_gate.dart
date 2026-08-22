@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/app_services.dart';
 import '../data/models/user.dart';
 import 'app_shell.dart';
-import 'login_screen.dart';
+import 'onboarding_screen.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -35,7 +35,7 @@ class _AuthGateState extends State<AuthGate> {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return user == null ? const LoginScreen() : const AppShell();
+            return user == null ? const AiteOnboarding() : const AppShell();
           },
         );
       },
