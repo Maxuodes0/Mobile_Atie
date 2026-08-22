@@ -5,6 +5,6 @@ class AppConfig {
   // - Production: `https://full-coding-system-backend.onrender.com` (or your own domain)
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://full-coding-system-backend.onrender.com',
+    defaultValue: 'https://full-coding-system-backend-1.onrender.com',
   );
 }

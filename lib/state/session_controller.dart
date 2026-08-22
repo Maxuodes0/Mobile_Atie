@@ -13,7 +13,8 @@ class SessionController {
 
   final ValueNotifier<User?> user = ValueNotifier<User?>(null);
   final ValueNotifier<bool> restoring = ValueNotifier<bool>(false);
-  final ValueNotifier<AccessSnapshot?> access = ValueNotifier<AccessSnapshot?>(null);
+  final ValueNotifier<AccessSnapshot?> access =
+      ValueNotifier<AccessSnapshot?>(null);
   Timer? _accessVersionTimer;
 
   SessionController(this._auth, this._api) {
@@ -41,7 +42,8 @@ class SessionController {
     if (user.value == null) return;
     try {
       final data = await _api.get('/access/version', forceRefresh: true);
-      final version = data is Map ? (data['permissionsVersion'] as num?)?.toInt() : null;
+      final version =
+          data is Map ? (data['permissionsVersion'] as num?)?.toInt() : null;
       if (version != null && version != access.value?.permissionsVersion) {
         await _loadAccess();
       }
@@ -52,7 +54,9 @@ class SessionController {
 
   void _handleResponseVersion() {
     final version = _api.permissionsVersion.value;
-    if (user.value != null && version != null && version != access.value?.permissionsVersion) {
+    if (user.value != null &&
+        version != null &&
+        version != access.value?.permissionsVersion) {
       unawaited(_loadAccess());
     }
   }
@@ -69,13 +73,21 @@ class SessionController {
     }
   }
 
-  Future<void> login({
+  Future<AuthLoginResult> login({
     required String email,
     required String password,
   }) async {
     // Avoid reusing cached GET responses when switching accounts.
     _api.clearCache();
-    user.value = await _auth.login(email: email, password: password);
+    final result = await _auth.login(email: email, password: password);
+    if (result.user != null) {
+      await acceptAuthenticatedUser(result.user!);
+    }
+    return result;
+  }
+
+  Future<void> acceptAuthenticatedUser(User authenticatedUser) async {
+    user.value = authenticatedUser;
     await _loadAccess();
   }
 

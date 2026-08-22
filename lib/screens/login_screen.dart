@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/api/api_exception.dart';
+import '../data/api/auth_api.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
@@ -22,16 +23,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _mfaCode = TextEditingController();
 
   bool _loading = false;
   bool _obscure = true;
   bool _submitted = false;
   String? _error;
+  String? _mfaTransaction;
+  String? _mfaMode;
+  String? _mfaSecret;
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _mfaCode.dispose();
     super.dispose();
   }
 
@@ -63,16 +69,115 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _loading = true);
     try {
-      await AppServices.session.login(
+      final result = await AppServices.session.login(
         email: _email.text.trim(),
         password: _password.text,
       );
+      if (result.requiresMfaEnrollment && result.transactionToken != null) {
+        final setup = await AppServices.auth.startMfaEnrollment(
+          result.transactionToken!,
+        );
+        if (!mounted) return;
+        setState(() {
+          _mfaTransaction = result.transactionToken;
+          _mfaMode = 'enrollment';
+          _mfaSecret = setup.secret;
+          _mfaCode.clear();
+        });
+      } else if (result.requiresMfaChallenge &&
+          result.transactionToken != null) {
+        setState(() {
+          _mfaTransaction = result.transactionToken;
+          _mfaMode = 'challenge';
+          _mfaSecret = null;
+          _mfaCode.clear();
+        });
+      } else if (result.user == null) {
+        throw Exception(result.message ?? 'Unexpected login response');
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() => _error = _loginErrorMessage(error, isAr));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _handleMfaSubmit() async {
+    FocusScope.of(context).unfocus();
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final transaction = _mfaTransaction;
+    final code = _mfaCode.text.trim();
+    if (transaction == null || code.isEmpty) return;
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      late final AuthLoginResult result;
+      if (_mfaMode == 'enrollment') {
+        result = await AppServices.auth.confirmMfaEnrollment(
+          transactionToken: transaction,
+          code: code,
+        );
+      } else {
+        result = await AppServices.auth.challengeMfa(
+          transactionToken: transaction,
+          code: code,
+        );
+      }
+      if (result.user == null) {
+        throw Exception(result.message ?? 'Unexpected MFA response');
+      }
+      if (_mfaMode == 'enrollment' && result.recoveryCodes.isNotEmpty) {
+        await _showRecoveryCodes(result.recoveryCodes, isAr);
+      }
+      await AppServices.session.acceptAuthenticatedUser(result.user!);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _error = _loginErrorMessage(error, isAr));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _showRecoveryCodes(List<String> codes, bool isAr) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(isAr ? 'رموز الاسترداد' : 'Recovery codes'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                isAr
+                    ? 'احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم مرة واحدة.'
+                    : 'Save these codes securely. Each code can be used once.',
+              ),
+              const SizedBox(height: 14),
+              SelectableText(
+                codes.join('\n'),
+                style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w700,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(isAr ? 'حفظت الرموز' : 'I saved the codes'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showUnavailableMessage(bool isAr) {
@@ -182,80 +287,119 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ErrorBanner(message: _error!),
                                 const SizedBox(height: 12),
                               ],
-                              TextFormField(
-                                controller: _email,
-                                keyboardType: TextInputType.emailAddress,
-                                textInputAction: TextInputAction.next,
-                                autofillHints: const [AutofillHints.email],
-                                decoration: _fieldDecoration(
-                                  hint: l10n.email,
-                                  prefix: Icons.mail_outline_rounded,
+                              if (_mfaMode == null) ...[
+                                TextFormField(
+                                  controller: _email,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  autofillHints: const [AutofillHints.email],
+                                  decoration: _fieldDecoration(
+                                    hint: l10n.email,
+                                    prefix: Icons.mail_outline_rounded,
+                                  ),
+                                  validator: (value) {
+                                    if ((value ?? '').trim().isEmpty) {
+                                      return l10n.emailRequired;
+                                    }
+                                    return null;
+                                  },
                                 ),
-                                validator: (value) {
-                                  if ((value ?? '').trim().isEmpty) {
-                                    return l10n.emailRequired;
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 12),
-                              TextFormField(
-                                controller: _password,
-                                obscureText: _obscure,
-                                textInputAction: TextInputAction.done,
-                                autofillHints: const [AutofillHints.password],
-                                onFieldSubmitted: (_) => _handleLogin(),
-                                decoration: _fieldDecoration(
-                                  hint: l10n.password,
-                                  prefix: Icons.lock_outline_rounded,
-                                  suffix: IconButton(
-                                    onPressed: () => setState(
-                                      () => _obscure = !_obscure,
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _password,
+                                  obscureText: _obscure,
+                                  textInputAction: TextInputAction.done,
+                                  autofillHints: const [AutofillHints.password],
+                                  onFieldSubmitted: (_) => _handleLogin(),
+                                  decoration: _fieldDecoration(
+                                    hint: l10n.password,
+                                    prefix: Icons.lock_outline_rounded,
+                                    suffix: IconButton(
+                                      onPressed: () => setState(
+                                        () => _obscure = !_obscure,
+                                      ),
+                                      icon: Icon(
+                                        _obscure
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        size: 21,
+                                        color: const Color(0xFF77716B),
+                                      ),
                                     ),
-                                    icon: Icon(
-                                      _obscure
-                                          ? Icons.visibility_off_outlined
-                                          : Icons.visibility_outlined,
-                                      size: 21,
-                                      color: const Color(0xFF77716B),
+                                  ),
+                                  validator: (value) => (value ?? '').isEmpty
+                                      ? l10n.passwordRequired
+                                      : null,
+                                ),
+                                Align(
+                                  alignment: AlignmentDirectional.centerEnd,
+                                  child: TextButton(
+                                    onPressed: () =>
+                                        _showUnavailableMessage(isAr),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: _buttonColor,
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                        10,
+                                        8,
+                                        0,
+                                        8,
+                                      ),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                    child: Text(
+                                      l10n.forgot,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                validator: (value) => (value ?? '').isEmpty
-                                    ? l10n.passwordRequired
-                                    : null,
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional.centerEnd,
-                                child: TextButton(
-                                  onPressed: () =>
-                                      _showUnavailableMessage(isAr),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: _buttonColor,
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                      10,
-                                      8,
-                                      0,
-                                      8,
-                                    ),
-                                    visualDensity: VisualDensity.compact,
+                              ] else ...[
+                                _MfaPanel(
+                                  enrollment: _mfaMode == 'enrollment',
+                                  secret: _mfaSecret,
+                                  isArabic: isAr,
+                                  codeController: _mfaCode,
+                                  decoration: _fieldDecoration(
+                                    hint: isAr
+                                        ? 'رمز التحقق'
+                                        : 'Verification code',
+                                    prefix: Icons.shield_outlined,
                                   ),
-                                  child: Text(
-                                    l10n.forgot,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
+                                  onSubmitted: _handleMfaSubmit,
+                                ),
+                                Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: TextButton.icon(
+                                    onPressed: _loading
+                                        ? null
+                                        : () => setState(() {
+                                              _mfaMode = null;
+                                              _mfaTransaction = null;
+                                              _mfaSecret = null;
+                                              _mfaCode.clear();
+                                            }),
+                                    icon: const Icon(Icons.arrow_back_rounded),
+                                    label: Text(
+                                      isAr
+                                          ? 'العودة لتسجيل الدخول'
+                                          : 'Back to sign in',
                                     ),
                                   ),
                                 ),
-                              ),
+                              ],
                               const SizedBox(height: 2),
                               SizedBox(
                                 width: double.infinity,
                                 height: 56,
                                 child: FilledButton(
-                                  onPressed: _loading ? null : _handleLogin,
+                                  onPressed: _loading
+                                      ? null
+                                      : (_mfaMode == null
+                                          ? _handleLogin
+                                          : _handleMfaSubmit),
                                   style: FilledButton.styleFrom(
                                     backgroundColor: _buttonColor,
                                     disabledBackgroundColor:
@@ -273,7 +417,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                         )
                                       : Text(
-                                          l10n.signIn,
+                                          _mfaMode == null
+                                              ? l10n.signIn
+                                              : (isAr
+                                                  ? 'تحقق ومتابعة'
+                                                  : 'Verify and continue'),
                                           style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
@@ -281,27 +429,30 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 54,
-                                child: OutlinedButton(
-                                  onPressed: () =>
-                                      _showUnavailableMessage(isAr),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: _buttonColor,
-                                    side: const BorderSide(color: _fieldBorder),
-                                    shape: const StadiumBorder(),
-                                  ),
-                                  child: Text(
-                                    isAr ? 'إنشاء حساب' : 'Create account',
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
+                              if (_mfaMode == null) ...[
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 54,
+                                  child: OutlinedButton(
+                                    onPressed: () =>
+                                        _showUnavailableMessage(isAr),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: _buttonColor,
+                                      side:
+                                          const BorderSide(color: _fieldBorder),
+                                      shape: const StadiumBorder(),
+                                    ),
+                                    child: Text(
+                                      isAr ? 'إنشاء حساب' : 'Create account',
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
+                              ],
                               SizedBox(height: compact ? 24 : 38),
                               Text.rich(
                                 TextSpan(
@@ -393,6 +544,111 @@ class _LoginBackground extends StatelessWidget {
         ),
       ),
       child: SizedBox.expand(),
+    );
+  }
+}
+
+class _MfaPanel extends StatelessWidget {
+  const _MfaPanel({
+    required this.enrollment,
+    required this.secret,
+    required this.isArabic,
+    required this.codeController,
+    required this.decoration,
+    required this.onSubmitted,
+  });
+
+  final bool enrollment;
+  final String? secret;
+  final bool isArabic;
+  final TextEditingController codeController;
+  final InputDecoration decoration;
+  final VoidCallback onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(105),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _LoginScreenState._fieldBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            enrollment
+                ? (isArabic
+                    ? 'ربط تطبيق المصادقة'
+                    : 'Connect your authenticator app')
+                : (isArabic ? 'التحقق بخطوتين' : 'Two-step verification'),
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.ink,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            enrollment
+                ? (isArabic
+                    ? 'افتح Google Authenticator أو Microsoft Authenticator، وأضف مفتاح الإعداد التالي.'
+                    : 'Open Google Authenticator or Microsoft Authenticator and add the setup key below.')
+                : (isArabic
+                    ? 'أدخل الرمز المكوّن من 6 أرقام، أو استخدم أحد رموز الاسترداد.'
+                    : 'Enter the 6-digit code, or use one of your recovery codes.'),
+            style: const TextStyle(
+              color: Color(0xFF6D6862),
+              height: 1.4,
+            ),
+          ),
+          if (enrollment && secret != null) ...[
+            const SizedBox(height: 14),
+            InkWell(
+              onTap: () async {
+                await Clipboard.setData(ClipboardData(text: secret!));
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      isArabic ? 'تم نسخ مفتاح الإعداد' : 'Setup key copied',
+                    ),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(155),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: SelectableText(
+                  secret!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
+          TextField(
+            controller: codeController,
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
+            autocorrect: false,
+            enableSuggestions: false,
+            onSubmitted: (_) => onSubmitted(),
+            decoration: decoration,
+          ),
+        ],
+      ),
     );
   }
 }
