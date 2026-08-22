@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../data/api/api_exception.dart';
 import '../data/api/auth_api.dart';
@@ -32,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _mfaTransaction;
   String? _mfaMode;
   String? _mfaSecret;
+  String? _mfaUri;
 
   @override
   void dispose() {
@@ -82,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
           _mfaTransaction = result.transactionToken;
           _mfaMode = 'enrollment';
           _mfaSecret = setup.secret;
+          _mfaUri = setup.uri;
           _mfaCode.clear();
         });
       } else if (result.requiresMfaChallenge &&
@@ -90,6 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
           _mfaTransaction = result.transactionToken;
           _mfaMode = 'challenge';
           _mfaSecret = null;
+          _mfaUri = null;
           _mfaCode.clear();
         });
       } else if (result.user == null) {
@@ -360,6 +364,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _MfaPanel(
                                   enrollment: _mfaMode == 'enrollment',
                                   secret: _mfaSecret,
+                                  uri: _mfaUri,
                                   isArabic: isAr,
                                   codeController: _mfaCode,
                                   decoration: _fieldDecoration(
@@ -379,6 +384,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               _mfaMode = null;
                                               _mfaTransaction = null;
                                               _mfaSecret = null;
+                                              _mfaUri = null;
                                               _mfaCode.clear();
                                             }),
                                     icon: const Icon(Icons.arrow_back_rounded),
@@ -552,6 +558,7 @@ class _MfaPanel extends StatelessWidget {
   const _MfaPanel({
     required this.enrollment,
     required this.secret,
+    required this.uri,
     required this.isArabic,
     required this.codeController,
     required this.decoration,
@@ -560,6 +567,7 @@ class _MfaPanel extends StatelessWidget {
 
   final bool enrollment;
   final String? secret;
+  final String? uri;
   final bool isArabic;
   final TextEditingController codeController;
   final InputDecoration decoration;
@@ -606,6 +614,43 @@ class _MfaPanel extends StatelessWidget {
           ),
           if (enrollment && secret != null) ...[
             const SizedBox(height: 14),
+            if (uri != null && uri!.isNotEmpty) ...[
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: QrImageView(
+                    data: uri!,
+                    version: QrVersions.auto,
+                    size: 190,
+                    backgroundColor: Colors.white,
+                    eyeStyle: const QrEyeStyle(
+                      eyeShape: QrEyeShape.square,
+                      color: _LoginScreenState._buttonColor,
+                    ),
+                    dataModuleStyle: const QrDataModuleStyle(
+                      dataModuleShape: QrDataModuleShape.square,
+                      color: _LoginScreenState._buttonColor,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                isArabic
+                    ? 'امسح الباركود باستخدام تطبيق المصادقة'
+                    : 'Scan the QR code with your authenticator app',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF6D6862),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             InkWell(
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: secret!));
