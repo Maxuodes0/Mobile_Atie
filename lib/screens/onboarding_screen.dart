@@ -15,6 +15,7 @@ class _AiteOnboardingState extends State<AiteOnboarding>
     with SingleTickerProviderStateMixin {
   static const _background = Color(0xFFF8E6D4);
   static const _transitionDuration = Duration(milliseconds: 1750);
+  static const _welcomeTransitionDuration = Duration(milliseconds: 1500);
 
   late final AnimationController _controller;
 
@@ -124,6 +125,8 @@ class _AiteOnboardingState extends State<AiteOnboarding>
     if (_currentPage == page) return;
 
     HapticFeedback.selectionClick();
+    _controller.duration =
+        vertical ? _welcomeTransitionDuration : _transitionDuration;
     setState(() {
       _targetPage = page;
       _verticalTransition = vertical;
@@ -279,12 +282,16 @@ class _AiteOnboardingState extends State<AiteOnboarding>
       return Stack(
         fit: StackFit.expand,
         children: [
-          _AnimatedSplashExit(
+          _VerticalPagePush(
             controller: _controller,
-            reducedMotion: _reducedMotion,
+            incoming: false,
             child: _WelcomeView(isArabic: _isArabic, onBegin: () {}),
           ),
-          incoming,
+          _VerticalPagePush(
+            controller: _controller,
+            incoming: true,
+            child: incoming,
+          ),
         ],
       );
     }
@@ -390,15 +397,15 @@ class _WelcomeView extends StatelessWidget {
   }
 }
 
-class _AnimatedSplashExit extends StatelessWidget {
-  const _AnimatedSplashExit({
+class _VerticalPagePush extends StatelessWidget {
+  const _VerticalPagePush({
     required this.controller,
-    required this.reducedMotion,
+    required this.incoming,
     required this.child,
   });
 
   final AnimationController controller;
-  final bool reducedMotion;
+  final bool incoming;
   final Widget child;
 
   @override
@@ -408,9 +415,16 @@ class _AnimatedSplashExit extends StatelessWidget {
       child: IgnorePointer(child: child),
       builder: (context, animatedChild) {
         final progress = Curves.easeOutCubic.transform(controller.value);
+        final offset = incoming ? 1 - progress : -progress;
         return FractionalTranslation(
-          translation: reducedMotion ? Offset.zero : Offset(0, -progress),
-          child: animatedChild,
+          translation: Offset(0, offset),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const _WarmBackground(),
+              if (animatedChild != null) animatedChild,
+            ],
+          ),
         );
       },
     );
