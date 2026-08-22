@@ -58,6 +58,14 @@ class _LoginScreenState extends State<LoginScreen> {
         : 'Login failed. Try again.';
   }
 
+  void _finishAuthenticatedNavigation() {
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.popUntil((route) => route.isFirst);
+    }
+  }
+
   Future<void> _handleLogin() async {
     FocusScope.of(context).unfocus();
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
@@ -98,6 +106,8 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       } else if (result.user == null) {
         throw Exception(result.message ?? 'Unexpected login response');
+      } else {
+        _finishAuthenticatedNavigation();
       }
     } catch (error) {
       if (!mounted) return;
@@ -138,6 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await _showRecoveryCodes(result.recoveryCodes, isAr);
       }
       await AppServices.session.acceptAuthenticatedUser(result.user!);
+      _finishAuthenticatedNavigation();
     } catch (error) {
       if (!mounted) return;
       setState(() => _error = _loginErrorMessage(error, isAr));

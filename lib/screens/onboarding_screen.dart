@@ -150,7 +150,7 @@ class _AiteOnboardingState extends State<AiteOnboarding>
 
   void _openLogin() {
     if (_isTransitioning) return;
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).push(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 320),
         pageBuilder: (_, animation, __) => FadeTransition(
