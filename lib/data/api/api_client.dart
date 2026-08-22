@@ -230,7 +230,7 @@ class ApiClient {
   Future<String?> _rotateCsrfToken() async {
     try {
       final res = await _dio.get<dynamic>('/auth/csrf');
-      _captureSetCookie(res.headers);
+      await _captureSetCookie(res.headers);
       final token =
           (res.data is Map) ? (res.data as Map)['csrfToken']?.toString() : null;
       if (token != null && token.isNotEmpty) {
@@ -259,7 +259,7 @@ class ApiClient {
               : null,
         ),
       );
-      _captureSetCookie(res.headers);
+      await _captureSetCookie(res.headers);
       completer.complete(res.statusCode != null &&
           res.statusCode! >= 200 &&
           res.statusCode! < 300);

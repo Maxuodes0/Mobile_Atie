@@ -29,5 +29,8 @@ void main() {
     expect(find.text('تسجيل الدخول'), findsAtLeastNWidgets(1));
     expect(find.text('البريد الإلكتروني'), findsOneWidget);
     expect(find.text('كلمة المرور'), findsOneWidget);
+
+    AppServices.session.dispose();
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }
