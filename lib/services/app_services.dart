@@ -1,5 +1,6 @@
 import '../data/api/api_client.dart';
 import '../data/api/auth_api.dart';
+import '../data/api/clients_api.dart';
 import '../data/api/dashboard_api.dart';
 import '../data/api/finance_api.dart';
 import '../data/api/projects_api.dart';
@@ -12,6 +13,7 @@ import '../state/session_controller.dart';
 class AppServices {
   static late final ApiClient api;
   static late final AuthApi auth;
+  static late final ClientsApi clients;
   static late final DashboardApi dashboard;
   static late final FinanceApi finance;
   static late final ProjectsApi projects;
@@ -24,6 +26,7 @@ class AppServices {
   static void init() {
     api = ApiClient();
     auth = AuthApi(api);
+    clients = ClientsApi(api);
     dashboard = DashboardApi(api);
     finance = FinanceApi(api);
     projects = ProjectsApi(api);

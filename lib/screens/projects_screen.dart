@@ -5,6 +5,8 @@ import '../services/app_services.dart';
 import '../data/models/page_meta.dart';
 import '../data/models/project_summary.dart';
 import '../utils/project_status.dart';
+import '../utils/collection_status.dart';
+import '../utils/formatters.dart';
 import '../utils/async_request_guard_mixin.dart';
 import '../widgets/project_image.dart';
 import '../widgets/app_page_header.dart';
@@ -202,6 +204,14 @@ class _ProjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusLabel = projectStatusLabel(project.status);
     final statusColor = projectStatusColor(project.status);
+    final collectionStatus = project.collectionStatus?.trim();
+    final hasCollectionStatus =
+        collectionStatus != null && collectionStatus.isNotEmpty;
+    final collectionLabel =
+        hasCollectionStatus ? collectionStatusLabel(collectionStatus) : null;
+    final collectionColor = hasCollectionStatus
+        ? collectionStatusColor(collectionStatus)
+        : AppTheme.muted;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -249,32 +259,48 @@ class _ProjectCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacitySafe(0.12),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                statusLabel,
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                            Expanded(
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  _ProjectStatusBadge(
+                                    label: statusLabel,
+                                    color: statusColor,
+                                  ),
+                                  if (collectionLabel != null)
+                                    _ProjectStatusBadge(
+                                      label: collectionLabel,
+                                      color: collectionColor,
+                                      icon: Icons.payments_outlined,
+                                    ),
+                                ],
                               ),
                             ),
-                            const Spacer(),
-                            const Icon(
-                              Icons.chevron_right,
+                            const SizedBox(width: 8),
+                            Icon(
+                              Directionality.of(context) == TextDirection.rtl
+                                  ? Icons.chevron_left
+                                  : Icons.chevron_right,
                               color: AppTheme.muted,
                             ),
                           ],
                         ),
+                        if (project.totalCollectedAmount != null &&
+                            project.totalCollectedAmount! > 0) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'المحصل: ${formatSar(project.totalCollectedAmount!.toStringAsFixed(2))}',
+                            textDirection: TextDirection.rtl,
+                            style: const TextStyle(
+                              color: AppTheme.muted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -283,6 +309,46 @@ class _ProjectCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ProjectStatusBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData? icon;
+
+  const _ProjectStatusBadge({
+    required this.label,
+    required this.color,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacitySafe(0.12),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, color: color, size: 14),
+            const SizedBox(width: 5),
+          ],
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

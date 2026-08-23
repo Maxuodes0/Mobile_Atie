@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
+import 'clients_screen.dart';
 import 'dashboard_screen.dart';
 import 'finance_screen.dart';
 import 'projects_screen.dart';
@@ -25,6 +26,8 @@ class _AppShellState extends State<AppShell> {
     final isProgramManager = role == 'PROGRAM_MANAGER';
     final canSeeAdminDashboard = isAdmin || isProgramManager;
     final canSeeFinance = isAdmin || isProgramManager;
+    final canSeeClients =
+        isAdmin || isProgramManager || role == 'PROJECT_MANAGER';
 
     final items = <_NavItem>[
       if (canSeeAdminDashboard)
@@ -44,6 +47,15 @@ class _AppShellState extends State<AppShell> {
           label: 'المشاريع',
         ),
       ),
+      if (canSeeClients)
+        _NavItem(
+          pageBuilder: (_) => const ClientsScreen(),
+          destination: const NavigationDestination(
+            icon: Icon(Icons.groups_outlined),
+            selectedIcon: Icon(Icons.groups),
+            label: 'العملاء',
+          ),
+        ),
       _NavItem(
         pageBuilder: (_) => const TasksScreen(),
         destination: const NavigationDestination(
