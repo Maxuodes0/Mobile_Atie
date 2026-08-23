@@ -27,12 +27,18 @@ class LatestProjectCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppTheme.border),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0D0F1115),
+                blurRadius: 18,
+                offset: Offset(0, 8),
+              ),
+            ],
           ),
           child: InkWell(
             onTap: onOpen,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Column(

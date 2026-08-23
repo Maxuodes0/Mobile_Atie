@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../theme/app_theme.dart';
-import '../../../widgets/app_card.dart';
 
 class DashboardChartCard extends StatelessWidget {
   final String title;
@@ -21,8 +20,19 @@ class DashboardChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
+    return Container(
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D0F1115),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

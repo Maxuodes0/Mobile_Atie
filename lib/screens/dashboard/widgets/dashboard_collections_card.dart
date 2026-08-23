@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/finance_dashboard.dart';
 import '../../../data/models/monthly_collection_point.dart';
+import '../../../theme/app_theme.dart';
 import '../../../utils/formatters.dart';
 import '../../../widgets/mini_line_chart.dart';
 import 'dashboard_chart_card.dart';
@@ -27,10 +28,11 @@ class DashboardCollectionsCard extends StatelessWidget {
       secondaryValue: 'غير محصل: ${formatSar(kpis?.outstandingAmount ?? '0')}',
       subtitle: 'حسب الأشهر',
       chart: SizedBox(
-        height: 120,
+        height: 240,
         child: MiniLineChart(
           values: collectedSeries,
-          color: const Color(0xFF3B82F6),
+          color: AppTheme.primary,
+          highlightColor: AppTheme.accent,
           labels: months,
         ),
       ),

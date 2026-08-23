@@ -692,6 +692,7 @@ class _OnboardingFooter extends StatelessWidget {
               child: const Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 25,
+                textDirection: TextDirection.ltr,
               ),
             ),
           ),

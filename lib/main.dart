@@ -21,6 +21,7 @@ class AiteApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Aite Management',
       theme: AppTheme.light(),
+      locale: const Locale('ar'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -28,14 +29,6 @@ class AiteApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      // Follow the device locale; fallback to English if the language isn't supported.
-      localeResolutionCallback: (locale, supportedLocales) {
-        if (locale == null) return const Locale('en');
-        for (final supported in supportedLocales) {
-          if (supported.languageCode == locale.languageCode) return supported;
-        }
-        return const Locale('en');
-      },
       home: const AuthGate(),
     );
   }

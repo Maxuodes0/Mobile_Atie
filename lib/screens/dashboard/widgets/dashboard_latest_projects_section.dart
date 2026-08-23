@@ -21,9 +21,17 @@ class DashboardLatestProjectsSection extends StatelessWidget {
       children: [
         const Text(
           'أحدث المشاريع',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
+        const Text(
+          'آخر المشاريع المضافة خلال الفترة الأخيرة',
+          style: TextStyle(color: AppTheme.muted, fontSize: 12),
+        ),
+        const SizedBox(height: 12),
         if (projects.isEmpty)
           const Text(
             'لا توجد مشاريع خلال آخر 3 أشهر',
@@ -31,7 +39,7 @@ class DashboardLatestProjectsSection extends StatelessWidget {
           )
         else
           SizedBox(
-            height: 320,
+            height: 282,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: projects.length,
