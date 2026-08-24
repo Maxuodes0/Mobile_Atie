@@ -33,6 +33,7 @@ class _AppShellState extends State<AppShell> {
       if (canSeeAdminDashboard)
         _NavItem(
           pageBuilder: (isActive) => DashboardScreen(isActive: isActive),
+          backgroundColor: AppTheme.primary,
           destination: const NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard),
@@ -97,7 +98,7 @@ class _AppShellState extends State<AppShell> {
       return nav[index].pageBuilder(index == effectiveIndex);
     }, growable: false);
     return Scaffold(
-      backgroundColor: AppTheme.primary,
+      backgroundColor: nav[effectiveIndex].backgroundColor,
       extendBody: true,
       body: IndexedStack(index: effectiveIndex, children: pages),
       bottomNavigationBar: _FloatingNavigationBar(
@@ -198,9 +199,11 @@ class _FloatingNavigationBar extends StatelessWidget {
 class _NavItem {
   final Widget Function(bool isActive) pageBuilder;
   final NavigationDestination destination;
+  final Color backgroundColor;
 
   _NavItem({
     required this.pageBuilder,
     required this.destination,
+    this.backgroundColor = AppTheme.pageBg,
   });
 }
