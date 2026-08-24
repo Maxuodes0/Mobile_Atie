@@ -97,6 +97,8 @@ class _AppShellState extends State<AppShell> {
       return nav[index].pageBuilder(index == effectiveIndex);
     }, growable: false);
     return Scaffold(
+      backgroundColor: AppTheme.primary,
+      extendBody: true,
       body: IndexedStack(index: effectiveIndex, children: pages),
       bottomNavigationBar: _FloatingNavigationBar(
         items: nav,
