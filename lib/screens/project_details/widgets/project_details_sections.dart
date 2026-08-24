@@ -10,6 +10,44 @@ import '../../../widgets/app_card.dart';
 import '../../../widgets/project_image.dart';
 import '../../user_profile_screen.dart';
 
+class ProjectValueSection extends StatelessWidget {
+  final bool loading;
+  final double? valueWithoutVat;
+  final double? valueWithVat;
+
+  const ProjectValueSection({
+    super.key,
+    required this.loading,
+    required this.valueWithoutVat,
+    required this.valueWithVat,
+  });
+
+  String _money(double? value) =>
+      value == null ? '—' : formatSar(value.toStringAsFixed(2));
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _MetaRow(
+          label: 'قيمة المشروع بدون ضريبة',
+          value: _money(valueWithoutVat),
+        ),
+        const Divider(height: 20),
+        _MetaRow(
+          label: 'قيمة المشروع مع الضريبة',
+          value: _money(valueWithVat),
+        ),
+        if (loading) ...[
+          const SizedBox(height: 10),
+          const LinearProgressIndicator(minHeight: 2),
+        ],
+      ],
+    );
+  }
+}
+
 class ProjectCostSection extends StatelessWidget {
   final bool loading;
   final double? totalCost;

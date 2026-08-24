@@ -10,6 +10,8 @@ class ProjectDetails {
   final DateTime? startDate;
   final DateTime? dueDate;
   final double? budgetSpent;
+  final double? projectValueWithoutVat;
+  final double? projectValueWithVat;
 
   const ProjectDetails({
     required this.id,
@@ -23,6 +25,8 @@ class ProjectDetails {
     required this.startDate,
     required this.dueDate,
     required this.budgetSpent,
+    required this.projectValueWithoutVat,
+    required this.projectValueWithVat,
   });
 
   factory ProjectDetails.fromJson(Map<String, dynamic> json) {
@@ -51,6 +55,14 @@ class ProjectDetails {
         ? ProjectUserRef.fromJson(Map<String, dynamic>.from(managerRaw))
         : null;
 
+    final valueWithoutVat = parseNumber(json['projectValueWithoutVat']);
+    final vatPercentage = parseNumber(json['vatPercentage']) ?? 15;
+    final valueWithVat = parseNumber(json['projectValueWithVat']) ??
+        parseNumber(json['dueAmount']) ??
+        (valueWithoutVat == null
+            ? null
+            : valueWithoutVat * (1 + vatPercentage / 100));
+
     return ProjectDetails(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -63,6 +75,8 @@ class ProjectDetails {
       startDate: parseDate(json['startDate']),
       dueDate: parseDate(json['dueDate']),
       budgetSpent: parseNumber(json['budgetSpent']),
+      projectValueWithoutVat: valueWithoutVat,
+      projectValueWithVat: valueWithVat,
     );
   }
 }

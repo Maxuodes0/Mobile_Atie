@@ -116,9 +116,8 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
             ),
           );
 
-    final remaining = team
-        .where((m) => m.userId.trim() != managerId)
-        .toList(growable: false);
+    final remaining =
+        team.where((m) => m.userId.trim() != managerId).toList(growable: false);
 
     return <ProjectTeamMember>[managerRow, ...remaining];
   }
@@ -220,6 +219,15 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 startDate: project?.startDate,
                 dueDate: project?.dueDate,
                 loading: _projectLoading,
+              ),
+              const SizedBox(height: 14),
+              ProjectDetailsSectionCard(
+                title: 'قيمة المشروع',
+                child: ProjectValueSection(
+                  loading: _projectLoading,
+                  valueWithoutVat: project?.projectValueWithoutVat,
+                  valueWithVat: project?.projectValueWithVat,
+                ),
               ),
               const SizedBox(height: 14),
               ProjectDetailsSectionCard(
