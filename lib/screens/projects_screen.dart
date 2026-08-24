@@ -280,9 +280,12 @@ class _ProjectCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Icon(
-                              Icons.chevron_left,
-                              color: AppTheme.muted,
+                            const Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Icon(
+                                Icons.chevron_left,
+                                color: AppTheme.muted,
+                              ),
                             ),
                           ],
                         ),
