@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/api/api_exception.dart';
 import '../data/api/auth_api.dart';
@@ -20,6 +21,12 @@ class _LoginScreenState extends State<LoginScreen> {
   static const _background = Color(0xFFF8E6D4);
   static const _fieldBorder = Color(0xFFE7CDB6);
   static const _buttonColor = Color(0xFF111D2D);
+  static final _privacyUrl = Uri.parse(
+    'https://www.aitemanagement.com/privacy',
+  );
+  static final _supportUrl = Uri.parse(
+    'https://www.aitemanagement.com/support',
+  );
 
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
@@ -204,6 +211,24 @@ class _LoginScreenState extends State<LoginScreen> {
             isAr
                 ? 'سيتم توفير هذه الخدمة داخل التطبيق قريبًا.'
                 : 'This service will be available in the app soon.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+  }
+
+  Future<void> _openExternalPage(Uri url, bool isAr) async {
+    final opened = await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (opened || !mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            isAr
+                ? 'تعذر فتح الصفحة، حاول مرة أخرى.'
+                : 'Could not open the page. Please try again.',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -471,29 +496,67 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ],
                               SizedBox(height: compact ? 24 : 38),
-                              Text.rich(
-                                TextSpan(
-                                  text: isAr
-                                      ? 'بالمتابعة، أنت توافق على '
-                                      : 'By signing in, you agree to AITE’s ',
-                                  children: [
-                                    TextSpan(
-                                      text: isAr
-                                          ? 'شروط الخدمة وسياسة الخصوصية.'
-                                          : 'Terms of Service and Privacy Policy.',
-                                      style: const TextStyle(
-                                        color: _buttonColor,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              Text(
+                                isAr
+                                    ? 'بتسجيل الدخول، أنت توافق على سياسات Aite.'
+                                    : 'By signing in, you agree to Aite policies.',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Color(0xFF8A837B),
                                   fontSize: 10.5,
                                   height: 1.35,
                                 ),
+                              ),
+                              const SizedBox(height: 2),
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                spacing: 4,
+                                children: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        _openExternalPage(_privacyUrl, isAr),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: _buttonColor,
+                                      minimumSize: const Size(0, 32),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                      ),
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: Text(
+                                      isAr
+                                          ? 'سياسة الخصوصية'
+                                          : 'Privacy Policy',
+                                      style: const TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        _openExternalPage(_supportUrl, isAr),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: _buttonColor,
+                                      minimumSize: const Size(0, 32),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                      ),
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: Text(
+                                      isAr ? 'الدعم' : 'Support',
+                                      style: const TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

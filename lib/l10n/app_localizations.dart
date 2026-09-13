@@ -7,9 +7,24 @@ class AppLocalizations {
   const AppLocalizations(this.locale);
 
   static const supportedLocales = <Locale>[
-    Locale('ar'),
     Locale('en'),
+    Locale('ar'),
   ];
+
+  static Locale resolveLocale(
+    List<Locale>? deviceLocales,
+    Iterable<Locale> supportedLocales,
+  ) {
+    for (final deviceLocale in deviceLocales ?? const <Locale>[]) {
+      for (final supportedLocale in supportedLocales) {
+        if (supportedLocale.languageCode == deviceLocale.languageCode) {
+          return supportedLocale;
+        }
+      }
+    }
+
+    return const Locale('en');
+  }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
       _AppLocalizationsDelegate();

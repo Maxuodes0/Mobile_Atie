@@ -263,7 +263,7 @@ class ApiClient {
       completer.complete(res.statusCode != null &&
           res.statusCode! >= 200 &&
           res.statusCode! < 300);
-      return completer.future;
+      return await completer.future;
     } on DioException {
       completer.complete(false);
       return false;

@@ -21,8 +21,8 @@ class AiteApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Aite Management',
       theme: AppTheme.light(),
-      locale: const Locale('ar'),
       supportedLocales: AppLocalizations.supportedLocales,
+      localeListResolutionCallback: AppLocalizations.resolveLocale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
