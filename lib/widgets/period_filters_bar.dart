@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class PeriodFiltersBar extends StatelessWidget {
   final int? year; // null = all years
@@ -54,7 +55,10 @@ class PeriodFiltersBar extends StatelessWidget {
     final yearDropdown = dropdown<int>(
       value: year,
       items: [
-        const DropdownMenuItem<int>(value: null, child: Text('كل السنوات')),
+        DropdownMenuItem<int>(
+          value: null,
+          child: Text(context.tr(en: 'All years', ar: 'كل السنوات')),
+        ),
         ...years.map(
           (y) => DropdownMenuItem<int>(value: y, child: Text(y.toString())),
         ),
@@ -65,12 +69,15 @@ class PeriodFiltersBar extends StatelessWidget {
     final quarterEnabled = year != null;
     final quarterDropdown = dropdown<int>(
       value: quarterEnabled ? quarter : null,
-      items: const [
-        DropdownMenuItem<int>(value: null, child: Text('كل الأرباع')),
-        DropdownMenuItem<int>(value: 1, child: Text('Q1')),
-        DropdownMenuItem<int>(value: 2, child: Text('Q2')),
-        DropdownMenuItem<int>(value: 3, child: Text('Q3')),
-        DropdownMenuItem<int>(value: 4, child: Text('Q4')),
+      items: [
+        DropdownMenuItem<int>(
+          value: null,
+          child: Text(context.tr(en: 'All quarters', ar: 'كل الأرباع')),
+        ),
+        const DropdownMenuItem<int>(value: 1, child: Text('Q1')),
+        const DropdownMenuItem<int>(value: 2, child: Text('Q2')),
+        const DropdownMenuItem<int>(value: 3, child: Text('Q3')),
+        const DropdownMenuItem<int>(value: 4, child: Text('Q4')),
       ],
       onChanged: quarterEnabled ? onQuarterChanged : null,
     );

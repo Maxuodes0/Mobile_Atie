@@ -30,7 +30,9 @@ class FinanceReport {
         : const <String, dynamic>{};
 
     final summaryRaw = json['summary'];
-    final summary = summaryRaw is Map ? Map<String, dynamic>.from(summaryRaw) : const <String, dynamic>{};
+    final summary = summaryRaw is Map
+        ? Map<String, dynamic>.from(summaryRaw)
+        : const <String, dynamic>{};
 
     int toInt(dynamic v) {
       if (v is int) return v;
@@ -56,4 +58,3 @@ class FinanceReport {
     );
   }
 }
-

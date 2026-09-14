@@ -3,6 +3,8 @@ import '../data/models/project_details.dart';
 import '../data/models/project_collection.dart';
 import '../data/models/project_summary.dart';
 import '../data/models/project_team_member.dart';
+import '../data/models/project_role_label.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../widgets/error_banner.dart';
 import 'project_details/widgets/project_details_sections.dart';
@@ -33,7 +35,7 @@ class _AsyncLoad<T> {
 
 class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   static const Duration _detailsCacheTtl = Duration(seconds: 45);
-  static const String _projectManagerRoleLabel = 'مدير المشروع';
+  static const String _projectManagerRoleLabel = 'Project Manager';
 
   bool _loading = true;
   String? _error;
@@ -41,6 +43,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   String? _collectionsError;
   ProjectDetails? _project;
   List<ProjectTeamMember> _team = const [];
+  List<ProjectRoleLabel> _roleLabels = const [];
   List<ProjectCollectionItem> _collections = const [];
 
   bool get _projectLoading => _loading && _project == null;
@@ -162,16 +165,25 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           .then((value) => value.collections),
     );
 
+    final rolesFuture = _capture(
+      AppServices.projects.listProjectRoles(
+        cacheTtl: _detailsCacheTtl,
+        forceRefresh: forceRefresh,
+      ),
+    );
+
     final results = await Future.wait<dynamic>([
       projectFuture,
       teamFuture,
       collectionsFuture,
+      rolesFuture,
     ]);
 
     final projectResult = results[0] as _AsyncLoad<ProjectDetails>;
     final teamResult = results[1] as _AsyncLoad<List<ProjectTeamMember>>;
     final collectionsResult =
         results[2] as _AsyncLoad<List<ProjectCollectionItem>>;
+    final rolesResult = results[3] as _AsyncLoad<List<ProjectRoleLabel>>;
 
     if (!mounted) return;
     setState(() {
@@ -182,6 +194,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
         teamResult.value ?? const <ProjectTeamMember>[],
       );
       _collections = collectionsResult.value ?? const <ProjectCollectionItem>[];
+      _roleLabels = rolesResult.value ?? const <ProjectRoleLabel>[];
       _teamError = teamResult.error;
       _collectionsError = collectionsResult.error;
       _loading = false;
@@ -193,7 +206,9 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
     final fallback = widget.initial;
     final project = _project;
 
-    final title = project?.name ?? fallback?.name ?? 'تفاصيل المشروع';
+    final title = project?.name ??
+        fallback?.name ??
+        context.tr(en: 'Project details', ar: 'تفاصيل المشروع');
     final totalCollected =
         _collections.fold<double>(0, (a, c) => a + c.collectedAmount);
     final projectCost = _resolveProjectCost(project, _team);
@@ -222,7 +237,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               ),
               const SizedBox(height: 14),
               ProjectDetailsSectionCard(
-                title: 'قيمة المشروع',
+                title: context.tr(en: 'Project value', ar: 'قيمة المشروع'),
                 child: ProjectValueSection(
                   loading: _projectLoading,
                   valueWithoutVat: project?.projectValueWithoutVat,
@@ -231,16 +246,17 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               ),
               const SizedBox(height: 14),
               ProjectDetailsSectionCard(
-                title: 'فريق المشروع',
+                title: context.tr(en: 'Project team', ar: 'فريق المشروع'),
                 child: ProjectTeamSection(
                   loading: _projectLoading && _team.isEmpty,
                   error: _teamError,
                   items: _team,
+                  roleLabels: _roleLabels,
                 ),
               ),
               const SizedBox(height: 14),
               ProjectDetailsSectionCard(
-                title: 'تكاليف المشروع',
+                title: context.tr(en: 'Project costs', ar: 'تكاليف المشروع'),
                 child: ProjectCostSection(
                   loading: _projectLoading && _team.isEmpty,
                   totalCost: projectCost,
@@ -248,7 +264,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               ),
               const SizedBox(height: 14),
               ProjectDetailsSectionCard(
-                title: 'التحصيل',
+                title: context.tr(en: 'Collections', ar: 'التحصيل'),
                 child: ProjectCollectionsSection(
                   loading: _projectLoading && _collections.isEmpty,
                   error: _collectionsError,

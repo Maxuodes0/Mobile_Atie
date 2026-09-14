@@ -3,6 +3,8 @@ import 'package:intl/intl.dart' as intl;
 
 import '../../../data/models/project_collection.dart';
 import '../../../data/models/project_team_member.dart';
+import '../../../data/models/project_role_label.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/formatters.dart';
 import '../../../utils/project_status.dart';
@@ -31,12 +33,18 @@ class ProjectValueSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _MetaRow(
-          label: 'قيمة المشروع بدون ضريبة',
+          label: context.tr(
+            en: 'Project value excluding VAT',
+            ar: 'قيمة المشروع بدون ضريبة',
+          ),
           value: _money(valueWithoutVat),
         ),
         const Divider(height: 20),
         _MetaRow(
-          label: 'قيمة المشروع مع الضريبة',
+          label: context.tr(
+            en: 'Project value including VAT',
+            ar: 'قيمة المشروع مع الضريبة',
+          ),
           value: _money(valueWithVat),
         ),
         if (loading) ...[
@@ -66,7 +74,10 @@ class ProjectCostSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _MetaRow(label: 'إجمالي التكاليف', value: valueText),
+        _MetaRow(
+          label: context.tr(en: 'Total costs', ar: 'إجمالي التكاليف'),
+          value: valueText,
+        ),
         if (loading) ...[
           const SizedBox(height: 10),
           const LinearProgressIndicator(minHeight: 2),
@@ -105,7 +116,10 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
         ? null
         : intl.DateFormat.yMMMd(locale.toString()).format(date.toLocal());
 
-    final statusLabel = projectStatusLabel(status);
+    final statusLabel = projectStatusLabel(
+      status,
+      languageCode: locale.languageCode,
+    );
     final statusColor = projectStatusColor(status);
 
     return AppCard(
@@ -153,15 +167,24 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            client ?? 'بدون عميل',
+            client ?? context.tr(en: 'No client', ar: 'بدون عميل'),
             style: const TextStyle(color: AppTheme.muted, fontSize: 12),
           ),
           const SizedBox(height: 12),
-          _MetaRow(label: 'تاريخ الإنشاء', value: fmt(createdAt) ?? '-'),
+          _MetaRow(
+            label: context.tr(en: 'Created on', ar: 'تاريخ الإنشاء'),
+            value: fmt(createdAt) ?? '-',
+          ),
           if (startDate != null)
-            _MetaRow(label: 'البداية', value: fmt(startDate) ?? '-'),
+            _MetaRow(
+              label: context.tr(en: 'Start', ar: 'البداية'),
+              value: fmt(startDate) ?? '-',
+            ),
           if (dueDate != null)
-            _MetaRow(label: 'التسليم', value: fmt(dueDate) ?? '-'),
+            _MetaRow(
+              label: context.tr(en: 'Delivery', ar: 'التسليم'),
+              value: fmt(dueDate) ?? '-',
+            ),
           if (loading) ...[
             const SizedBox(height: 10),
             const LinearProgressIndicator(minHeight: 2),
@@ -202,12 +225,14 @@ class ProjectTeamSection extends StatelessWidget {
   final bool loading;
   final String? error;
   final List<ProjectTeamMember> items;
+  final List<ProjectRoleLabel> roleLabels;
 
   const ProjectTeamSection({
     super.key,
     required this.loading,
     required this.error,
     required this.items,
+    required this.roleLabels,
   });
 
   @override
@@ -217,21 +242,27 @@ class ProjectTeamSection extends StatelessWidget {
     }
     if (error != null) {
       return Text(
-        'تعذر تحميل فريق المشروع: $error',
+        context.tr(
+          en: 'Could not load the project team: $error',
+          ar: 'تعذر تحميل فريق المشروع: $error',
+        ),
         style: const TextStyle(color: AppTheme.muted, fontSize: 12),
       );
     }
     if (items.isEmpty) {
-      return const Text(
-        'لا يوجد أعضاء في فريق المشروع',
-        style: TextStyle(color: AppTheme.muted, fontSize: 12),
+      return Text(
+        context.tr(
+          en: 'No project team members',
+          ar: 'لا يوجد أعضاء في فريق المشروع',
+        ),
+        style: const TextStyle(color: AppTheme.muted, fontSize: 12),
       );
     }
 
     return Column(
       children: [
         for (final member in items) ...[
-          _TeamMemberRow(member: member),
+          _TeamMemberRow(member: member, roleLabels: roleLabels),
           if (member != items.last) const Divider(height: 18),
         ],
       ],
@@ -265,14 +296,20 @@ class ProjectCollectionsSection extends StatelessWidget {
     }
     if (error != null) {
       return Text(
-        'تعذر تحميل التحصيل: $error',
+        context.tr(
+          en: 'Could not load collections: $error',
+          ar: 'تعذر تحميل التحصيل: $error',
+        ),
         style: const TextStyle(color: AppTheme.muted, fontSize: 12),
       );
     }
     if (items.isEmpty) {
-      return const Text(
-        'لا توجد عمليات تحصيل مسجلة',
-        style: TextStyle(color: AppTheme.muted, fontSize: 12),
+      return Text(
+        context.tr(
+          en: 'No collections recorded',
+          ar: 'لا توجد عمليات تحصيل مسجلة',
+        ),
+        style: const TextStyle(color: AppTheme.muted, fontSize: 12),
       );
     }
 
@@ -282,7 +319,10 @@ class ProjectCollectionsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _MetaRow(label: 'إجمالي المحصل', value: formatSar(totalStr)),
+        _MetaRow(
+          label: context.tr(en: 'Total collected', ar: 'إجمالي المحصل'),
+          value: formatSar(totalStr),
+        ),
         const SizedBox(height: 10),
         for (final collection in shown) ...[
           Row(
@@ -309,7 +349,10 @@ class ProjectCollectionsSection extends StatelessWidget {
         ],
         if (items.length > shown.length)
           Text(
-            'عرض ${shown.length} من ${items.length}',
+            context.tr(
+              en: 'Showing ${shown.length} of ${items.length}',
+              ar: 'عرض ${shown.length} من ${items.length}',
+            ),
             style: const TextStyle(color: AppTheme.muted, fontSize: 12),
           ),
       ],
@@ -349,19 +392,24 @@ class _MetaRow extends StatelessWidget {
 
 class _TeamMemberRow extends StatelessWidget {
   final ProjectTeamMember member;
+  final List<ProjectRoleLabel> roleLabels;
 
-  const _TeamMemberRow({required this.member});
+  const _TeamMemberRow({required this.member, required this.roleLabels});
 
   @override
   Widget build(BuildContext context) {
     final user = member.user;
     final name = (user?.name ?? '').trim();
     final projectRole = (member.projectRole ?? '').trim();
-    final roleLabel = projectRole.isNotEmpty ? projectRole : 'بدون دور';
+    final roleLabel = projectRole.isNotEmpty
+        ? _localizedProjectRole(context, projectRole, roleLabels)
+        : context.tr(en: 'No role', ar: 'بدون دور');
 
     final chipColor =
         member.isPaid ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
-    final chipLabel = member.isPaid ? 'مدفوع' : 'غير مدفوع';
+    final chipLabel = member.isPaid
+        ? context.tr(en: 'Paid', ar: 'مدفوع')
+        : context.tr(en: 'Unpaid', ar: 'غير مدفوع');
 
     final initials = name.isEmpty ? '?' : name.characters.first;
 
@@ -390,7 +438,7 @@ class _TeamMemberRow extends StatelessWidget {
               builder: (_) => UserProfileScreen(
                 userId: userId,
                 initialName: name.isEmpty ? null : name,
-                initialProjectRole: projectRole.isEmpty ? null : projectRole,
+                initialProjectRole: projectRole.isEmpty ? null : roleLabel,
               ),
             ),
           );
@@ -475,4 +523,35 @@ class _TeamMemberRow extends StatelessWidget {
       ),
     );
   }
+}
+
+String _localizedProjectRole(
+  BuildContext context,
+  String value,
+  List<ProjectRoleLabel> roleLabels,
+) {
+  for (final role in roleLabels) {
+    if (role.matches(value)) {
+      return role.localized(Localizations.localeOf(context).languageCode);
+    }
+  }
+  final normalized = value.trim().toLowerCase();
+  const roles = <String, ({String en, String ar})>{
+    'project manager': (en: 'Project Manager', ar: 'مدير المشروع'),
+    'manager': (en: 'Manager', ar: 'مدير'),
+    'photographer': (en: 'Photographer', ar: 'مصور'),
+    'videographer': (en: 'Videographer', ar: 'مصور فيديو'),
+    'editor': (en: 'Editor', ar: 'مونتير'),
+    'designer': (en: 'Designer', ar: 'مصمم'),
+    'producer': (en: 'Producer', ar: 'منتج'),
+    'director': (en: 'Director', ar: 'مخرج'),
+    'assistant': (en: 'Assistant', ar: 'مساعد'),
+    'live broadcast': (en: 'Live Broadcast', ar: 'بث مباشر'),
+    'coverage': (en: 'Coverage', ar: 'تغطية'),
+    'interviews': (en: 'Interviews', ar: 'لقاءات'),
+    'television filming': (en: 'Television Filming', ar: 'تصوير تلفزيوني'),
+  };
+  final translated = roles[normalized];
+  if (translated == null) return value;
+  return context.tr(en: translated.en, ar: translated.ar);
 }

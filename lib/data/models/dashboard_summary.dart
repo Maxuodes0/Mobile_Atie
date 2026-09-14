@@ -26,8 +26,8 @@ class DashboardSummary {
     return DashboardSummary(
       userRoleCounts: roleCounts,
       hrEmployeesCount: parseInt(json['hrEmployeesCount']),
-      hrEmployeesWithAccountCount: parseInt(json['hrEmployeesWithAccountCount']),
+      hrEmployeesWithAccountCount:
+          parseInt(json['hrEmployeesWithAccountCount']),
     );
   }
 }
-

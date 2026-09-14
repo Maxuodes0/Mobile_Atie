@@ -27,4 +27,3 @@ PeriodRange computePeriodRange({required int? year, int? quarter}) {
   final to = '$year-${_two(endMonth)}-${_two(endDay)}';
   return PeriodRange(from: from, to: to);
 }
-

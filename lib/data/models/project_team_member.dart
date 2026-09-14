@@ -52,7 +52,9 @@ class ProjectTeamMember {
     }
 
     final userRaw = json['user'];
-    final user = userRaw is Map ? ProjectTeamUser.fromJson(Map<String, dynamic>.from(userRaw)) : null;
+    final user = userRaw is Map
+        ? ProjectTeamUser.fromJson(Map<String, dynamic>.from(userRaw))
+        : null;
 
     return ProjectTeamMember(
       userId: json['userId']?.toString() ?? '',
@@ -67,4 +69,3 @@ class ProjectTeamMember {
     );
   }
 }
-

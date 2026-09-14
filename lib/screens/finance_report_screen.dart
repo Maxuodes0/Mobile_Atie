@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../data/models/finance_report.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
+import '../utils/localized_values.dart';
 import '../widgets/app_card.dart';
 import '../widgets/error_banner.dart';
 
@@ -103,9 +105,12 @@ class _FinanceReportScreenState extends State<FinanceReportScreen> {
               if (_loading && report == null)
                 const Center(child: CircularProgressIndicator())
               else if ((report?.rows ?? const []).isEmpty)
-                const Text(
-                  'لا توجد بيانات لهذا التقرير',
-                  style: TextStyle(color: AppTheme.muted, fontSize: 12),
+                Text(
+                  context.tr(
+                    en: 'No data available for this report',
+                    ar: 'لا توجد بيانات لهذا التقرير',
+                  ),
+                  style: const TextStyle(color: AppTheme.muted, fontSize: 12),
                 )
               else
                 ...report!.rows.map(
@@ -153,20 +158,28 @@ class _SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'ملخص التقرير',
-            style: TextStyle(fontWeight: FontWeight.w800),
+          Text(
+            context.tr(en: 'Report summary', ar: 'ملخص التقرير'),
+            style: const TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          _MetaRow(label: 'الإجمالي', value: totalAmount),
-          _MetaRow(label: 'عدد السجلات', value: totalCount.toString()),
+          _MetaRow(
+              label: context.tr(en: 'Total', ar: 'الإجمالي'),
+              value: totalAmount),
+          _MetaRow(
+            label: context.tr(en: 'Record count', ar: 'عدد السجلات'),
+            value: totalCount.toString(),
+          ),
           if ((from ?? '').trim().isNotEmpty || (to ?? '').trim().isNotEmpty)
             _MetaRow(
-              label: 'الفترة',
+              label: context.tr(en: 'Period', ar: 'الفترة'),
               value: '${from ?? '—'}  →  ${to ?? '—'}',
             ),
           if (generated != null)
-            _MetaRow(label: 'تاريخ الإنشاء', value: generated),
+            _MetaRow(
+              label: context.tr(en: 'Generated on', ar: 'تاريخ الإنشاء'),
+              value: generated,
+            ),
         ],
       ),
     );
@@ -211,14 +224,14 @@ class _ReportRowCard extends StatelessWidget {
     required this.fmtDate,
   });
 
-  String _paymentStatusLabel(String raw) {
+  String _paymentStatusLabel(BuildContext context, String raw) {
     switch (raw) {
       case 'PAID':
-        return 'مدفوع';
+        return context.tr(en: 'Paid', ar: 'مدفوع');
       case 'PARTIAL':
-        return 'جزئي';
+        return context.tr(en: 'Partial', ar: 'جزئي');
       case 'UNPAID':
-        return 'غير مدفوع';
+        return context.tr(en: 'Unpaid', ar: 'غير مدفوع');
       default:
         return raw;
     }
@@ -255,7 +268,7 @@ class _ReportRowCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _MetaRow(
-              label: 'الإيراد',
+              label: context.tr(en: 'Revenue', ar: 'الإيراد'),
               value: formatSar(row['totalRevenue']?.toString() ?? '0')),
         ],
       );
@@ -268,18 +281,24 @@ class _ReportRowCard extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          _MetaRow(label: 'التاريخ', value: fmtDate(row['collectedDate'])),
           _MetaRow(
-              label: 'المبلغ',
+            label: context.tr(en: 'Date', ar: 'التاريخ'),
+            value: fmtDate(row['collectedDate']),
+          ),
+          _MetaRow(
+              label: context.tr(en: 'Amount', ar: 'المبلغ'),
               value: formatSar(row['amount']?.toString() ?? '0')),
           _MetaRow(
-              label: 'طريقة الدفع',
-              value: row['paymentMethod']?.toString() ?? '—'),
+              label: context.tr(en: 'Payment method', ar: 'طريقة الدفع'),
+              value: localizedPaymentMethod(
+                row['paymentMethod']?.toString() ?? '—',
+                Localizations.localeOf(context).languageCode,
+              )),
         ],
       );
     } else if (reportType == 'TEAM_COSTS_REPORT') {
       final statusRaw = row['paymentStatus']?.toString() ?? '';
-      final statusLabel = _paymentStatusLabel(statusRaw);
+      final statusLabel = _paymentStatusLabel(context, statusRaw);
       final statusColor = _paymentStatusColor(statusRaw);
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,13 +336,13 @@ class _ReportRowCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _MetaRow(
-              label: 'الإجمالي',
+              label: context.tr(en: 'Total', ar: 'الإجمالي'),
               value: formatSar(row['totalAmount']?.toString() ?? '0')),
           _MetaRow(
-              label: 'المدفوع',
+              label: context.tr(en: 'Paid', ar: 'المدفوع'),
               value: formatSar(row['paidAmount']?.toString() ?? '0')),
           _MetaRow(
-              label: 'المتبقي',
+              label: context.tr(en: 'Remaining', ar: 'المتبقي'),
               value: formatSar(row['remainingAmount']?.toString() ?? '0')),
         ],
       );
@@ -332,7 +351,10 @@ class _ReportRowCard extends StatelessWidget {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('سجل', style: TextStyle(fontWeight: FontWeight.w800)),
+          Text(
+            context.tr(en: 'Record', ar: 'سجل'),
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 10),
           for (final e in entries)
             _MetaRow(label: e.key, value: e.value?.toString() ?? '—'),

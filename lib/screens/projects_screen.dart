@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/error_banner.dart';
 import '../services/app_services.dart';
 import '../data/models/page_meta.dart';
@@ -127,9 +128,12 @@ class _ProjectsScreenState extends State<ProjectsScreen>
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const AppPageHeader(
-              title: 'المشاريع',
-              subtitle: 'تابع تقدم المشاريع وأعضاء الفريق',
+            AppPageHeader(
+              title: context.tr(en: 'Projects', ar: 'المشاريع'),
+              subtitle: context.tr(
+                en: 'Track projects and team progress',
+                ar: 'تابع تقدم المشاريع وأعضاء الفريق',
+              ),
             ),
             InlineLoadingBar(visible: _updating),
             const SizedBox(height: 16),
@@ -139,16 +143,17 @@ class _ProjectsScreenState extends State<ProjectsScreen>
             ],
             TextField(
               controller: _search,
-              decoration: const InputDecoration(
-                hintText: 'ابحث عن مشروع',
-                prefixIcon: Icon(Icons.search, size: 20),
+              decoration: InputDecoration(
+                hintText:
+                    context.tr(en: 'Search projects', ar: 'ابحث عن مشروع'),
+                prefixIcon: const Icon(Icons.search, size: 20),
                 prefixIconColor: AppTheme.muted,
               ),
             ),
             const SizedBox(height: 16),
             if (_filtered.isEmpty)
-              const Text('لا توجد مشاريع',
-                  style: TextStyle(color: AppTheme.muted, fontSize: 12))
+              Text(context.tr(en: 'No projects found', ar: 'لا توجد مشاريع'),
+                  style: const TextStyle(color: AppTheme.muted, fontSize: 12))
             else
               ..._filtered.map(
                 (p) => _ProjectCard(
@@ -178,9 +183,9 @@ class _ProjectsScreenState extends State<ProjectsScreen>
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
-                        'تحميل المزيد',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                      child: Text(
+                        context.tr(en: 'Load more', ar: 'تحميل المزيد'),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
             ],
@@ -202,13 +207,18 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusLabel = projectStatusLabel(project.status);
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final statusLabel = projectStatusLabel(
+      project.status,
+      languageCode: languageCode,
+    );
     final statusColor = projectStatusColor(project.status);
     final collectionStatus = project.collectionStatus?.trim();
     final hasCollectionStatus =
         collectionStatus != null && collectionStatus.isNotEmpty;
-    final collectionLabel =
-        hasCollectionStatus ? collectionStatusLabel(collectionStatus) : null;
+    final collectionLabel = hasCollectionStatus
+        ? collectionStatusLabel(collectionStatus, languageCode: languageCode)
+        : null;
     final collectionColor = hasCollectionStatus
         ? collectionStatusColor(collectionStatus)
         : AppTheme.muted;
@@ -251,7 +261,8 @@ class _ProjectCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          project.clientName ?? 'بدون عميل',
+                          project.clientName ??
+                              context.tr(en: 'No client', ar: 'بدون عميل'),
                           style: const TextStyle(
                             color: AppTheme.muted,
                             fontSize: 12,
@@ -293,8 +304,10 @@ class _ProjectCard extends StatelessWidget {
                             project.totalCollectedAmount! > 0) ...[
                           const SizedBox(height: 8),
                           Text(
-                            'المحصل: ${formatSar(project.totalCollectedAmount!.toStringAsFixed(2))}',
-                            textDirection: TextDirection.rtl,
+                            context.tr(
+                              en: 'Collected: ${formatSar(project.totalCollectedAmount!.toStringAsFixed(2))}',
+                              ar: 'المحصل: ${formatSar(project.totalCollectedAmount!.toStringAsFixed(2))}',
+                            ),
                             style: const TextStyle(
                               color: AppTheme.muted,
                               fontSize: 11,

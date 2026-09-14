@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/dashboard_summary.dart';
 import '../../../data/models/project_status_count.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/role_bar_chart.dart';
 import 'dashboard_chart_card.dart';
@@ -36,25 +37,25 @@ class DashboardProjectsAndStaffRow extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         DashboardChartCard(
-          title: 'عدد الموظفين',
+          title: context.tr(en: 'Team members', ar: 'عدد الموظفين'),
           value: totalStaff.toString(),
-          subtitle: 'حسب الدور',
+          subtitle: context.tr(en: 'By role', ar: 'حسب الدور'),
           chart: SizedBox(
             height: 140,
             child: RoleBarChart(
               items: [
                 RoleBarDatum(
-                  label: 'موظف',
+                  label: context.tr(en: 'Employee', ar: 'موظف'),
                   value: employees,
                   color: const Color(0xFF3B82F6),
                 ),
                 RoleBarDatum(
-                  label: 'فريلانسر',
+                  label: context.tr(en: 'Freelancer', ar: 'فريلانسر'),
                   value: freelancers,
                   color: const Color(0xFFF59E0B),
                 ),
                 RoleBarDatum(
-                  label: 'إدارة',
+                  label: context.tr(en: 'Management', ar: 'إدارة'),
                   value: managers,
                   color: const Color(0xFF111827),
                 ),
@@ -114,23 +115,23 @@ class _ProjectsOverviewCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 2),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'عدد المشاريع',
-                            style: TextStyle(
+                            context.tr(en: 'Project count', ar: 'عدد المشاريع'),
+                            style: const TextStyle(
                               color: AppTheme.ink,
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            'حسب الحالة',
-                            style: TextStyle(
+                            context.tr(en: 'By status', ar: 'حسب الحالة'),
+                            style: const TextStyle(
                               color: AppTheme.muted,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -167,9 +168,9 @@ class _ProjectsOverviewCard extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              const Text(
-                'إجمالي المشاريع',
-                style: TextStyle(
+              Text(
+                context.tr(en: 'Total projects', ar: 'إجمالي المشاريع'),
+                style: const TextStyle(
                   color: AppTheme.muted,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -177,7 +178,10 @@ class _ProjectsOverviewCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '$totalProjects مشروع',
+                context.tr(
+                  en: '$totalProjects projects',
+                  ar: '$totalProjects مشروع',
+                ),
                 style: const TextStyle(
                   color: _accent,
                   fontSize: 12,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 import '../utils/formatters.dart';
 import '../utils/period_range.dart';
 import '../widgets/app_page_header.dart';
@@ -71,9 +72,12 @@ class _FinanceScreenState extends State<FinanceScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const AppPageHeader(
-              title: 'المالية',
-              subtitle: 'تقارير الإيرادات والتكاليف',
+            AppPageHeader(
+              title: context.tr(en: 'Finance', ar: 'المالية'),
+              subtitle: context.tr(
+                en: 'Revenue and cost reports',
+                ar: 'تقارير الإيرادات والتكاليف',
+              ),
             ),
             const SizedBox(height: 14),
             IgnorePointer(
@@ -114,25 +118,26 @@ class _FinanceScreenState extends State<FinanceScreen> {
               childAspectRatio: 1.2,
               children: [
                 SummaryCard(
-                  title: 'إيرادات بدون ضريبة',
+                  title: context.tr(
+                      en: 'Revenue excl. VAT', ar: 'إيرادات بدون ضريبة'),
                   value: formatSar(kpis?.totalProjectValueWithoutVat ?? '0'),
                   icon: Icons.attach_money,
                   accent: const Color(0xFF4F9E8D),
                 ),
                 SummaryCard(
-                  title: 'إجمالي التكاليف',
+                  title: context.tr(en: 'Total costs', ar: 'إجمالي التكاليف'),
                   value: formatSar(kpis?.totalCosts ?? '0'),
                   icon: Icons.payments_outlined,
                   accent: const Color(0xFFF59E0B),
                 ),
                 SummaryCard(
-                  title: 'هامش الربح',
+                  title: context.tr(en: 'Profit margin', ar: 'هامش الربح'),
                   value: formatPercent(kpis?.profitMargin ?? '0'),
                   icon: Icons.percent,
                   accent: const Color(0xFF3B82F6),
                 ),
                 SummaryCard(
-                  title: 'المحصّل',
+                  title: context.tr(en: 'Collected', ar: 'المحصّل'),
                   value: formatSar(kpis?.totalCollectedAmount ?? '0'),
                   icon: Icons.account_balance_wallet_outlined,
                   accent: const Color(0xFF10B981),
@@ -141,13 +146,17 @@ class _FinanceScreenState extends State<FinanceScreen> {
             ),
             const SizedBox(height: 18),
             _ReportCard(
-              title: 'تقرير الإيرادات',
-              subtitle: 'قيمة المشاريع بدون ضريبة',
+              title: context.tr(en: 'Revenue report', ar: 'تقرير الإيرادات'),
+              subtitle: context.tr(
+                en: 'Project value excluding VAT',
+                ar: 'قيمة المشاريع بدون ضريبة',
+              ),
               onOpen: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => FinanceReportScreen(
-                      title: 'تقرير الإيرادات',
+                      title: context.tr(
+                          en: 'Revenue report', ar: 'تقرير الإيرادات'),
                       reportType: 'REVENUE_REPORT',
                       from: range.from,
                       to: range.to,
@@ -158,13 +167,18 @@ class _FinanceScreenState extends State<FinanceScreen> {
             ),
             const SizedBox(height: 12),
             _ReportCard(
-              title: 'تقرير تكاليف الفريق',
-              subtitle: 'إجمالي رواتب الفريق حسب الشخص',
+              title: context.tr(
+                  en: 'Team costs report', ar: 'تقرير تكاليف الفريق'),
+              subtitle: context.tr(
+                en: 'Total team pay by person',
+                ar: 'إجمالي رواتب الفريق حسب الشخص',
+              ),
               onOpen: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => FinanceReportScreen(
-                      title: 'تقرير تكاليف الفريق',
+                      title: context.tr(
+                          en: 'Team costs report', ar: 'تقرير تكاليف الفريق'),
                       reportType: 'TEAM_COSTS_REPORT',
                       from: range.from,
                       to: range.to,
@@ -175,13 +189,17 @@ class _FinanceScreenState extends State<FinanceScreen> {
             ),
             const SizedBox(height: 12),
             _ReportCard(
-              title: 'تقرير التحصيل',
-              subtitle: 'جميع التحصيلات المسجلة',
+              title: context.tr(en: 'Collections report', ar: 'تقرير التحصيل'),
+              subtitle: context.tr(
+                en: 'All recorded collections',
+                ar: 'جميع التحصيلات المسجلة',
+              ),
               onOpen: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => FinanceReportScreen(
-                      title: 'تقرير التحصيل',
+                      title: context.tr(
+                          en: 'Collections report', ar: 'تقرير التحصيل'),
                       reportType: 'COLLECTIONS_REPORT',
                       from: range.from,
                       to: range.to,

@@ -63,7 +63,9 @@ class UserProfile {
     }
 
     final hrRaw = json['hrProfile'];
-    final hr = hrRaw is Map ? HrProfile.fromJson(Map<String, dynamic>.from(hrRaw)) : null;
+    final hr = hrRaw is Map
+        ? HrProfile.fromJson(Map<String, dynamic>.from(hrRaw))
+        : null;
 
     return UserProfile(
       id: json['id']?.toString() ?? '',
@@ -79,4 +81,3 @@ class UserProfile {
     );
   }
 }
-

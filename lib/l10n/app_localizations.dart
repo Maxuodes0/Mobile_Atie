@@ -66,6 +66,10 @@ class AppLocalizations {
     return lang[key] ?? (_values['en']![key] ?? key);
   }
 
+  bool get isArabic => locale.languageCode == 'ar';
+
+  String select({required String en, required String ar}) => isArabic ? ar : en;
+
   String get title => _t('title');
   String get subtitle => _t('subtitle');
   String get email => _t('email');
@@ -75,6 +79,15 @@ class AppLocalizations {
   String get emailRequired => _t('emailRequired');
   String get emailInvalid => _t('emailInvalid');
   String get passwordRequired => _t('passwordRequired');
+}
+
+extension AiteLocalizationContext on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+
+  bool get isArabic => l10n.isArabic;
+
+  String tr({required String en, required String ar}) =>
+      l10n.select(en: en, ar: ar);
 }
 
 class _AppLocalizationsDelegate

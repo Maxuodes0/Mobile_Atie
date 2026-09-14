@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/project_summary.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 
 class CreateTaskProjectPickerSheet extends StatefulWidget {
@@ -56,18 +57,19 @@ class _CreateTaskProjectPickerSheetState
             TextField(
               controller: _search,
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                hintText: 'ابحث عن مشروع',
-                prefixIcon: Icon(Icons.search, size: 20),
+              decoration: InputDecoration(
+                hintText:
+                    context.tr(en: 'Search projects', ar: 'ابحث عن مشروع'),
+                prefixIcon: const Icon(Icons.search, size: 20),
               ),
             ),
             const SizedBox(height: 12),
             Flexible(
               child: items.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'لا توجد نتائج',
-                        style: TextStyle(color: AppTheme.muted),
+                        context.tr(en: 'No results', ar: 'لا توجد نتائج'),
+                        style: const TextStyle(color: AppTheme.muted),
                       ),
                     )
                   : ListView.separated(
@@ -84,7 +86,8 @@ class _CreateTaskProjectPickerSheetState
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                           subtitle: Text(
-                            p.clientName ?? 'بدون عميل',
+                            p.clientName ??
+                                context.tr(en: 'No client', ar: 'بدون عميل'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),

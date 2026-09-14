@@ -56,4 +56,3 @@ class UserAvatar extends StatelessWidget {
     );
   }
 }
-

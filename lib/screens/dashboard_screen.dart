@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/app_services.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import '../widgets/error_banner.dart';
@@ -149,8 +150,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                 0,
                 _DashboardHero(
                   userName: userName == null || userName.isEmpty
-                      ? 'مرحبًا بك'
-                      : 'أهلًا، $userName',
+                      ? context.tr(en: 'Welcome', ar: 'مرحبًا بك')
+                      : context.tr(
+                          en: 'Hello, $userName', ar: 'أهلًا، $userName'),
                   netProfit: formatSar(kpis?.netProfit ?? '0'),
                   profitMargin: kpis?.profitMargin ?? '0',
                   onRefresh: () => _controller.load(
@@ -198,15 +200,22 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ],
                     _reveal(
                       2,
-                      const _SectionHeading(
-                        title: 'ملخص الأداء',
-                        subtitle: 'أهم المؤشرات المالية للفترة المحددة',
+                      _SectionHeading(
+                        title: context.tr(
+                            en: 'Performance summary', ar: 'ملخص الأداء'),
+                        subtitle: context.tr(
+                          en: 'Key financial indicators for the selected period',
+                          ar: 'أهم المؤشرات المالية للفترة المحددة',
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
                     if (_controller.finance == null && financeError != null)
                       DashboardSectionErrorCard(
-                        title: 'تعذر تحميل مؤشرات المالية',
+                        title: context.tr(
+                          en: 'Could not load financial indicators',
+                          ar: 'تعذر تحميل مؤشرات المالية',
+                        ),
                         message: financeError,
                         onRetry: () => _controller.retrySections(
                           const [DashboardScreenController.sectionFinance],
@@ -226,7 +235,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                     if (_controller.collections.isEmpty &&
                         collectionsError != null)
                       DashboardSectionErrorCard(
-                        title: 'تعذر تحميل بيانات الأموال المحصلة',
+                        title: context.tr(
+                          en: 'Could not load collection data',
+                          ar: 'تعذر تحميل بيانات الأموال المحصلة',
+                        ),
                         message: collectionsError,
                         onRetry: () => _controller.retrySections(
                           const [DashboardScreenController.sectionCollections],
@@ -250,7 +262,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                         _controller.statusCounts.isEmpty &&
                         projectsAndStaffError != null)
                       DashboardSectionErrorCard(
-                        title: 'تعذر تحميل إحصاءات المشاريع والموظفين',
+                        title: context.tr(
+                          en: 'Could not load project and team statistics',
+                          ar: 'تعذر تحميل إحصاءات المشاريع والموظفين',
+                        ),
                         message: projectsAndStaffError,
                         onRetry: () => _controller.retrySections(
                           const [
@@ -279,7 +294,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                     if (_controller.latestProjects.isEmpty &&
                         latestProjectsError != null)
                       DashboardSectionErrorCard(
-                        title: 'تعذر تحميل أحدث المشاريع',
+                        title: context.tr(
+                          en: 'Could not load latest projects',
+                          ar: 'تعذر تحميل أحدث المشاريع',
+                        ),
                         message: latestProjectsError,
                         onRetry: () => _controller.retrySections(
                           const [
@@ -364,30 +382,34 @@ class _DashboardHero extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    const Text(
-                      'هذه نظرة سريعة على أعمالك',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    Text(
+                      context.tr(
+                        en: 'Here is a quick look at your work',
+                        ar: 'هذه نظرة سريعة على أعمالك',
+                      ),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                   ],
                 ),
               ),
               _HeroAction(
                 icon: Icons.refresh_rounded,
-                tooltip: 'تحديث البيانات',
+                tooltip: context.tr(en: 'Refresh data', ar: 'تحديث البيانات'),
                 onPressed: onRefresh,
               ),
               const SizedBox(width: 8),
               _HeroAction(
                 icon: Icons.logout_rounded,
-                tooltip: 'تسجيل الخروج',
+                tooltip: context.tr(en: 'Log out', ar: 'تسجيل الخروج'),
                 onPressed: onLogout,
               ),
             ],
           ),
           const SizedBox(height: 24),
-          const Text(
-            'صافي الربح',
-            style: TextStyle(
+          Text(
+            context.tr(en: 'Net profit', ar: 'صافي الربح'),
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -426,7 +448,10 @@ class _DashboardHero extends StatelessWidget {
               ],
             ),
             child: Text(
-              'هامش الربح $margin٪',
+              context.tr(
+                en: 'Profit margin $margin%',
+                ar: 'هامش الربح $margin٪',
+              ),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 11,
@@ -490,13 +515,13 @@ class _DashboardFilterBand extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.tune_rounded, color: Colors.white, size: 18),
-                SizedBox(width: 7),
+                const Icon(Icons.tune_rounded, color: Colors.white, size: 18),
+                const SizedBox(width: 7),
                 Text(
-                  'الفترة الزمنية',
-                  style: TextStyle(
+                  context.tr(en: 'Time period', ar: 'الفترة الزمنية'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.w800,

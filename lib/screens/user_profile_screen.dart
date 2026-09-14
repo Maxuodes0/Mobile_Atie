@@ -3,9 +3,11 @@ import 'package:intl/intl.dart' as intl;
 
 import '../data/models/user_profile.dart';
 import '../data/models/user_project_summary.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
+import '../utils/localized_values.dart';
 import '../widgets/app_card.dart';
 import '../widgets/error_banner.dart';
 import '../widgets/user_avatar.dart';
@@ -81,7 +83,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final accountRole = (profile?.role ?? '').trim();
     final projectRole = (widget.initialProjectRole ?? '').trim();
 
-    final title = displayName.isEmpty ? 'ملف الموظف' : displayName;
+    final title = displayName.isEmpty
+        ? context.tr(en: 'Team member profile', ar: 'ملف الموظف')
+        : displayName;
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -100,40 +104,43 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 name: displayName.isEmpty ? '—' : displayName,
                 initials: initials,
                 imageUrl: profile?.profileImage,
-                role: accountRole.isEmpty ? null : accountRole,
+                role: accountRole.isEmpty
+                    ? null
+                    : localizedAccountRole(accountRole, locale.languageCode),
                 projectRole: projectRole.isEmpty ? null : projectRole,
               ),
               const SizedBox(height: 14),
               _SectionCard(
-                title: 'معلومات التواصل',
+                title: context.tr(
+                    en: 'Contact information', ar: 'معلومات التواصل'),
                 child: Column(
                   children: [
                     _InfoRow(
                       icon: Icons.mail_outline,
-                      label: 'البريد',
+                      label: context.tr(en: 'Email', ar: 'البريد'),
                       value: (profile?.email ?? '').trim(),
                     ),
                     _InfoRow(
                       icon: Icons.phone_outlined,
-                      label: 'الجوال',
+                      label: context.tr(en: 'Phone', ar: 'الجوال'),
                       value: (profile?.phone ?? '').trim(),
                       fallback: '—',
                     ),
                     _InfoRow(
                       icon: Icons.credit_card_outlined,
-                      label: 'الآيبان',
+                      label: context.tr(en: 'IBAN', ar: 'الآيبان'),
                       value: (profile?.iban ?? '').trim(),
                       fallback: '—',
                     ),
                     _InfoRow(
                       icon: Icons.apartment_outlined,
-                      label: 'المنظمة',
+                      label: context.tr(en: 'Organization', ar: 'المنظمة'),
                       value: (profile?.organizationName ?? '').trim(),
                       fallback: '—',
                     ),
                     _InfoRow(
                       icon: Icons.calendar_month_outlined,
-                      label: 'تاريخ التسجيل',
+                      label: context.tr(en: 'Joined on', ar: 'تاريخ التسجيل'),
                       value: fmtDate(profile?.createdAt),
                     ),
                   ],
@@ -142,36 +149,42 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(height: 14),
               if (profile?.hrProfile != null)
                 _SectionCard(
-                  title: 'بيانات وظيفية',
+                  title:
+                      context.tr(en: 'Employment details', ar: 'بيانات وظيفية'),
                   child: Column(
                     children: [
                       _InfoRow(
                         icon: Icons.badge_outlined,
-                        label: 'رقم الموظف',
-                        value: (profile!.hrProfile!.employeeNumber ?? '').trim(),
+                        label:
+                            context.tr(en: 'Employee number', ar: 'رقم الموظف'),
+                        value:
+                            (profile!.hrProfile!.employeeNumber ?? '').trim(),
                         fallback: '—',
                       ),
                       _InfoRow(
                         icon: Icons.work_outline,
-                        label: 'المسمى',
+                        label: context.tr(en: 'Job title', ar: 'المسمى'),
                         value: (profile.hrProfile!.jobTitle ?? '').trim(),
                         fallback: '—',
                       ),
                       _InfoRow(
                         icon: Icons.account_tree_outlined,
-                        label: 'القسم',
+                        label: context.tr(en: 'Department', ar: 'القسم'),
                         value: (profile.hrProfile!.department ?? '').trim(),
                         fallback: '—',
                       ),
                       _InfoRow(
                         icon: Icons.verified_outlined,
-                        label: 'الحالة',
-                        value: (profile.hrProfile!.status ?? '').trim(),
+                        label: context.tr(en: 'Status', ar: 'الحالة'),
+                        value: localizedEmploymentStatus(
+                          (profile.hrProfile!.status ?? '').trim(),
+                          locale.languageCode,
+                        ),
                         fallback: '—',
                       ),
                       _InfoRow(
                         icon: Icons.date_range_outlined,
-                        label: 'تاريخ التعيين',
+                        label: context.tr(en: 'Hire date', ar: 'تاريخ التعيين'),
                         value: fmtDate(profile.hrProfile!.hireDate),
                       ),
                     ],
@@ -179,7 +192,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
               if (profile?.hrProfile != null) const SizedBox(height: 14),
               _SectionCard(
-                title: 'إحصائيات',
+                title: context.tr(en: 'Statistics', ar: 'إحصائيات'),
                 child: summary == null && _loading
                     ? const Center(child: CircularProgressIndicator())
                     : _StatsGrid(
@@ -191,7 +204,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               const SizedBox(height: 14),
               _SectionCard(
-                title: 'المشاريع',
+                title: context.tr(en: 'Projects', ar: 'المشاريع'),
                 child: summary == null && _loading
                     ? const Center(child: CircularProgressIndicator())
                     : _ProjectsList(
@@ -376,7 +389,7 @@ class _StatsGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _StatTile(
-                label: 'إجمالي المشاريع',
+                label: context.tr(en: 'Total projects', ar: 'إجمالي المشاريع'),
                 value: '$totalProjects',
                 icon: Icons.work_outline,
               ),
@@ -384,7 +397,7 @@ class _StatsGrid extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _StatTile(
-                label: 'مدفوعة',
+                label: context.tr(en: 'Paid', ar: 'مدفوعة'),
                 value: '$paidProjects',
                 icon: Icons.verified_outlined,
                 tint: const Color(0xFF10B981),
@@ -397,7 +410,7 @@ class _StatsGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _StatTile(
-                label: 'غير مدفوعة',
+                label: context.tr(en: 'Unpaid', ar: 'غير مدفوعة'),
                 value: '$unpaidProjects',
                 icon: Icons.error_outline,
                 tint: const Color(0xFFF59E0B),
@@ -406,7 +419,7 @@ class _StatsGrid extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _StatTile(
-                label: 'إجمالي المدفوع',
+                label: context.tr(en: 'Total paid', ar: 'إجمالي المدفوع'),
                 value: formatSar(totalPaidAmount.toStringAsFixed(2)),
                 icon: Icons.payments_outlined,
               ),
@@ -483,9 +496,9 @@ class _ProjectsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const Text(
-        'لا توجد بيانات مشاريع',
-        style: TextStyle(color: AppTheme.muted, fontSize: 12),
+      return Text(
+        context.tr(en: 'No project data', ar: 'لا توجد بيانات مشاريع'),
+        style: const TextStyle(color: AppTheme.muted, fontSize: 12),
       );
     }
 
@@ -500,7 +513,10 @@ class _ProjectsList extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
-              'عرض ${shown.length} من ${items.length}',
+              context.tr(
+                en: 'Showing ${shown.length} of ${items.length}',
+                ar: 'عرض ${shown.length} من ${items.length}',
+              ),
               style: const TextStyle(color: AppTheme.muted, fontSize: 12),
             ),
           ),
@@ -518,7 +534,9 @@ class _ProjectRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final chipColor =
         item.isPaid ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
-    final chipLabel = item.isPaid ? 'مدفوع' : 'غير مدفوع';
+    final chipLabel = item.isPaid
+        ? context.tr(en: 'Paid', ar: 'مدفوع')
+        : context.tr(en: 'Unpaid', ar: 'غير مدفوع');
 
     final amount = item.amount ??
         (item.days != null && item.ratePerDay != null
@@ -528,8 +546,9 @@ class _ProjectRow extends StatelessWidget {
         amount == null ? '—' : formatSar(amount.toStringAsFixed(2));
 
     final direction = Directionality.of(context);
-    final chevron =
-        direction == TextDirection.rtl ? Icons.chevron_left : Icons.chevron_right;
+    final chevron = direction == TextDirection.rtl
+        ? Icons.chevron_left
+        : Icons.chevron_right;
 
     return Material(
       color: Colors.transparent,
@@ -539,7 +558,8 @@ class _ProjectRow extends StatelessWidget {
           final id = item.projectId.trim();
           if (id.isEmpty) return;
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => ProjectDetailsScreen(projectId: id)),
+            MaterialPageRoute(
+                builder: (_) => ProjectDetailsScreen(projectId: id)),
           );
         },
         child: Padding(
@@ -560,7 +580,7 @@ class _ProjectRow extends StatelessWidget {
                         Expanded(
                           child: Text(
                             (item.role ?? '').trim().isEmpty
-                                ? 'بدون دور'
+                                ? context.tr(en: 'No role', ar: 'بدون دور')
                                 : item.role!.trim(),
                             style: const TextStyle(
                               color: AppTheme.muted,
@@ -582,7 +602,8 @@ class _ProjectRow extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: chipColor.withOpacitySafe(0.12),
                   borderRadius: BorderRadius.circular(12),

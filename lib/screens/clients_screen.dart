@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
 import '../data/models/client_summary.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
 import '../utils/async_request_guard_mixin.dart';
@@ -104,9 +105,12 @@ class _ClientsScreenState extends State<ClientsScreen>
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           children: [
-            const AppPageHeader(
-              title: 'العملاء',
-              subtitle: 'قائمة العملاء وإحصائيات المشاريع',
+            AppPageHeader(
+              title: context.tr(en: 'Clients', ar: 'العملاء'),
+              subtitle: context.tr(
+                en: 'Client list and project statistics',
+                ar: 'قائمة العملاء وإحصائيات المشاريع',
+              ),
             ),
             InlineLoadingBar(visible: _updating),
             const SizedBox(height: 16),
@@ -120,27 +124,35 @@ class _ClientsScreenState extends State<ClientsScreen>
                 scrollDirection: Axis.horizontal,
                 children: [
                   _StatisticCard(
-                    title: 'إجمالي العملاء',
+                    title:
+                        context.tr(en: 'Total clients', ar: 'إجمالي العملاء'),
                     value: _clients.length.toString(),
                     icon: Icons.groups_rounded,
                     color: AppTheme.accent,
                   ),
                   _StatisticCard(
-                    title: 'إجمالي المشاريع',
+                    title:
+                        context.tr(en: 'Total projects', ar: 'إجمالي المشاريع'),
                     value: _totalProjects.toString(),
                     icon: Icons.folder_copy_rounded,
                     color: const Color(0xFF4F7CAC),
                   ),
                   _StatisticCard(
-                    title: 'القيمة بدون الضريبة',
-                    value: _formatSar(_totalValue),
+                    title: context.tr(
+                      en: 'Value excluding VAT',
+                      ar: 'القيمة بدون الضريبة',
+                    ),
+                    value: _formatSar(_totalValue, context),
                     icon: Icons.account_balance_wallet_rounded,
                     color: const Color(0xFFB7791F),
                     wide: true,
                   ),
                   _StatisticCard(
-                    title: 'متوسط قيمة العميل',
-                    value: _formatSar(averageValue),
+                    title: context.tr(
+                      en: 'Average client value',
+                      ar: 'متوسط قيمة العميل',
+                    ),
+                    value: _formatSar(averageValue, context),
                     icon: Icons.insights_rounded,
                     color: const Color(0xFF7C5CBF),
                     wide: true,
@@ -151,20 +163,20 @@ class _ClientsScreenState extends State<ClientsScreen>
             const SizedBox(height: 18),
             TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: 'ابحث عن عميل',
-                prefixIcon: Icon(Icons.search, size: 20),
+              decoration: InputDecoration(
+                hintText: context.tr(en: 'Search clients', ar: 'ابحث عن عميل'),
+                prefixIcon: const Icon(Icons.search, size: 20),
                 prefixIconColor: AppTheme.muted,
               ),
             ),
             const SizedBox(height: 16),
             if (clients.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 28),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 28),
                 child: Center(
                   child: Text(
-                    'لا يوجد عملاء',
-                    style: TextStyle(color: AppTheme.muted),
+                    context.tr(en: 'No clients found', ar: 'لا يوجد عملاء'),
+                    style: const TextStyle(color: AppTheme.muted),
                   ),
                 ),
               )
@@ -283,12 +295,17 @@ class _ClientCard extends StatelessWidget {
                   children: [
                     _ClientMetric(
                       icon: Icons.folder_open_rounded,
-                      label: '${client.projectCount} مشروع',
+                      label: context.tr(
+                        en: '${client.projectCount} projects',
+                        ar: '${client.projectCount} مشروع',
+                      ),
                     ),
                     _ClientMetric(
                       icon: Icons.payments_outlined,
-                      label:
-                          '${_formatSar(client.totalRevenueWithoutVat)} بدون ضريبة',
+                      label: context.tr(
+                        en: '${_formatSar(client.totalRevenueWithoutVat, context)} excl. VAT',
+                        ar: '${_formatSar(client.totalRevenueWithoutVat, context)} بدون ضريبة',
+                      ),
                     ),
                   ],
                 ),
@@ -309,7 +326,9 @@ class _ClientAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logo = client.logo?.trim();
-    final initial = client.name.trim().isEmpty ? 'ع' : client.name.trim()[0];
+    final initial = client.name.trim().isEmpty
+        ? context.tr(en: 'C', ar: 'ع')
+        : client.name.trim()[0];
 
     if (logo != null && logo.isNotEmpty) {
       return ClipRRect(
@@ -385,4 +404,7 @@ class _ClientMetric extends StatelessWidget {
 
 final intl.NumberFormat _sarFormatter = intl.NumberFormat('#,##0.##', 'en_US');
 
-String _formatSar(double value) => '${_sarFormatter.format(value)} ر.س';
+String _formatSar(double value, BuildContext context) => context.tr(
+      en: 'SAR ${_sarFormatter.format(value)}',
+      ar: '${_sarFormatter.format(value)} ر.س',
+    );

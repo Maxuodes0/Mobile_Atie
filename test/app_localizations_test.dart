@@ -1,5 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:aite_mobile/utils/collection_status.dart';
+import 'package:aite_mobile/utils/project_status.dart';
+import 'package:aite_mobile/utils/task_status.dart';
 
 import 'package:aite_mobile/l10n/app_localizations.dart';
 
@@ -29,5 +32,20 @@ void main() {
     );
 
     expect(locale.languageCode, 'en');
+  });
+
+  test('status labels follow the selected app language', () {
+    expect(projectStatusLabel('COMPLETED', languageCode: 'en'), 'Completed');
+    expect(projectStatusLabel('COMPLETED', languageCode: 'ar'), 'مكتمل');
+    expect(taskStatusLabel('in_progress', languageCode: 'en'), 'In progress');
+    expect(taskStatusLabel('in_progress', languageCode: 'ar'), 'قيد التنفيذ');
+    expect(
+      collectionStatusLabel('FULLY_COLLECTED', languageCode: 'en'),
+      'Fully collected',
+    );
+    expect(
+      collectionStatusLabel('FULLY_COLLECTED', languageCode: 'ar'),
+      'محصل بالكامل',
+    );
   });
 }

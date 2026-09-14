@@ -5,6 +5,7 @@ import '../models/project_collection.dart';
 import '../models/project_team_member.dart';
 import '../models/project_collections_result.dart';
 import '../models/project_list_result.dart';
+import '../models/project_role_label.dart';
 import 'api_client.dart';
 
 class ProjectsApi {
@@ -102,6 +103,26 @@ class ProjectsApi {
       }
     }
     return const <ProjectTeamMember>[];
+  }
+
+  Future<List<ProjectRoleLabel>> listProjectRoles({
+    Duration? cacheTtl,
+    bool forceRefresh = false,
+  }) async {
+    final res = await _api.get(
+      '/project-roles',
+      cacheTtl: cacheTtl,
+      forceRefresh: forceRefresh,
+    );
+    if (res is Map && res['roles'] is List) {
+      return (res['roles'] as List)
+          .whereType<Map>()
+          .map((role) => ProjectRoleLabel.fromJson(
+                Map<String, dynamic>.from(role),
+              ))
+          .toList(growable: false);
+    }
+    return const <ProjectRoleLabel>[];
   }
 
   Future<ProjectCollectionsResult> listCollections({

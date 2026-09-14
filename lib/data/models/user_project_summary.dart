@@ -28,7 +28,8 @@ class UserProjectMembership {
       projectId: json['projectId']?.toString() ?? '',
       projectName: json['projectName']?.toString() ?? '',
       role: json['role']?.toString(),
-      amount: toDouble(json['amount'] ?? json['amountPaid'] ?? json['totalAmount']),
+      amount:
+          toDouble(json['amount'] ?? json['amountPaid'] ?? json['totalAmount']),
       days: toDouble(json['days'] ?? json['estimatedDays']),
       ratePerDay: toDouble(json['ratePerDay'] ?? json['dailyRate']),
       isPaid: json['isPaid'] == true,
@@ -68,7 +69,8 @@ class UserProjectSummary {
     final projects = raw is List
         ? raw
             .whereType<Map>()
-            .map((p) => UserProjectMembership.fromJson(Map<String, dynamic>.from(p)))
+            .map((p) =>
+                UserProjectMembership.fromJson(Map<String, dynamic>.from(p)))
             .toList()
         : const <UserProjectMembership>[];
 
@@ -81,4 +83,3 @@ class UserProjectSummary {
     );
   }
 }
-

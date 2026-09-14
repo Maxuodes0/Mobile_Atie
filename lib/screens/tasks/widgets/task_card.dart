@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../data/models/task_item.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/task_status.dart';
 
@@ -22,9 +23,14 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = taskStatusColor(task.status);
-    final statusLabel = taskStatusLabel(task.status);
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final statusLabel =
+        taskStatusLabel(task.status, languageCode: languageCode);
     final prioColor = taskPriorityColor(task.priority);
-    final prioLabel = taskPriorityLabel(task.priority);
+    final prioLabel = taskPriorityLabel(
+      task.priority,
+      languageCode: languageCode,
+    );
 
     final locale = Localizations.localeOf(context);
     final due = task.dueDate == null
@@ -67,7 +73,8 @@ class TaskCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        task.projectName ?? 'بدون مشروع',
+                        task.projectName ??
+                            context.tr(en: 'No project', ar: 'بدون مشروع'),
                         style: const TextStyle(
                           color: AppTheme.muted,
                           fontSize: 12,
@@ -76,7 +83,7 @@ class TaskCard extends StatelessWidget {
                       if (due != null) ...[
                         const SizedBox(height: 6),
                         Text(
-                          'الاستحقاق: $due',
+                          context.tr(en: 'Due: $due', ar: 'الاستحقاق: $due'),
                           style: const TextStyle(
                             color: AppTheme.muted,
                             fontSize: 12,
@@ -89,7 +96,10 @@ class TaskCard extends StatelessWidget {
                           _TaskChip(label: statusLabel, color: statusColor),
                           const SizedBox(width: 8),
                           _TaskChip(
-                            label: 'الأولوية: $prioLabel',
+                            label: context.tr(
+                              en: 'Priority: $prioLabel',
+                              ar: 'الأولوية: $prioLabel',
+                            ),
                             color: prioColor,
                           ),
                         ],
@@ -116,7 +126,7 @@ class TaskCard extends StatelessWidget {
                                 ? statusColor
                                 : AppTheme.muted,
                           ),
-                          tooltip: 'إكمال',
+                          tooltip: context.tr(en: 'Complete', ar: 'إكمال'),
                         ),
                 ),
               ],

@@ -23,6 +23,7 @@ class _AiteOnboardingState extends State<AiteOnboarding>
   int _targetPage = 0;
   bool _isTransitioning = false;
   bool _verticalTransition = true;
+  bool _movingForward = true;
   bool _assetsPrepared = false;
 
   static const _arabicPages = <_OnboardingContent>[
@@ -130,6 +131,7 @@ class _AiteOnboardingState extends State<AiteOnboarding>
     setState(() {
       _targetPage = page;
       _verticalTransition = vertical;
+      _movingForward = page > _currentPage;
       _isTransitioning = true;
     });
     _controller.forward(from: 0);
@@ -267,6 +269,7 @@ class _AiteOnboardingState extends State<AiteOnboarding>
             controller: _controller,
             incoming: false,
             vertical: _verticalTransition,
+            movingForward: _movingForward,
             reducedMotion: _reducedMotion,
           );
 
@@ -275,6 +278,7 @@ class _AiteOnboardingState extends State<AiteOnboarding>
       controller: _controller,
       incoming: true,
       vertical: _verticalTransition,
+      movingForward: _movingForward,
       reducedMotion: _reducedMotion,
     );
 
@@ -452,6 +456,7 @@ class _AnimatedOnboardingPage extends StatelessWidget {
     required this.controller,
     required this.incoming,
     required this.vertical,
+    required this.movingForward,
     required this.reducedMotion,
   });
 
@@ -459,6 +464,7 @@ class _AnimatedOnboardingPage extends StatelessWidget {
   final AnimationController controller;
   final bool incoming;
   final bool vertical;
+  final bool movingForward;
   final bool reducedMotion;
 
   @override
@@ -468,7 +474,9 @@ class _AnimatedOnboardingPage extends StatelessWidget {
       builder: (context, _) {
         if (!vertical) {
           final progress = Curves.easeOutCubic.transform(controller.value);
-          final horizontalOffset = incoming ? 1 - progress : -progress;
+          final direction = movingForward ? 1.0 : -1.0;
+          final horizontalOffset =
+              incoming ? direction * (1 - progress) : -direction * progress;
           final page = _OnboardingLayout(
             illustration: _Illustration(content: content),
             heading: _Heading(content: content),
@@ -524,7 +532,10 @@ class _AnimatedOnboardingPage extends StatelessWidget {
     if (vertical) {
       return incoming ? Offset(0, 1 - progress) : Offset(0, -progress);
     }
-    return incoming ? Offset(1 - progress, 0) : Offset(-progress, 0);
+    final direction = movingForward ? 1.0 : -1.0;
+    return incoming
+        ? Offset(direction * (1 - progress), 0)
+        : Offset(-direction * progress, 0);
   }
 }
 

@@ -10,4 +10,3 @@ class OrgUsersResult {
     required this.meta,
   });
 }
-

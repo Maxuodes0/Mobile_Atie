@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/project_summary.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/project_status.dart';
 import '../../../widgets/project_image.dart';
@@ -17,7 +18,10 @@ class LatestProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusLabel = projectStatusLabel(project.status);
+    final statusLabel = projectStatusLabel(
+      project.status,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
     final statusColor = projectStatusColor(project.status);
 
     return SizedBox(
@@ -60,7 +64,8 @@ class LatestProjectCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    project.clientName ?? 'بدون عميل',
+                    project.clientName ??
+                        context.tr(en: 'No client', ar: 'بدون عميل'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(color: AppTheme.muted, fontSize: 12),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/app_services.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'clients_screen.dart';
 import 'dashboard_screen.dart';
@@ -34,44 +35,44 @@ class _AppShellState extends State<AppShell> {
         _NavItem(
           pageBuilder: (isActive) => DashboardScreen(isActive: isActive),
           backgroundColor: AppTheme.primary,
-          destination: const NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'لوحة التحكم',
+          destination: NavigationDestination(
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard),
+            label: context.tr(en: 'Dashboard', ar: 'لوحة التحكم'),
           ),
         ),
       _NavItem(
         pageBuilder: (_) => const ProjectsScreen(),
-        destination: const NavigationDestination(
-          icon: Icon(Icons.folder_open_outlined),
-          selectedIcon: Icon(Icons.folder),
-          label: 'المشاريع',
+        destination: NavigationDestination(
+          icon: const Icon(Icons.folder_open_outlined),
+          selectedIcon: const Icon(Icons.folder),
+          label: context.tr(en: 'Projects', ar: 'المشاريع'),
         ),
       ),
       if (canSeeClients)
         _NavItem(
           pageBuilder: (_) => const ClientsScreen(),
-          destination: const NavigationDestination(
-            icon: Icon(Icons.groups_outlined),
-            selectedIcon: Icon(Icons.groups),
-            label: 'العملاء',
+          destination: NavigationDestination(
+            icon: const Icon(Icons.groups_outlined),
+            selectedIcon: const Icon(Icons.groups),
+            label: context.tr(en: 'Clients', ar: 'العملاء'),
           ),
         ),
       _NavItem(
         pageBuilder: (_) => const TasksScreen(),
-        destination: const NavigationDestination(
-          icon: Icon(Icons.checklist_outlined),
-          selectedIcon: Icon(Icons.checklist),
-          label: 'المهام',
+        destination: NavigationDestination(
+          icon: const Icon(Icons.checklist_outlined),
+          selectedIcon: const Icon(Icons.checklist),
+          label: context.tr(en: 'Tasks', ar: 'المهام'),
         ),
       ),
       if (canSeeFinance)
         _NavItem(
           pageBuilder: (isActive) => FinanceScreen(isActive: isActive),
-          destination: const NavigationDestination(
-            icon: Icon(Icons.pie_chart_outline),
-            selectedIcon: Icon(Icons.pie_chart),
-            label: 'المالية',
+          destination: NavigationDestination(
+            icon: const Icon(Icons.pie_chart_outline),
+            selectedIcon: const Icon(Icons.pie_chart),
+            label: context.tr(en: 'Finance', ar: 'المالية'),
           ),
         ),
     ];

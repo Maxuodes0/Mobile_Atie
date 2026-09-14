@@ -5,6 +5,7 @@ import '../data/models/page_meta.dart';
 import '../data/models/task_item.dart';
 import '../data/models/task_note.dart';
 import '../data/models/task_notes_result.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
 import '../utils/task_status.dart';
@@ -138,9 +139,15 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     final locale = Localizations.localeOf(context);
 
     final statusColor = taskStatusColor(task.status);
-    final statusLabel = taskStatusLabel(task.status);
+    final statusLabel = taskStatusLabel(
+      task.status,
+      languageCode: locale.languageCode,
+    );
     final prioColor = taskPriorityColor(task.priority);
-    final prioLabel = taskPriorityLabel(task.priority);
+    final prioLabel = taskPriorityLabel(
+      task.priority,
+      languageCode: locale.languageCode,
+    );
 
     final due = task.dueDate == null
         ? null
@@ -154,7 +161,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تفاصيل المهمة'),
+        title: Text(context.tr(en: 'Task details', ar: 'تفاصيل المهمة')),
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -175,14 +182,15 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      task.projectName ?? 'بدون مشروع',
+                      task.projectName ??
+                          context.tr(en: 'No project', ar: 'بدون مشروع'),
                       style:
                           const TextStyle(color: AppTheme.muted, fontSize: 12),
                     ),
                     if (due != null) ...[
                       const SizedBox(height: 8),
                       Text(
-                        'الاستحقاق: $due',
+                        context.tr(en: 'Due: $due', ar: 'الاستحقاق: $due'),
                         style: const TextStyle(
                             color: AppTheme.muted, fontSize: 12),
                       ),
@@ -194,7 +202,10 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                       children: [
                         _Pill(label: statusLabel, color: statusColor),
                         _Pill(
-                          label: 'الأولوية: $prioLabel',
+                          label: context.tr(
+                            en: 'Priority: $prioLabel',
+                            ar: 'الأولوية: $prioLabel',
+                          ),
                           color: prioColor,
                         ),
                       ],
@@ -214,9 +225,10 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Text(
-                    'الملاحظات',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  Text(
+                    context.tr(en: 'Notes', ar: 'الملاحظات'),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w800),
                   ),
                   const Spacer(),
                   Text(
@@ -230,9 +242,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'إضافة ملاحظة',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                    Text(
+                      context.tr(en: 'Add note', ar: 'إضافة ملاحظة'),
+                      style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 10),
                     TextField(
@@ -241,7 +253,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                       maxLines: 5,
                       textAlign: TextAlign.start,
                       decoration: InputDecoration(
-                        hintText: 'اكتب ملاحظة...',
+                        hintText: context.tr(
+                            en: 'Write a note…', ar: 'اكتب ملاحظة...'),
                         filled: true,
                         fillColor: AppTheme.ink.withOpacitySafe(0.03),
                         contentPadding: const EdgeInsetsDirectional.fromSTEB(
@@ -282,9 +295,10 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text(
-                                'إرسال',
-                                style: TextStyle(fontWeight: FontWeight.w800),
+                            : Text(
+                                context.tr(en: 'Send', ar: 'إرسال'),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800),
                               ),
                       ),
                     ),
@@ -297,9 +311,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                 const SizedBox(height: 12),
               ],
               if (_notes.isEmpty)
-                const Text(
-                  'لا توجد ملاحظات',
-                  style: TextStyle(color: AppTheme.muted, fontSize: 12),
+                Text(
+                  context.tr(en: 'No notes', ar: 'لا توجد ملاحظات'),
+                  style: const TextStyle(color: AppTheme.muted, fontSize: 12),
                 )
               else
                 ..._notes.map((n) => _NoteCard(note: n)),
@@ -316,9 +330,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text(
-                          'تحميل المزيد',
-                          style: TextStyle(fontWeight: FontWeight.w700),
+                        child: Text(
+                          context.tr(en: 'Load more', ar: 'تحميل المزيد'),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
               ],
@@ -398,7 +412,7 @@ class _NoteCard extends StatelessWidget {
         : DateFormat.yMMMd(locale.toString()).add_jm().format(note.createdAt);
 
     final author = (note.authorName ?? '').trim().isEmpty
-        ? 'مستخدم'
+        ? context.tr(en: 'User', ar: 'مستخدم')
         : note.authorName!.trim();
     final initial = author.isNotEmpty ? author.characters.first : '?';
 

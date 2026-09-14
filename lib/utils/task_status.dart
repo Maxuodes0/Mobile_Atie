@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-String taskStatusLabel(String status) {
+String taskStatusLabel(String status, {String languageCode = 'ar'}) {
+  final isArabic = languageCode == 'ar';
   switch (status) {
     case 'pending':
-      return 'معلّقة';
+      return isArabic ? 'معلّقة' : 'Pending';
     case 'in_progress':
-      return 'قيد التنفيذ';
+      return isArabic ? 'قيد التنفيذ' : 'In progress';
     case 'done':
-      return 'مكتملة';
+      return isArabic ? 'مكتملة' : 'Completed';
     default:
       return status;
   }
@@ -25,16 +26,17 @@ Color taskStatusColor(String status) {
   }
 }
 
-String taskPriorityLabel(String? priority) {
+String taskPriorityLabel(String? priority, {String languageCode = 'ar'}) {
+  final isArabic = languageCode == 'ar';
   switch (priority) {
     case 'high':
-      return 'عالية';
+      return isArabic ? 'عالية' : 'High';
     case 'medium':
-      return 'متوسطة';
+      return isArabic ? 'متوسطة' : 'Medium';
     case 'low':
-      return 'منخفضة';
+      return isArabic ? 'منخفضة' : 'Low';
     default:
-      return 'غير محدد';
+      return isArabic ? 'غير محدد' : 'Not set';
   }
 }
 

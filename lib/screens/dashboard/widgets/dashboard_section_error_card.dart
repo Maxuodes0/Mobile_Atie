@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class DashboardSectionErrorCard extends StatelessWidget {
   final String title;
@@ -52,7 +53,7 @@ class DashboardSectionErrorCard extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh, size: 16),
-              label: const Text('إعادة المحاولة'),
+              label: Text(context.tr(en: 'Try again', ar: 'إعادة المحاولة')),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFFB91C1C),
                 side: BorderSide(color: danger.withOpacitySafe(0.45)),

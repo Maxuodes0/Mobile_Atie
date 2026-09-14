@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/org_user.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../services/app_services.dart';
 import '../../../theme/app_theme.dart';
 
@@ -100,11 +101,14 @@ class _CreateTaskUserPickerSheetState extends State<CreateTaskUserPickerSheet> {
               ),
             ),
             ListTile(
-              title: const Text(
-                'بدون إسناد',
-                style: TextStyle(fontWeight: FontWeight.w800),
+              title: Text(
+                context.tr(en: 'Unassigned', ar: 'بدون إسناد'),
+                style: const TextStyle(fontWeight: FontWeight.w800),
               ),
-              subtitle: const Text('إلغاء اختيار الشخص'),
+              subtitle: Text(context.tr(
+                en: 'Clear selected assignee',
+                ar: 'إلغاء اختيار الشخص',
+              )),
               onTap: () => Navigator.of(context).pop(null),
             ),
             const Divider(height: 1),
@@ -112,9 +116,10 @@ class _CreateTaskUserPickerSheetState extends State<CreateTaskUserPickerSheet> {
             TextField(
               controller: _search,
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                hintText: 'ابحث عن موظف',
-                prefixIcon: Icon(Icons.search, size: 20),
+              decoration: InputDecoration(
+                hintText:
+                    context.tr(en: 'Search team members', ar: 'ابحث عن موظف'),
+                prefixIcon: const Icon(Icons.search, size: 20),
               ),
             ),
             const SizedBox(height: 12),
@@ -123,9 +128,9 @@ class _CreateTaskUserPickerSheetState extends State<CreateTaskUserPickerSheet> {
                   ? Center(
                       child: _loadingMore && _users.isEmpty
                           ? const CircularProgressIndicator()
-                          : const Text(
-                              'لا توجد نتائج',
-                              style: TextStyle(color: AppTheme.muted),
+                          : Text(
+                              context.tr(en: 'No results', ar: 'لا توجد نتائج'),
+                              style: const TextStyle(color: AppTheme.muted),
                             ),
                     )
                   : ListView.separated(
@@ -160,7 +165,10 @@ class _CreateTaskUserPickerSheetState extends State<CreateTaskUserPickerSheet> {
                     )
                   : OutlinedButton(
                       onPressed: () => _loadMore(reset: false),
-                      child: Text('تحميل المزيد (${_users.length}/$_total)'),
+                      child: Text(context.tr(
+                        en: 'Load more (${_users.length}/$_total)',
+                        ar: 'تحميل المزيد (${_users.length}/$_total)',
+                      )),
                     ),
             ],
           ],

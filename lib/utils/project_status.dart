@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
-String projectStatusLabel(String status) {
+String projectStatusLabel(String status, {String languageCode = 'ar'}) {
+  final isArabic = languageCode == 'ar';
   switch (status) {
     case 'ON_TRACK':
-      return 'على المسار';
+      return isArabic ? 'على المسار' : 'On track';
     case 'AT_RISK':
-      return 'معرّض للخطر';
+      return isArabic ? 'معرّض للخطر' : 'At risk';
     case 'OFF_TRACK':
-      return 'متأخر';
+      return isArabic ? 'متأخر' : 'Off track';
     case 'COMPLETED':
-      return 'مكتمل';
+      return isArabic ? 'مكتمل' : 'Completed';
     default:
       return status;
   }

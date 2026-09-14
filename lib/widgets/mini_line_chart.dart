@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class MiniLineChart extends StatelessWidget {
   final List<double> values;
@@ -25,10 +26,10 @@ class MiniLineChart extends StatelessWidget {
           color: const Color(0xFFF2F3F5),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
-            'لا توجد بيانات',
-            style: TextStyle(color: AppTheme.muted, fontSize: 12),
+            context.tr(en: 'No data', ar: 'لا توجد بيانات'),
+            style: const TextStyle(color: AppTheme.muted, fontSize: 12),
           ),
         ),
       );

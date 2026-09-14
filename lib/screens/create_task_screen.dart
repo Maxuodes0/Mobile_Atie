@@ -5,6 +5,7 @@ import '../data/api/api_exception.dart';
 import '../data/models/org_user.dart';
 import '../data/models/org_users_result.dart';
 import '../data/models/project_summary.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
 import 'create_task/widgets/create_task_project_picker_sheet.dart';
@@ -183,7 +184,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         : intl.DateFormat.yMMMd(locale.toString()).format(_dueDate!.toLocal());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('إضافة مهمة')),
+      appBar: AppBar(title: Text(context.tr(en: 'Add task', ar: 'إضافة مهمة'))),
       body: SafeArea(
         child: _bootLoading
             ? const Center(child: CircularProgressIndicator())
@@ -199,9 +200,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          '1. اختر المشروع',
-                          style: TextStyle(
+                        Text(
+                          context.tr(
+                              en: '1. Choose project', ar: '1. اختر المشروع'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             color: AppTheme.muted,
                             fontSize: 12,
@@ -209,7 +211,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         ),
                         const SizedBox(height: 10),
                         CreateTaskSelectTile(
-                          title: _selectedProject?.name ?? 'اختر مشروع',
+                          title: _selectedProject?.name ??
+                              context.tr(
+                                  en: 'Choose a project', ar: 'اختر مشروع'),
                           subtitle: _selectedProject?.clientName,
                           onTap: _selectProject,
                         ),
@@ -222,9 +226,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          '2. اختر الشخص (اختياري)',
-                          style: TextStyle(
+                        Text(
+                          context.tr(
+                            en: '2. Choose assignee (optional)',
+                            ar: '2. اختر الشخص (اختياري)',
+                          ),
+                          style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             color: AppTheme.muted,
                             fontSize: 12,
@@ -233,7 +240,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         const SizedBox(height: 10),
                         CreateTaskSelectTile(
                           title: (_selectedAssignee?.name ?? '').trim().isEmpty
-                              ? 'بدون إسناد'
+                              ? context.tr(en: 'Unassigned', ar: 'بدون إسناد')
                               : _selectedAssignee!.name,
                           subtitle:
                               (_selectedAssignee?.email ?? '').trim().isEmpty
@@ -246,7 +253,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   onPressed: () =>
                                       setState(() => _selectedAssignee = null),
                                   icon: const Icon(Icons.close),
-                                  tooltip: 'إزالة',
+                                  tooltip:
+                                      context.tr(en: 'Remove', ar: 'إزالة'),
                                 ),
                         ),
                       ],
@@ -258,9 +266,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          '3. تفاصيل المهمة',
-                          style: TextStyle(
+                        Text(
+                          context.tr(
+                              en: '3. Task details', ar: '3. تفاصيل المهمة'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             color: AppTheme.muted,
                             fontSize: 12,
@@ -269,17 +278,24 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         const SizedBox(height: 12),
                         TextField(
                           controller: _title,
-                          decoration: const InputDecoration(
-                            labelText: 'عنوان المهمة',
-                            hintText: 'مثال: تجهيز عرض السعر',
+                          decoration: InputDecoration(
+                            labelText: context.tr(
+                                en: 'Task title', ar: 'عنوان المهمة'),
+                            hintText: context.tr(
+                              en: 'Example: Prepare the quotation',
+                              ar: 'مثال: تجهيز عرض السعر',
+                            ),
                           ),
                           textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 12),
                         TextField(
                           controller: _description,
-                          decoration: const InputDecoration(
-                            labelText: 'الوصف (اختياري)',
+                          decoration: InputDecoration(
+                            labelText: context.tr(
+                              en: 'Description (optional)',
+                              ar: 'الوصف (اختياري)',
+                            ),
                           ),
                           minLines: 2,
                           maxLines: 4,
@@ -290,20 +306,25 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             Expanded(
                               child: DropdownButtonFormField<String>(
                                 initialValue: _priority,
-                                decoration: const InputDecoration(
-                                    labelText: 'الأولوية'),
-                                items: const [
+                                decoration: InputDecoration(
+                                  labelText: context.tr(
+                                      en: 'Priority', ar: 'الأولوية'),
+                                ),
+                                items: [
                                   DropdownMenuItem(
                                     value: 'low',
-                                    child: Text('منخفضة'),
+                                    child: Text(
+                                        context.tr(en: 'Low', ar: 'منخفضة')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'medium',
-                                    child: Text('متوسطة'),
+                                    child: Text(
+                                        context.tr(en: 'Medium', ar: 'متوسطة')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'high',
-                                    child: Text('عالية'),
+                                    child: Text(
+                                        context.tr(en: 'High', ar: 'عالية')),
                                   ),
                                 ],
                                 onChanged: (v) => setState(
@@ -315,29 +336,35 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             Expanded(
                               child: DropdownButtonFormField<String>(
                                 initialValue: _section,
-                                decoration: const InputDecoration(
-                                  labelText: 'المرحلة',
+                                decoration: InputDecoration(
+                                  labelText:
+                                      context.tr(en: 'Stage', ar: 'المرحلة'),
                                 ),
-                                items: const [
+                                items: [
                                   DropdownMenuItem(
                                     value: 'BACKLOG',
-                                    child: Text('Backlog'),
+                                    child: Text(context.tr(
+                                        en: 'Backlog', ar: 'الأعمال المؤجلة')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'TODO',
-                                    child: Text('To do'),
+                                    child: Text(
+                                        context.tr(en: 'To do', ar: 'للعمل')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'IN_PROGRESS',
-                                    child: Text('In progress'),
+                                    child: Text(context.tr(
+                                        en: 'In progress', ar: 'قيد التنفيذ')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'IN_REVIEW',
-                                    child: Text('In review'),
+                                    child: Text(context.tr(
+                                        en: 'In review', ar: 'قيد المراجعة')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'DONE',
-                                    child: Text('Done'),
+                                    child: Text(
+                                        context.tr(en: 'Done', ar: 'مكتملة')),
                                   ),
                                 ],
                                 onChanged: (v) => setState(
@@ -349,7 +376,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         ),
                         const SizedBox(height: 12),
                         CreateTaskSelectTile(
-                          title: 'تاريخ الاستحقاق',
+                          title:
+                              context.tr(en: 'Due date', ar: 'تاريخ الاستحقاق'),
                           subtitle: dueText,
                           onTap: _pickDueDate,
                           trailing: _dueDate == null
@@ -358,7 +386,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   onPressed: () =>
                                       setState(() => _dueDate = null),
                                   icon: const Icon(Icons.close),
-                                  tooltip: 'إزالة',
+                                  tooltip:
+                                      context.tr(en: 'Remove', ar: 'إزالة'),
                                 ),
                         ),
                       ],
@@ -366,7 +395,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                   ),
                   const SizedBox(height: 16),
                   PrimaryButton(
-                    label: 'إضافة المهمة',
+                    label: context.tr(en: 'Add task', ar: 'إضافة المهمة'),
                     loading: _submitting,
                     onPressed: _canSubmit ? _submit : null,
                   ),

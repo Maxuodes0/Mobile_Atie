@@ -12,7 +12,7 @@ class SessionController {
   final ApiClient _api;
 
   final ValueNotifier<User?> user = ValueNotifier<User?>(null);
-  final ValueNotifier<bool> restoring = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> restoring = ValueNotifier<bool>(true);
   final ValueNotifier<AccessSnapshot?> access =
       ValueNotifier<AccessSnapshot?>(null);
   Timer? _accessVersionTimer;
@@ -38,6 +38,15 @@ class SessionController {
     }
   }
 
+  Future<void> _loadAccessSafely() async {
+    try {
+      await _loadAccess();
+    } catch (_) {
+      // Access will be retried by the version poll. The backend remains the
+      // authority, so this request should never block launch or sign-in UI.
+    }
+  }
+
   Future<void> _checkAccessVersion() async {
     if (user.value == null) return;
     try {
@@ -57,7 +66,7 @@ class SessionController {
     if (user.value != null &&
         version != null &&
         version != access.value?.permissionsVersion) {
-      unawaited(_loadAccess());
+      unawaited(_loadAccessSafely());
     }
   }
 
@@ -65,7 +74,9 @@ class SessionController {
     restoring.value = true;
     try {
       user.value = await _auth.me();
-      await _loadAccess();
+      // A slow permissions request must not keep the launch screen visible.
+      // The shell can render immediately and react when access arrives.
+      unawaited(_loadAccessSafely());
     } catch (_) {
       user.value = null;
     } finally {
@@ -88,7 +99,7 @@ class SessionController {
 
   Future<void> acceptAuthenticatedUser(User authenticatedUser) async {
     user.value = authenticatedUser;
-    await _loadAccess();
+    unawaited(_loadAccessSafely());
   }
 
   Future<void> logout() async {

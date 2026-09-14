@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class TaskFiltersRow extends StatelessWidget {
   final String value;
@@ -37,13 +38,13 @@ class TaskFiltersRow extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          chip('all', 'الكل'),
+          chip('all', context.tr(en: 'All', ar: 'الكل')),
           const SizedBox(width: 8),
-          chip('pending', 'معلّقة'),
+          chip('pending', context.tr(en: 'Pending', ar: 'معلّقة')),
           const SizedBox(width: 8),
-          chip('in_progress', 'قيد التنفيذ'),
+          chip('in_progress', context.tr(en: 'In progress', ar: 'قيد التنفيذ')),
           const SizedBox(width: 8),
-          chip('done', 'مكتملة'),
+          chip('done', context.tr(en: 'Completed', ar: 'مكتملة')),
         ],
       ),
     );

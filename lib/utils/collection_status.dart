@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
-String collectionStatusLabel(String status) {
+String collectionStatusLabel(String status, {String languageCode = 'ar'}) {
+  final isArabic = languageCode == 'ar';
   switch (status.trim().toUpperCase()) {
     case 'FULLY_COLLECTED':
-      return 'محصل بالكامل';
+      return isArabic ? 'محصل بالكامل' : 'Fully collected';
     case 'PARTIALLY_COLLECTED':
-      return 'محصل جزئيًا';
+      return isArabic ? 'محصل جزئيًا' : 'Partially collected';
     case 'NOT_COLLECTED':
-      return 'غير محصل';
+      return isArabic ? 'غير محصل' : 'Not collected';
     default:
-      return 'حالة التحصيل غير معروفة';
+      return isArabic ? 'حالة التحصيل غير معروفة' : 'Unknown collection status';
   }
 }
 

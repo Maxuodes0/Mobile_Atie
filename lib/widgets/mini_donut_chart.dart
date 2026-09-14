@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class DonutSegment {
   final String label;
@@ -29,7 +30,8 @@ class MiniDonutChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = segments.fold<double>(0, (a, s) => a + (s.value.isFinite ? s.value : 0));
+    final total = segments.fold<double>(
+        0, (a, s) => a + (s.value.isFinite ? s.value : 0));
 
     if (total <= 0) {
       return Container(
@@ -37,10 +39,10 @@ class MiniDonutChart extends StatelessWidget {
           color: const Color(0xFFF2F3F5),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
-            'لا توجد بيانات',
-            style: TextStyle(color: AppTheme.muted, fontSize: 12),
+            context.tr(en: 'No data', ar: 'لا توجد بيانات'),
+            style: const TextStyle(color: AppTheme.muted, fontSize: 12),
           ),
         ),
       );
@@ -70,14 +72,16 @@ class _DonutPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final total = segments.fold<double>(0, (a, s) => a + (s.value.isFinite ? s.value : 0));
+    final total = segments.fold<double>(
+        0, (a, s) => a + (s.value.isFinite ? s.value : 0));
     if (total <= 0) return;
 
     final rect = Offset.zero & size;
     final bg = Paint()
       ..color = const Color(0xFFF2F3F5)
       ..style = PaintingStyle.fill;
-    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(14)), bg);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, const Radius.circular(14)), bg);
 
     final shortest = math.min(size.width, size.height);
     final pad = math.max(10.0, strokeWidth);
@@ -123,4 +127,3 @@ class _DonutPainter extends CustomPainter {
     return false;
   }
 }
-

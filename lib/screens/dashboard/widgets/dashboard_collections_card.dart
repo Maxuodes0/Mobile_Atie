@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/finance_dashboard.dart';
 import '../../../data/models/monthly_collection_point.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/formatters.dart';
 import '../../../widgets/mini_line_chart.dart';
@@ -23,10 +24,13 @@ class DashboardCollectionsCard extends StatelessWidget {
     final months = collections.map((p) => p.month).toList();
 
     return DashboardChartCard(
-      title: 'الأموال المحصلة',
+      title: context.tr(en: 'Collected funds', ar: 'الأموال المحصلة'),
       value: formatSar(kpis?.totalCollectedAmount ?? '0'),
-      secondaryValue: 'غير محصل: ${formatSar(kpis?.outstandingAmount ?? '0')}',
-      subtitle: 'حسب الأشهر',
+      secondaryValue: context.tr(
+        en: 'Outstanding: ${formatSar(kpis?.outstandingAmount ?? '0')}',
+        ar: 'غير محصل: ${formatSar(kpis?.outstandingAmount ?? '0')}',
+      ),
+      subtitle: context.tr(en: 'By month', ar: 'حسب الأشهر'),
       chart: SizedBox(
         height: 240,
         child: MiniLineChart(

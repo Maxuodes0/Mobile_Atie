@@ -32,7 +32,8 @@ class CookieStore {
   }
 
   String buildCookieHeader(String requestPath) => _cookies.entries
-      .where((entry) => entry.key != 'refresh_token' || requestPath.startsWith('/auth'))
+      .where((entry) =>
+          entry.key != 'refresh_token' || requestPath.startsWith('/auth'))
       .map((entry) => '${entry.key}=${entry.value}')
       .join('; ');
 
@@ -45,10 +46,14 @@ class CookieStore {
       final value = pair.substring(separator + 1).trim();
       if (value.isEmpty) {
         _cookies.remove(name);
-        if (!kIsWeb && _persistedNames.contains(name)) await _storage.delete(key: 'aite.auth.$name');
+        if (!kIsWeb && _persistedNames.contains(name)) {
+          await _storage.delete(key: 'aite.auth.$name');
+        }
       } else {
         _cookies[name] = value;
-        if (!kIsWeb && _persistedNames.contains(name)) await _storage.write(key: 'aite.auth.$name', value: value);
+        if (!kIsWeb && _persistedNames.contains(name)) {
+          await _storage.write(key: 'aite.auth.$name', value: value);
+        }
       }
     }
   }

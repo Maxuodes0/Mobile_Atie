@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/models/page_meta.dart';
 import '../data/models/task_item.dart';
 import '../data/models/task_list_result.dart';
+import '../l10n/app_localizations.dart';
 import 'tasks/widgets/task_card.dart';
 import 'tasks/widgets/task_filters_row.dart';
 import '../services/app_services.dart';
@@ -165,9 +166,10 @@ class _TasksScreenState extends State<TasksScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const AppPageHeader(
-              title: 'المهام',
-              subtitle: 'مهامي عبر المشاريع',
+            AppPageHeader(
+              title: context.tr(en: 'Tasks', ar: 'المهام'),
+              subtitle: context.tr(
+                  en: 'My tasks across projects', ar: 'مهامي عبر المشاريع'),
             ),
             InlineLoadingBar(visible: _refreshing),
             const SizedBox(height: 16),
@@ -192,9 +194,9 @@ class _TasksScreenState extends State<TasksScreen> {
                 ),
               ),
               icon: const Icon(Icons.add, size: 20),
-              label: const Text(
-                'إضافة مهمة',
-                style: TextStyle(fontWeight: FontWeight.w800),
+              label: Text(
+                context.tr(en: 'Add task', ar: 'إضافة مهمة'),
+                style: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
             const SizedBox(height: 12),
@@ -209,17 +211,20 @@ class _TasksScreenState extends State<TasksScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _search,
-              decoration: const InputDecoration(
-                hintText: 'ابحث عن مهمة أو مشروع',
-                prefixIcon: Icon(Icons.search, size: 20),
+              decoration: InputDecoration(
+                hintText: context.tr(
+                  en: 'Search tasks or projects',
+                  ar: 'ابحث عن مهمة أو مشروع',
+                ),
+                prefixIcon: const Icon(Icons.search, size: 20),
                 prefixIconColor: AppTheme.muted,
               ),
             ),
             const SizedBox(height: 16),
             if (items.isEmpty)
-              const Text(
-                'لا توجد مهام',
-                style: TextStyle(color: AppTheme.muted, fontSize: 12),
+              Text(
+                context.tr(en: 'No tasks found', ar: 'لا توجد مهام'),
+                style: const TextStyle(color: AppTheme.muted, fontSize: 12),
               )
             else
               ...items.map(
@@ -250,9 +255,9 @@ class _TasksScreenState extends State<TasksScreen> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
-                        'تحميل المزيد',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                      child: Text(
+                        context.tr(en: 'Load more', ar: 'تحميل المزيد'),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
             ],

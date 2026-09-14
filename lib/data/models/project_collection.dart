@@ -33,7 +33,8 @@ class ProjectCollectionItem {
     }
 
     final createdByRaw = json['createdBy'];
-    final createdBy = createdByRaw is Map ? Map<String, dynamic>.from(createdByRaw) : null;
+    final createdBy =
+        createdByRaw is Map ? Map<String, dynamic>.from(createdByRaw) : null;
 
     return ProjectCollectionItem(
       id: json['id']?.toString() ?? '',
@@ -46,4 +47,3 @@ class ProjectCollectionItem {
     );
   }
 }
-

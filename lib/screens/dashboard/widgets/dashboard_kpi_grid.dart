@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/finance_dashboard.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/formatters.dart';
 
@@ -35,25 +36,25 @@ class _DashboardKpiGridState extends State<DashboardKpiGrid> {
   Widget build(BuildContext context) {
     final cards = <Widget>[
       _DashboardMetricCard(
-        title: 'إيرادات بدون ضريبة',
+        title: context.tr(en: 'Revenue excl. VAT', ar: 'إيرادات بدون ضريبة'),
         value: formatSar(widget.kpis?.totalProjectValueWithoutVat ?? '0'),
         icon: Icons.trending_up,
         accent: const Color(0xFF4F9E8D),
       ),
       _DashboardMetricCard(
-        title: 'المحصّل',
+        title: context.tr(en: 'Collected', ar: 'المحصّل'),
         value: formatSar(widget.kpis?.totalCollectedAmount ?? '0'),
         icon: Icons.account_balance_wallet_outlined,
         accent: const Color(0xFF3B82F6),
       ),
       _DashboardMetricCard(
-        title: 'غير محصّل',
+        title: context.tr(en: 'Outstanding', ar: 'غير محصّل'),
         value: formatSar(widget.kpis?.outstandingAmount ?? '0'),
         icon: Icons.pending_actions,
         accent: const Color(0xFFEF4444),
       ),
       _DashboardMetricCard(
-        title: 'إجمالي التكاليف',
+        title: context.tr(en: 'Total costs', ar: 'إجمالي التكاليف'),
         value: formatSar(widget.kpis?.totalCosts ?? '0'),
         icon: Icons.payments_outlined,
         accent: const Color(0xFFF59E0B),

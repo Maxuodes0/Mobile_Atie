@@ -15,14 +15,16 @@ class ProjectCollectionsResult {
     final items = raw is List
         ? raw
             .whereType<Map>()
-            .map((e) => ProjectCollectionItem.fromJson(Map<String, dynamic>.from(e)))
+            .map((e) =>
+                ProjectCollectionItem.fromJson(Map<String, dynamic>.from(e)))
             .toList()
         : const <ProjectCollectionItem>[];
 
     final metaRaw = json['meta'];
-    final meta = metaRaw is Map ? PageMeta.fromJson(Map<String, dynamic>.from(metaRaw)) : const PageMeta(total: 0, limit: 0, offset: 0);
+    final meta = metaRaw is Map
+        ? PageMeta.fromJson(Map<String, dynamic>.from(metaRaw))
+        : const PageMeta(total: 0, limit: 0, offset: 0);
 
     return ProjectCollectionsResult(collections: items, meta: meta);
   }
 }
-
