@@ -74,10 +74,22 @@ class PeriodFiltersBar extends StatelessWidget {
           value: null,
           child: Text(context.tr(en: 'All quarters', ar: 'كل الأرباع')),
         ),
-        const DropdownMenuItem<int>(value: 1, child: Text('Q1')),
-        const DropdownMenuItem<int>(value: 2, child: Text('Q2')),
-        const DropdownMenuItem<int>(value: 3, child: Text('Q3')),
-        const DropdownMenuItem<int>(value: 4, child: Text('Q4')),
+        DropdownMenuItem<int>(
+          value: 1,
+          child: Text(context.tr(en: 'Q1', ar: 'الربع الأول')),
+        ),
+        DropdownMenuItem<int>(
+          value: 2,
+          child: Text(context.tr(en: 'Q2', ar: 'الربع الثاني')),
+        ),
+        DropdownMenuItem<int>(
+          value: 3,
+          child: Text(context.tr(en: 'Q3', ar: 'الربع الثالث')),
+        ),
+        DropdownMenuItem<int>(
+          value: 4,
+          child: Text(context.tr(en: 'Q4', ar: 'الربع الرابع')),
+        ),
       ],
       onChanged: quarterEnabled ? onQuarterChanged : null,
     );
