@@ -91,6 +91,8 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
   final String? imageUrl;
   final String name;
   final String? client;
+  final String? operatingCompanyName;
+  final String? operatingCompanyNameEn;
   final String status;
   final DateTime? createdAt;
   final DateTime? startDate;
@@ -102,6 +104,8 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
     required this.imageUrl,
     required this.name,
     required this.client,
+    required this.operatingCompanyName,
+    required this.operatingCompanyNameEn,
     required this.status,
     required this.createdAt,
     required this.startDate,
@@ -121,6 +125,12 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
       languageCode: locale.languageCode,
     );
     final statusColor = projectStatusColor(status);
+    final isArabic = locale.languageCode == 'ar';
+    final localizedOperatingCompanyName = isArabic
+        ? operatingCompanyName
+        : ((operatingCompanyNameEn?.trim().isNotEmpty ?? false)
+            ? operatingCompanyNameEn
+            : operatingCompanyName);
 
     return AppCard(
       padding: const EdgeInsets.all(16),
@@ -171,6 +181,14 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
             style: const TextStyle(color: AppTheme.muted, fontSize: 12),
           ),
           const SizedBox(height: 12),
+          if (localizedOperatingCompanyName?.trim().isNotEmpty ?? false)
+            _MetaRow(
+              label: context.tr(
+                en: 'Operating company',
+                ar: 'الشركة المشغلة',
+              ),
+              value: localizedOperatingCompanyName!,
+            ),
           _MetaRow(
             label: context.tr(en: 'Created on', ar: 'تاريخ الإنشاء'),
             value: fmt(createdAt) ?? '-',

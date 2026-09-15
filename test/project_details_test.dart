@@ -10,10 +10,16 @@ void main() {
       'projectValueWithoutVat': '8500.00',
       'vatPercentage': '15.00',
       'dueAmount': '9775.00',
+      'operatingCompany': {
+        'name': 'الشركة المشغلة',
+        'nameEn': 'Operating Company',
+      },
     });
 
     expect(project.projectValueWithoutVat, 8500);
     expect(project.projectValueWithVat, 9775);
+    expect(project.operatingCompanyName, 'الشركة المشغلة');
+    expect(project.operatingCompanyNameEn, 'Operating Company');
   });
 
   test('project details calculate VAT value when the API omits it', () {

@@ -229,6 +229,8 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 imageUrl: project?.projectImage ?? fallback?.projectImage,
                 name: project?.name ?? fallback?.name ?? '',
                 client: project?.clientName ?? fallback?.clientName,
+                operatingCompanyName: project?.operatingCompanyName,
+                operatingCompanyNameEn: project?.operatingCompanyNameEn,
                 status: project?.status ?? fallback?.status ?? '',
                 createdAt: project?.createdAt ?? fallback?.createdAt,
                 startDate: project?.startDate,
