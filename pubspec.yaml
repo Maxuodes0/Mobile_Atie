@@ -82,6 +82,11 @@ flutter:
     - assets/images/New pics/AITE_team_task.png
     - assets/images/New pics/AITE_insights.png
 
+  fonts:
+    - family: AiteSaudiRiyal
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Riyal.ttf
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

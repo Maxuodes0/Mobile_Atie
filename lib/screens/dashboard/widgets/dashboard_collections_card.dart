@@ -25,10 +25,10 @@ class DashboardCollectionsCard extends StatelessWidget {
 
     return DashboardChartCard(
       title: context.tr(en: 'Collected funds', ar: 'الأموال المحصلة'),
-      value: formatSar(kpis?.totalCollectedAmount ?? '0'),
+      value: formatSar(kpis?.totalCollectedAmount),
       secondaryValue: context.tr(
-        en: 'Outstanding: ${formatSar(kpis?.outstandingAmount ?? '0')}',
-        ar: 'غير محصل: ${formatSar(kpis?.outstandingAmount ?? '0')}',
+        en: 'Outstanding: ${formatSar(kpis?.outstandingAmount)}',
+        ar: 'غير محصل: ${formatSar(kpis?.outstandingAmount)}',
       ),
       subtitle: context.tr(en: 'By month', ar: 'حسب الأشهر'),
       chart: SizedBox(

@@ -107,6 +107,11 @@ class _FinanceScreenState extends State<FinanceScreen> {
             const SizedBox(height: 16),
             if (_controller.error != null) ...[
               ErrorBanner(message: _controller.error!),
+              TextButton.icon(
+                onPressed: () => _controller.load(forceRefresh: true),
+                icon: const Icon(Icons.refresh),
+                label: Text(context.tr(en: 'Retry', ar: 'إعادة المحاولة')),
+              ),
               const SizedBox(height: 12),
             ],
             GridView.count(
@@ -120,25 +125,25 @@ class _FinanceScreenState extends State<FinanceScreen> {
                 SummaryCard(
                   title: context.tr(
                       en: 'Revenue excl. VAT', ar: 'إيرادات بدون ضريبة'),
-                  value: formatSar(kpis?.totalProjectValueWithoutVat ?? '0'),
+                  value: formatSar(kpis?.totalProjectValueWithoutVat),
                   icon: Icons.attach_money,
                   accent: const Color(0xFF4F9E8D),
                 ),
                 SummaryCard(
                   title: context.tr(en: 'Total costs', ar: 'إجمالي التكاليف'),
-                  value: formatSar(kpis?.totalCosts ?? '0'),
+                  value: formatSar(kpis?.totalCosts),
                   icon: Icons.payments_outlined,
                   accent: const Color(0xFFF59E0B),
                 ),
                 SummaryCard(
                   title: context.tr(en: 'Profit margin', ar: 'هامش الربح'),
-                  value: formatPercent(kpis?.profitMargin ?? '0'),
+                  value: formatPercent(kpis?.profitMargin),
                   icon: Icons.percent,
                   accent: const Color(0xFF3B82F6),
                 ),
                 SummaryCard(
                   title: context.tr(en: 'Collected', ar: 'المحصّل'),
-                  value: formatSar(kpis?.totalCollectedAmount ?? '0'),
+                  value: formatSar(kpis?.totalCollectedAmount),
                   icon: Icons.account_balance_wallet_outlined,
                   accent: const Color(0xFF10B981),
                 ),

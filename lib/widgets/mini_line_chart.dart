@@ -259,11 +259,12 @@ class _MiniLineChartPainter extends CustomPainter {
 
     final textPainter = TextPainter(
       text: TextSpan(
-        text: '${compactValue(value)} SAR',
+        text: '\u2066\u20C1\u00A0${compactValue(value)}\u2069',
         style: const TextStyle(
           color: Colors.white,
           fontSize: 11,
           fontWeight: FontWeight.w900,
+          fontFamilyFallback: ['AiteSaudiRiyal'],
         ),
       ),
       textDirection: TextDirection.ltr,

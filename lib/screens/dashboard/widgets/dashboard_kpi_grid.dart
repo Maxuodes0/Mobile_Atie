@@ -37,25 +37,25 @@ class _DashboardKpiGridState extends State<DashboardKpiGrid> {
     final cards = <Widget>[
       _DashboardMetricCard(
         title: context.tr(en: 'Revenue excl. VAT', ar: 'إيرادات بدون ضريبة'),
-        value: formatSar(widget.kpis?.totalProjectValueWithoutVat ?? '0'),
+        value: formatSar(widget.kpis?.totalProjectValueWithoutVat),
         icon: Icons.trending_up,
         accent: const Color(0xFF4F9E8D),
       ),
       _DashboardMetricCard(
         title: context.tr(en: 'Collected', ar: 'المحصّل'),
-        value: formatSar(widget.kpis?.totalCollectedAmount ?? '0'),
+        value: formatSar(widget.kpis?.totalCollectedAmount),
         icon: Icons.account_balance_wallet_outlined,
         accent: const Color(0xFF3B82F6),
       ),
       _DashboardMetricCard(
         title: context.tr(en: 'Outstanding', ar: 'غير محصّل'),
-        value: formatSar(widget.kpis?.outstandingAmount ?? '0'),
+        value: formatSar(widget.kpis?.outstandingAmount),
         icon: Icons.pending_actions,
         accent: const Color(0xFFEF4444),
       ),
       _DashboardMetricCard(
         title: context.tr(en: 'Total costs', ar: 'إجمالي التكاليف'),
-        value: formatSar(widget.kpis?.totalCosts ?? '0'),
+        value: formatSar(widget.kpis?.totalCosts),
         icon: Icons.payments_outlined,
         accent: const Color(0xFFF59E0B),
       ),

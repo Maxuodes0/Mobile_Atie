@@ -1,8 +1,10 @@
+import '../../utils/formatters.dart';
+
 class FinanceReport {
   final String reportType;
   final DateTime? generatedAt;
   final Map<String, dynamic> filters;
-  final String totalAmount;
+  final String? totalAmount;
   final int totalCount;
   final List<Map<String, dynamic>> rows;
 
@@ -33,6 +35,10 @@ class FinanceReport {
     final summary = summaryRaw is Map
         ? Map<String, dynamic>.from(summaryRaw)
         : const <String, dynamic>{};
+    final totalAmount = summary['totalAmount'];
+    if (totalAmount != null && parseFinancialValue(totalAmount) == null) {
+      throw const FormatException('Financial report contains an invalid total.');
+    }
 
     int toInt(dynamic v) {
       if (v is int) return v;
@@ -52,7 +58,7 @@ class FinanceReport {
       reportType: json['reportType']?.toString() ?? '',
       generatedAt: parseDate(json['generatedAt']),
       filters: filters,
-      totalAmount: summary['totalAmount']?.toString() ?? '0.00',
+      totalAmount: totalAmount?.toString(),
       totalCount: toInt(summary['totalCount']),
       rows: rows,
     );

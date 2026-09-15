@@ -153,8 +153,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                       ? context.tr(en: 'Welcome', ar: 'مرحبًا بك')
                       : context.tr(
                           en: 'Hello, $userName', ar: 'أهلًا، $userName'),
-                  netProfit: formatSar(kpis?.netProfit ?? '0'),
-                  profitMargin: kpis?.profitMargin ?? '0',
+                  netProfit: formatSar(kpis?.netProfit),
+                  profitMargin: kpis?.profitMargin,
                   onRefresh: () => _controller.load(
                     refreshYears: true,
                     forceRefresh: true,
@@ -342,7 +342,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 class _DashboardHero extends StatelessWidget {
   final String userName;
   final String netProfit;
-  final String profitMargin;
+  final String? profitMargin;
   final VoidCallback onRefresh;
   final VoidCallback onLogout;
 
@@ -356,7 +356,7 @@ class _DashboardHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final margin = profitMargin.replaceAll('%', '').trim();
+    final margin = formatPercent(profitMargin);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 26),
       decoration: const BoxDecoration(
@@ -449,8 +449,8 @@ class _DashboardHero extends StatelessWidget {
             ),
             child: Text(
               context.tr(
-                en: 'Profit margin $margin%',
-                ar: 'هامش الربح $margin٪',
+                en: 'Profit margin $margin',
+                ar: 'هامش الربح $margin',
               ),
               style: const TextStyle(
                 color: Colors.white,

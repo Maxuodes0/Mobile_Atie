@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' as intl;
 
 import '../data/models/client_summary.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
 import '../utils/async_request_guard_mixin.dart';
+import '../utils/formatters.dart';
 import '../widgets/app_page_header.dart';
 import '../widgets/error_banner.dart';
 import '../widgets/inline_loading_bar.dart';
@@ -402,9 +402,5 @@ class _ClientMetric extends StatelessWidget {
   }
 }
 
-final intl.NumberFormat _sarFormatter = intl.NumberFormat('#,##0.##', 'en_US');
-
-String _formatSar(double value, BuildContext context) => context.tr(
-      en: 'SAR ${_sarFormatter.format(value)}',
-      ar: '${_sarFormatter.format(value)} ر.س',
-    );
+String _formatSar(double value, BuildContext _) =>
+    formatSar(value.toStringAsFixed(2));

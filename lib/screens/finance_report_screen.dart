@@ -95,7 +95,7 @@ class _FinanceReportScreenState extends State<FinanceReportScreen> {
                 const SizedBox(height: 12),
               ],
               _SummaryCard(
-                totalAmount: formatSar(report?.totalAmount ?? '0'),
+                totalAmount: formatSar(report?.totalAmount),
                 totalCount: report?.totalCount ?? 0,
                 generatedAt: report?.generatedAt,
                 from: widget.from,
@@ -269,7 +269,7 @@ class _ReportRowCard extends StatelessWidget {
           const SizedBox(height: 10),
           _MetaRow(
               label: context.tr(en: 'Revenue', ar: 'الإيراد'),
-              value: formatSar(row['totalRevenue']?.toString() ?? '0')),
+              value: formatSar(row['totalRevenue']?.toString())),
         ],
       );
     } else if (reportType == 'COLLECTIONS_REPORT') {
@@ -287,7 +287,7 @@ class _ReportRowCard extends StatelessWidget {
           ),
           _MetaRow(
               label: context.tr(en: 'Amount', ar: 'المبلغ'),
-              value: formatSar(row['amount']?.toString() ?? '0')),
+              value: formatSar(row['amount']?.toString())),
           _MetaRow(
               label: context.tr(en: 'Payment method', ar: 'طريقة الدفع'),
               value: localizedPaymentMethod(
@@ -337,13 +337,13 @@ class _ReportRowCard extends StatelessWidget {
           const SizedBox(height: 10),
           _MetaRow(
               label: context.tr(en: 'Total', ar: 'الإجمالي'),
-              value: formatSar(row['totalAmount']?.toString() ?? '0')),
+              value: formatSar(row['totalAmount']?.toString())),
           _MetaRow(
               label: context.tr(en: 'Paid', ar: 'المدفوع'),
-              value: formatSar(row['paidAmount']?.toString() ?? '0')),
+              value: formatSar(row['paidAmount']?.toString())),
           _MetaRow(
               label: context.tr(en: 'Remaining', ar: 'المتبقي'),
-              value: formatSar(row['remainingAmount']?.toString() ?? '0')),
+              value: formatSar(row['remainingAmount']?.toString())),
         ],
       );
     } else {
