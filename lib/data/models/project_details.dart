@@ -3,6 +3,7 @@ class ProjectDetails {
   final String name;
   final String? description;
   final String status;
+  final String projectType;
   final String? projectImage;
   final String? clientName;
   final String? operatingCompanyName;
@@ -20,6 +21,7 @@ class ProjectDetails {
     required this.name,
     required this.description,
     required this.status,
+    required this.projectType,
     required this.projectImage,
     required this.clientName,
     required this.operatingCompanyName,
@@ -77,6 +79,7 @@ class ProjectDetails {
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString(),
       status: json['status']?.toString() ?? '',
+      projectType: json['projectType']?.toString() ?? 'PAID',
       projectImage: json['projectImage']?.toString(),
       clientName: client?['name']?.toString(),
       operatingCompanyName: operatingCompany?['name']?.toString(),

@@ -11,6 +11,8 @@ String projectStatusLabel(String status, {String languageCode = 'ar'}) {
       return isArabic ? 'متأخر' : 'Off track';
     case 'COMPLETED':
       return isArabic ? 'مكتمل' : 'Completed';
+    case 'CANCELLED':
+      return isArabic ? 'ملغي' : 'Cancelled';
     default:
       return status;
   }
@@ -24,7 +26,22 @@ Color projectStatusColor(String status) {
       return const Color(0xFFF59E0B);
     case 'COMPLETED':
       return const Color(0xFF3B82F6);
+    case 'CANCELLED':
+      return const Color(0xFF6B7280);
     default:
       return const Color(0xFFEF4444);
+  }
+}
+
+String projectTypeLabel(String projectType, {String languageCode = 'ar'}) {
+  final isArabic = languageCode == 'ar';
+  switch (projectType) {
+    case 'SPONSORED':
+      return isArabic ? 'رعاية' : 'Sponsored';
+    case 'FREE':
+      return isArabic ? 'مجاني' : 'Free';
+    case 'PAID':
+    default:
+      return isArabic ? 'مدفوع' : 'Paid';
   }
 }

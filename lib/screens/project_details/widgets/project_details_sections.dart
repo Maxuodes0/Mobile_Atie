@@ -94,6 +94,7 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
   final String? operatingCompanyName;
   final String? operatingCompanyNameEn;
   final String status;
+  final String projectType;
   final DateTime? createdAt;
   final DateTime? startDate;
   final DateTime? dueDate;
@@ -107,6 +108,7 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
     required this.operatingCompanyName,
     required this.operatingCompanyNameEn,
     required this.status,
+    required this.projectType,
     required this.createdAt,
     required this.startDate,
     required this.dueDate,
@@ -125,6 +127,10 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
       languageCode: locale.languageCode,
     );
     final statusColor = projectStatusColor(status);
+    final typeLabel = projectTypeLabel(
+      projectType,
+      languageCode: locale.languageCode,
+    );
     final isArabic = locale.languageCode == 'ar';
     final localizedOperatingCompanyName = isArabic
         ? operatingCompanyName
@@ -189,6 +195,10 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
               ),
               value: localizedOperatingCompanyName!,
             ),
+          _MetaRow(
+            label: context.tr(en: 'Project type', ar: 'نوع المشروع'),
+            value: typeLabel,
+          ),
           _MetaRow(
             label: context.tr(en: 'Created on', ar: 'تاريخ الإنشاء'),
             value: fmt(createdAt) ?? '-',

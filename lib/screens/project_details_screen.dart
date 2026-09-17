@@ -232,6 +232,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 operatingCompanyName: project?.operatingCompanyName,
                 operatingCompanyNameEn: project?.operatingCompanyNameEn,
                 status: project?.status ?? fallback?.status ?? '',
+                projectType: project?.projectType ?? 'PAID',
                 createdAt: project?.createdAt ?? fallback?.createdAt,
                 startDate: project?.startDate,
                 dueDate: project?.dueDate,
