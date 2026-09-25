@@ -1,285 +1,282 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
+import '../data/models/finance_dashboard.dart';
+import '../data/models/finance_module.dart';
 import '../l10n/app_localizations.dart';
-import '../utils/formatters.dart';
-import '../utils/period_range.dart';
+import '../services/app_services.dart';
+import '../theme/app_theme.dart';
 import '../widgets/app_page_header.dart';
-import '../widgets/error_banner.dart';
-import '../widgets/inline_loading_bar.dart';
-import '../widgets/period_filters_bar.dart';
-import '../widgets/summary_card.dart';
-import 'finance/finance_screen_controller.dart';
-import 'finance_report_screen.dart';
+import 'finance/finance_collections_screen.dart';
+import 'finance/finance_costs_screen.dart';
+import 'finance/finance_drilldown_screen.dart';
+import 'finance/finance_reports_screen.dart';
+import 'finance/finance_ui.dart';
 
 class FinanceScreen extends StatefulWidget {
   final bool isActive;
-
-  const FinanceScreen({
-    super.key,
-    required this.isActive,
-  });
+  const FinanceScreen({super.key, required this.isActive});
 
   @override
   State<FinanceScreen> createState() => _FinanceScreenState();
 }
 
 class _FinanceScreenState extends State<FinanceScreen> {
-  late final FinanceScreenController _controller;
+  FinanceQuery _query = FinanceQuery(year: DateTime.now().year);
+  FinanceDashboard? _dashboard;
+  List<int> _years = const [];
+  bool _loading = true;
+  bool _updating = false;
+  String? _error;
+  int _requestId = 0;
+  bool _loaded = false;
+
+  bool get _canReadReports {
+    final role = AppServices.session.user.value?.role.toUpperCase();
+    final screen = role == 'ADMIN'
+        ? 'admin.finance.reports'
+        : role == 'PROGRAM_MANAGER'
+            ? 'programManager.finance.reports'
+            : null;
+    final access = AppServices.session.access.value;
+    return screen != null &&
+        access != null &&
+        access.actions.contains('finance.read') &&
+        access.screens.contains(screen);
+  }
+
+  void _accessChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
-    _controller = FinanceScreenController();
-    _controller.addListener(_onControllerChanged);
-    _controller.setActive(widget.isActive);
+    AppServices.session.access.addListener(_accessChanged);
+    if (widget.isActive) _load();
+  }
+
+  @override
+  void dispose() {
+    AppServices.session.access.removeListener(_accessChanged);
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant FinanceScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isActive != widget.isActive) {
-      _controller.setActive(widget.isActive);
+    if (widget.isActive && !oldWidget.isActive && !_loaded) _load();
+  }
+
+  Future<void> _load({bool refresh = false}) async {
+    _loaded = true;
+    final ticket = ++_requestId;
+    setState(() {
+      _error = null;
+      _loading = _dashboard == null;
+      _updating = _dashboard != null;
+    });
+    try {
+      final results = await Future.wait<dynamic>([
+        AppServices.finance.getDashboard(
+          year: _query.year,
+          quarter: _query.quarter,
+          forceRefresh: refresh,
+        ),
+        if (_years.isEmpty || refresh)
+          AppServices.finance
+              .availableYears(forceRefresh: refresh)
+              .catchError((_) => <int>[]),
+      ]);
+      if (!mounted || ticket != _requestId) return;
+      setState(() {
+        _dashboard = results[0] as FinanceDashboard;
+        if (results.length > 1) _years = results[1] as List<int>;
+        _loading = false;
+        _updating = false;
+      });
+    } catch (error) {
+      if (!mounted || ticket != _requestId) return;
+      setState(() {
+        _error = error.toString();
+        _loading = false;
+        _updating = false;
+        _dashboard =
+            null; // A failed calculation must not look like genuine zero finance data.
+      });
     }
   }
 
-  @override
-  void dispose() {
-    _controller.removeListener(_onControllerChanged);
-    _controller.dispose();
-    super.dispose();
+  void _periodChanged(FinanceQuery next) {
+    setState(() => _query = next.copyWith(page: 1));
+    _load();
   }
 
-  void _onControllerChanged() {
-    if (!mounted) return;
-    setState(() {});
+  Future<void> _open(Widget page) async {
+    await Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => page));
+    if (mounted && widget.isActive) _load();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_controller.loading) {
-      return const Scaffold(
-        backgroundColor: AppTheme.pageBg,
-        body: SafeArea(child: Center(child: CircularProgressIndicator())),
-      );
-    }
-
-    final kpis = _controller.data?.kpis;
-    final range = computePeriodRange(
-        year: _controller.year, quarter: _controller.quarter);
+    final kpis = _dashboard?.kpis;
+    final metrics =
+        <({String id, String value, String caption, Color bg, Color fg})>[
+      (
+        id: 'contractValue',
+        value: financeMoney(kpis?.totalProjectValueWithoutVat),
+        caption: context.tr(en: 'Excluding VAT', ar: 'بدون الضريبة'),
+        bg: AppTheme.dashboardPaper,
+        fg: AppTheme.dashboardInk
+      ),
+      (
+        id: 'collected',
+        value: financeMoney(kpis?.totalCollectedAmount),
+        caption: context.tr(
+            en: 'Received by collection date', ar: 'حسب تاريخ التحصيل'),
+        bg: AppTheme.dashboardMint,
+        fg: AppTheme.dashboardInk
+      ),
+      (
+        id: 'uncollected',
+        value: financeMoney(kpis?.outstandingAmount),
+        caption: context.tr(en: 'Still outstanding', ar: 'قيد التحصيل'),
+        bg: const Color(0xFFE2DDD7),
+        fg: AppTheme.dashboardInk
+      ),
+      (
+        id: 'costs',
+        value: financeMoney(kpis?.totalCosts),
+        caption:
+            context.tr(en: 'Team and other costs', ar: 'تكاليف الفريق وغيرها'),
+        bg: AppTheme.dashboardGraphite,
+        fg: Colors.white
+      ),
+      (
+        id: 'netProfit',
+        value: financeMoney(kpis?.netProfit),
+        caption: context.tr(
+            en: 'Excluding VAT less costs', ar: 'بدون الضريبة بعد التكاليف'),
+        bg: AppTheme.dashboardInk,
+        fg: Colors.white
+      ),
+      (
+        id: 'collectionRate',
+        value: financePercent(kpis?.collectionRate),
+        caption:
+            context.tr(en: 'Finance methodology', ar: 'وفق منهجية المالية'),
+        bg: const Color(0xFFB8CEC6),
+        fg: AppTheme.dashboardInk
+      ),
+    ];
 
     return Scaffold(
       backgroundColor: AppTheme.pageBg,
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () =>
-              _controller.load(refreshYears: true, forceRefresh: true),
+          onRefresh: () => _load(refresh: true),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 116),
             children: [
               AppPageHeader(
                 title: context.tr(en: 'Finance', ar: 'المالية'),
                 subtitle: context.tr(
-                  en: 'Revenue and cost reports',
-                  ar: 'تقارير الإيرادات والتكاليف',
-                ),
+                    en: 'Your financial picture, one period at a time',
+                    ar: 'الصورة المالية للفترة التي تختارها'),
                 showLogout: false,
                 showBack: Navigator.of(context).canPop(),
               ),
-              const SizedBox(height: 14),
-              IgnorePointer(
-                ignoring: _controller.updating,
-                child: Opacity(
-                  opacity: _controller.updating ? 0.65 : 1,
-                  child: PeriodFiltersBar(
-                    year: _controller.year,
-                    quarter: _controller.quarter,
-                    availableYears: List<int>.from(_controller.availableYears),
-                    onYearChanged: (y) {
-                      _controller.updateSharedFilter(
-                        year: y,
-                        quarter: y == null ? null : _controller.quarter,
-                      );
-                    },
-                    onQuarterChanged: (q) {
-                      _controller.updateSharedFilter(
-                        year: _controller.year,
-                        quarter: _controller.year == null ? null : q,
-                      );
-                    },
-                  ),
-                ),
-              ),
-              InlineLoadingBar(visible: _controller.updating),
-              const SizedBox(height: 16),
-              if (_controller.error != null) ...[
-                ErrorBanner(message: _controller.error!),
-                TextButton.icon(
-                  onPressed: () => _controller.load(forceRefresh: true),
-                  icon: const Icon(Icons.refresh),
-                  label: Text(context.tr(en: 'Retry', ar: 'إعادة المحاولة')),
-                ),
-                const SizedBox(height: 12),
-              ],
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 0.94,
-                children: [
-                  SummaryCard(
-                    title: context.tr(
-                        en: 'Revenue excl. VAT', ar: 'إيرادات بدون ضريبة'),
-                    value: formatSar(kpis?.totalProjectValueWithoutVat),
-                    icon: Icons.attach_money,
-                    accent: AppTheme.ink,
-                  ),
-                  SummaryCard(
-                    title: context.tr(en: 'Total costs', ar: 'إجمالي التكاليف'),
-                    value: formatSar(kpis?.totalCosts),
-                    icon: Icons.payments_outlined,
-                    accent: AppTheme.accent,
-                  ),
-                  SummaryCard(
-                    title: context.tr(en: 'Profit margin', ar: 'هامش الربح'),
-                    value: formatPercent(kpis?.profitMargin),
-                    icon: Icons.percent,
-                    accent: AppTheme.ink,
-                  ),
-                  SummaryCard(
-                    title: context.tr(en: 'Collected', ar: 'المحصّل'),
-                    value: formatSar(kpis?.totalCollectedAmount),
-                    icon: Icons.account_balance_wallet_outlined,
-                    accent: AppTheme.accent,
-                  ),
-                ],
-              ),
               const SizedBox(height: 18),
-              _ReportCard(
-                title: context.tr(en: 'Revenue report', ar: 'تقرير الإيرادات'),
-                subtitle: context.tr(
-                  en: 'Project value excluding VAT',
-                  ar: 'قيمة المشاريع بدون ضريبة',
-                ),
-                onOpen: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => FinanceReportScreen(
-                        title: context.tr(
-                            en: 'Revenue report', ar: 'تقرير الإيرادات'),
-                        reportType: 'REVENUE_REPORT',
-                        from: range.from,
-                        to: range.to,
-                      ),
-                    ),
-                  );
-                },
+              FinancePeriodPicker(
+                year: _query.year,
+                quarter: _query.quarter,
+                availableYears: _years,
+                onYearChanged: (year) => _periodChanged(year == null
+                    ? _query.copyWith(clearYear: true, quarter: 'ALL')
+                    : _query.copyWith(year: year)),
+                onQuarterChanged: (quarter) =>
+                    _periodChanged(_query.copyWith(quarter: quarter)),
               ),
-              const SizedBox(height: 12),
-              _ReportCard(
-                title: context.tr(
-                    en: 'Team costs report', ar: 'تقرير تكاليف الفريق'),
-                subtitle: context.tr(
-                  en: 'Total team pay by person',
-                  ar: 'إجمالي رواتب الفريق حسب الشخص',
-                ),
-                onOpen: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => FinanceReportScreen(
-                        title: context.tr(
-                            en: 'Team costs report', ar: 'تقرير تكاليف الفريق'),
-                        reportType: 'TEAM_COSTS_REPORT',
-                        from: range.from,
-                        to: range.to,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              _ReportCard(
-                title:
-                    context.tr(en: 'Collections report', ar: 'تقرير التحصيل'),
-                subtitle: context.tr(
-                  en: 'All recorded collections',
-                  ar: 'جميع التحصيلات المسجلة',
-                ),
-                onOpen: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => FinanceReportScreen(
-                        title: context.tr(
-                            en: 'Collections report', ar: 'تقرير التحصيل'),
-                        reportType: 'COLLECTIONS_REPORT',
-                        from: range.from,
-                        to: range.to,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ReportCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final VoidCallback onOpen;
-
-  const _ReportCard({
-    required this.title,
-    required this.subtitle,
-    required this.onOpen,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Ink(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppTheme.border),
-        ),
-        child: InkWell(
-          onTap: onOpen,
-          borderRadius: BorderRadius.circular(24),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
+              if (_updating) const LinearProgressIndicator(minHeight: 2),
+              const SizedBox(height: 22),
+              Text(context.tr(en: 'Overview', ar: 'نظرة عامة'),
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 5),
+              Text(
+                  context.tr(
+                      en: 'Tap a card to see the reconciled details.',
+                      ar: 'اضغط على البطاقة لعرض التفاصيل المطابقة.'),
+                  style: const TextStyle(color: AppTheme.muted, fontSize: 13)),
+              const SizedBox(height: 16),
+              if (_loading)
+                const SizedBox(
+                    height: 208,
+                    child: Center(child: CircularProgressIndicator()))
+              else if (_error != null)
+                FinanceErrorState(message: _error, onRetry: _load)
+              else ...[
+                SizedBox(
+                  height: 202,
+                  child: ListView.separated(
+                    key: const ValueKey('finance-kpi-scroll'),
+                    scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
+                    itemCount: metrics.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final metric = metrics[index];
+                      return FinanceMetricCard(
+                        key: ValueKey('finance-kpi-${metric.id}'),
+                        title: financeMetricTitle(context, metric.id),
+                        value: metric.value,
+                        caption: metric.caption,
+                        color: metric.bg,
+                        foreground: metric.fg,
+                        onTap: () => _open(FinanceDrilldownScreen(
+                          metric: metric.id,
+                          title: financeMetricTitle(context, metric.id),
+                          query: _query,
                         )),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        color: AppTheme.muted,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
-              ),
-              const Icon(Icons.arrow_forward_ios,
-                  size: 16, color: AppTheme.muted),
+                const SizedBox(height: 24),
+                Text(context.tr(en: 'Explore', ar: 'استكشف'),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 12),
+                FinanceActionTile(
+                  title: context.tr(en: 'Collections', ar: 'التحصيلات'),
+                  subtitle: context.tr(
+                      en: 'Payments received and their projects',
+                      ar: 'المبالغ المحصلة ومشاريعها'),
+                  icon: Icons.account_balance_wallet_outlined,
+                  onTap: () => _open(FinanceCollectionsScreen(query: _query)),
+                ),
+                const SizedBox(height: 10),
+                FinanceActionTile(
+                  title: context.tr(en: 'Cost breakdown', ar: 'تفصيل التكاليف'),
+                  subtitle: context.tr(
+                      en: 'Team, other, and total costs',
+                      ar: 'تكاليف الفريق وغيرها والإجمالي'),
+                  icon: Icons.receipt_long_outlined,
+                  onTap: () => _open(FinanceCostsScreen(query: _query)),
+                ),
+                const SizedBox(height: 10),
+                if (_canReadReports)
+                  FinanceActionTile(
+                    title: context.tr(
+                        en: 'Financial reports', ar: 'التقارير المالية'),
+                    subtitle: context.tr(
+                        en: 'Revenue, profitability, VAT, cash flow and more',
+                        ar: 'الإيرادات والربحية والضريبة والتدفق النقدي والمزيد'),
+                    icon: Icons.insights_outlined,
+                    onTap: () => _open(FinanceReportsScreen(query: _query)),
+                  ),
+              ],
             ],
           ),
         ),

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../services/app_services.dart';
+import '../data/models/access_snapshot.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_bottom_navigation_bar.dart';
 import 'dashboard_screen.dart';
+import 'finance_screen.dart';
 import 'more_screen.dart';
 import 'projects_screen.dart';
-import 'tasks_screen.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -17,18 +18,49 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  int _index = 0;
-  final Set<int> _builtIndexes = <int>{0};
+  String? _selectedId;
+  final Set<String> _builtIds = <String>{};
 
-  List<_NavItem> _navForRole(String? rawRole) {
+  @override
+  void initState() {
+    super.initState();
+    AppServices.session.access.addListener(_onAccessChanged);
+  }
+
+  @override
+  void dispose() {
+    AppServices.session.access.removeListener(_onAccessChanged);
+    super.dispose();
+  }
+
+  void _onAccessChanged() {
+    if (mounted) setState(() {});
+  }
+
+  List<_NavItem> _navForRole(String? rawRole, AccessSnapshot? access) {
     final role = (rawRole ?? '').trim().toUpperCase();
 
     final isAdmin = role == 'ADMIN';
     final isProgramManager = role == 'PROGRAM_MANAGER';
-    final canSeeAdminDashboard = isAdmin || isProgramManager;
+    final supportedRole = isAdmin || isProgramManager;
+    final dashboardScreen =
+        isAdmin ? 'admin.dashboard' : 'programManager.dashboard';
+    final financeScreen = isAdmin
+        ? 'admin.finance.dashboard'
+        : 'programManager.finance.dashboard';
+    // Until /access/me arrives, keep the role-based shell responsive. Once it
+    // arrives, mirror the server's screen/action gates; the server remains the
+    // authority for every request.
+    final canSeeAdminDashboard = supportedRole &&
+        (access == null || access.screens.contains(dashboardScreen));
+    final canSeeFinance = supportedRole &&
+        (access == null ||
+            (access.screens.contains(financeScreen) &&
+                access.actions.contains('finance.read')));
     final items = <_NavItem>[
       if (canSeeAdminDashboard)
         _NavItem(
+          id: 'dashboard',
           pageBuilder: (isActive) => DashboardScreen(isActive: isActive),
           destination: NavigationDestination(
             icon: const Icon(Icons.dashboard_outlined),
@@ -37,6 +69,7 @@ class _AppShellState extends State<AppShell> {
           ),
         ),
       _NavItem(
+        id: 'projects',
         pageBuilder: (_) => const ProjectsScreen(),
         destination: NavigationDestination(
           icon: const Icon(Icons.folder_open_outlined),
@@ -44,15 +77,18 @@ class _AppShellState extends State<AppShell> {
           label: context.tr(en: 'Projects', ar: 'المشاريع'),
         ),
       ),
-      _NavItem(
-        pageBuilder: (_) => const TasksScreen(),
-        destination: NavigationDestination(
-          icon: const Icon(Icons.checklist_outlined),
-          selectedIcon: const Icon(Icons.checklist),
-          label: context.tr(en: 'Tasks', ar: 'المهام'),
+      if (canSeeFinance)
+        _NavItem(
+          id: 'finance',
+          pageBuilder: (isActive) => FinanceScreen(isActive: isActive),
+          destination: NavigationDestination(
+            icon: const Icon(Icons.pie_chart_outline_rounded),
+            selectedIcon: const Icon(Icons.pie_chart_rounded),
+            label: context.tr(en: 'Finance', ar: 'المالية'),
+          ),
         ),
-      ),
       _NavItem(
+        id: 'more',
         pageBuilder: (_) => const MoreScreen(),
         destination: NavigationDestination(
           icon: const Icon(Icons.grid_view_outlined),
@@ -68,17 +104,13 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final role = AppServices.session.user.value?.role;
-    final nav = _navForRole(role);
-    final effectiveIndex = _index.clamp(0, nav.length - 1);
-    _builtIndexes.add(effectiveIndex);
-    if (effectiveIndex != _index) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _index = effectiveIndex);
-      });
-    }
+    final nav = _navForRole(role, AppServices.session.access.value);
+    final selectedIndex = nav.indexWhere((item) => item.id == _selectedId);
+    final effectiveIndex = selectedIndex < 0 ? 0 : selectedIndex;
+    _builtIds.add(nav[effectiveIndex].id);
 
     final pages = List<Widget>.generate(nav.length, (index) {
-      if (!_builtIndexes.contains(index)) {
+      if (!_builtIds.contains(nav[index].id)) {
         return const SizedBox.shrink();
       }
       return nav[index].pageBuilder(index == effectiveIndex);
@@ -91,8 +123,8 @@ class _AppShellState extends State<AppShell> {
         destinations: nav.map((item) => item.destination).toList(),
         selectedIndex: effectiveIndex,
         onDestinationSelected: (value) => setState(() {
-          _index = value;
-          _builtIndexes.add(value);
+          _selectedId = nav[value].id;
+          _builtIds.add(nav[value].id);
         }),
       ),
     );
@@ -100,10 +132,12 @@ class _AppShellState extends State<AppShell> {
 }
 
 class _NavItem {
+  final String id;
   final Widget Function(bool isActive) pageBuilder;
   final NavigationDestination destination;
 
   _NavItem({
+    required this.id,
     required this.pageBuilder,
     required this.destination,
   });

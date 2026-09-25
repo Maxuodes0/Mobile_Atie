@@ -1,10 +1,26 @@
-import 'package:intl/intl.dart';
-
 const String sarSymbol = '\u20C1';
 
-String _localizedNumber(double value, String pattern, String? locale) {
-  // Financial figures intentionally use Latin digits in both app languages.
-  return NumberFormat(pattern, 'en_US').format(value);
+/// Formats a decimal string without passing monetary digits through `double`.
+/// The server remains the source of truth; this only groups and displays it.
+String? _formatDecimal(String raw, {int places = 2}) {
+  final match = RegExp(r'^(-?)(\d+)(?:\.(\d+))?$').firstMatch(raw.trim());
+  if (match == null) return null;
+  final negative = match.group(1) == '-';
+  final whole = BigInt.parse(match.group(2)!);
+  final fraction = match.group(3) ?? '';
+  final scale = BigInt.from(10).pow(places);
+  final kept = fraction.padRight(places, '0').substring(0, places);
+  var units = whole * scale + BigInt.parse(kept.isEmpty ? '0' : kept);
+  if (fraction.length > places && int.parse(fraction[places]) >= 5) {
+    units += BigInt.one;
+  }
+  final wholeText = (units ~/ scale).toString().replaceAllMapped(
+        RegExp(r'\B(?=(\d{3})+(?!\d))'),
+        (_) => ',',
+      );
+  final fractionText = (units % scale).toString().padLeft(places, '0');
+  final sign = negative && units != BigInt.zero ? '-' : '';
+  return places == 0 ? '$sign$wholeText' : '$sign$wholeText.$fractionText';
 }
 
 /// Keeps localized labels/month names while displaying every digit as 0-9.
@@ -29,13 +45,15 @@ double? parseFinancialValue(Object? raw) {
 }
 
 String formatSar(String? raw, {String? locale}) {
-  final value = parseFinancialValue(raw);
+  if (raw == null) return '—';
+  final value = _formatDecimal(raw);
   if (value == null) return '—';
-  return '\u2066$sarSymbol\u00A0${_localizedNumber(value, '#,##0.00', locale)}\u2069';
+  return '\u2066$sarSymbol\u00A0$value\u2069';
 }
 
 String formatPercent(String? raw, {String? locale}) {
-  final value = parseFinancialValue(raw);
+  if (raw == null) return '—';
+  final value = _formatDecimal(raw);
   if (value == null) return '—';
-  return '\u2066${_localizedNumber(value, '0.00', locale)}%\u2069';
+  return '\u2066$value%\u2069';
 }

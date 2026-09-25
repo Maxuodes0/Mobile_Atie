@@ -5,7 +5,7 @@ import '../services/app_services.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_page_header.dart';
 import 'clients_screen.dart';
-import 'finance_screen.dart';
+import 'tasks_screen.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -17,8 +17,6 @@ class MoreScreen extends StatelessWidget {
       _role == 'ADMIN' ||
       _role == 'PROGRAM_MANAGER' ||
       _role == 'PROJECT_MANAGER';
-
-  bool get _canSeeFinance => _role == 'ADMIN' || _role == 'PROGRAM_MANAGER';
 
   Future<void> _logout(BuildContext context) async {
     Navigator.of(context).popUntil((route) => route.isFirst);
@@ -101,21 +99,23 @@ class MoreScreen extends StatelessWidget {
                 MaterialPageRoute<void>(builder: (_) => const ClientsScreen()),
               ),
             ),
-          if (_canSeeFinance)
-            _MoreTile(
-              icon: Icons.pie_chart_rounded,
-              color: AppTheme.ink,
-              title: context.tr(en: 'Finance', ar: 'المالية'),
-              subtitle: context.tr(
-                en: 'Revenue, costs, and collection reports',
-                ar: 'تقارير الإيرادات والتكاليف والتحصيل',
-              ),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const FinanceScreen(isActive: true),
+          _MoreTile(
+            icon: Icons.checklist_rounded,
+            color: AppTheme.ink,
+            title: context.tr(en: 'Tasks', ar: 'المهام'),
+            subtitle: context.tr(
+              en: 'Your assigned tasks and their progress',
+              ar: 'مهامك المسندة إليك وتقدمها',
+            ),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const Scaffold(
+                  backgroundColor: AppTheme.pageBg,
+                  body: TasksScreen(),
                 ),
               ),
             ),
+          ),
           _MoreTile(
             icon: Icons.logout_rounded,
             color: AppTheme.muted,
@@ -199,10 +199,8 @@ class _MoreTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
+                const Icon(
+                  Icons.chevron_right_rounded,
                   color: AppTheme.muted,
                 ),
               ],

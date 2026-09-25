@@ -1,5 +1,3 @@
-import '../../utils/formatters.dart';
-
 class FinanceKpis {
   final String? totalProjectValueWithoutVat;
   final String? totalCollectedAmount;
@@ -7,6 +5,7 @@ class FinanceKpis {
   final String? totalCosts;
   final String? netProfit;
   final String? profitMargin;
+  final String? collectionRate;
 
   const FinanceKpis({
     required this.totalProjectValueWithoutVat,
@@ -15,6 +14,7 @@ class FinanceKpis {
     required this.totalCosts,
     required this.netProfit,
     required this.profitMargin,
+    this.collectionRate,
   });
 
   FinanceKpis copyWith({
@@ -24,6 +24,7 @@ class FinanceKpis {
     String? totalCosts,
     String? netProfit,
     String? profitMargin,
+    String? collectionRate,
   }) {
     return FinanceKpis(
       totalProjectValueWithoutVat:
@@ -33,6 +34,7 @@ class FinanceKpis {
       totalCosts: totalCosts ?? this.totalCosts,
       netProfit: netProfit ?? this.netProfit,
       profitMargin: profitMargin ?? this.profitMargin,
+      collectionRate: collectionRate ?? this.collectionRate,
     );
   }
 
@@ -40,7 +42,7 @@ class FinanceKpis {
     String? read(String key) {
       final raw = json[key];
       if (raw == null) return null;
-      if (parseFinancialValue(raw) == null) {
+      if (!RegExp(r'^-?\d+(?:\.\d+)?$').hasMatch(raw.toString())) {
         throw FormatException('Invalid financial field: $key');
       }
       return raw.toString();
@@ -53,6 +55,7 @@ class FinanceKpis {
       totalCosts: read('totalCosts'),
       netProfit: read('netProfit'),
       profitMargin: read('profitMargin'),
+      collectionRate: read('collectionRate'),
     );
   }
 }
@@ -63,6 +66,10 @@ class FinanceDashboard {
   const FinanceDashboard({required this.kpis});
 
   factory FinanceDashboard.fromJson(Map<String, dynamic> json) {
+    final meta = json['meta'];
+    if (meta is Map && meta['fallback'] == true) {
+      throw const FormatException('Financial data is temporarily unavailable.');
+    }
     final kpisRaw = json['kpis'];
     if (kpisRaw is! Map<String, dynamic>) {
       throw const FormatException('Financial response is missing KPI data.');

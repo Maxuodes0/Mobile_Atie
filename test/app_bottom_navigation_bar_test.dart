@@ -16,9 +16,9 @@ void main() {
       label: 'Projects',
     ),
     NavigationDestination(
-      icon: Icon(Icons.checklist_outlined),
-      selectedIcon: Icon(Icons.checklist),
-      label: 'Tasks',
+      icon: Icon(Icons.pie_chart_outline_rounded),
+      selectedIcon: Icon(Icons.pie_chart_rounded),
+      label: 'Finance',
     ),
     NavigationDestination(
       icon: Icon(Icons.grid_view_outlined),

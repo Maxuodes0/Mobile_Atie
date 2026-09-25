@@ -155,8 +155,30 @@ class _TasksScreenState extends State<TasksScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final header = AppPageHeader(
+      title: context.tr(en: 'Tasks', ar: 'المهام'),
+      subtitle: context.tr(
+        en: 'My tasks across projects',
+        ar: 'مهامي عبر المشاريع',
+      ),
+      showLogout: false,
+      showBack: Navigator.of(context).canPop(),
+    );
+
     if (_loading) {
-      return const SafeArea(child: Center(child: CircularProgressIndicator()));
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+          child: Column(
+            children: [
+              header,
+              const Expanded(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     final items = _visible;
@@ -166,12 +188,7 @@ class _TasksScreenState extends State<TasksScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 116),
           children: [
-            AppPageHeader(
-              title: context.tr(en: 'Tasks', ar: 'المهام'),
-              subtitle: context.tr(
-                  en: 'My tasks across projects', ar: 'مهامي عبر المشاريع'),
-              showLogout: false,
-            ),
+            header,
             InlineLoadingBar(visible: _refreshing),
             const SizedBox(height: 16),
             FilledButton.icon(

@@ -9,6 +9,7 @@ import '../data/api/tasks_api.dart';
 import '../data/api/users_api.dart';
 import '../state/period_filter_controller.dart';
 import '../state/session_controller.dart';
+import 'finance_export_service.dart';
 
 class AppServices {
   static late final ApiClient api;
@@ -16,6 +17,7 @@ class AppServices {
   static late final ClientsApi clients;
   static late final DashboardApi dashboard;
   static late final FinanceApi finance;
+  static late final FinanceExportService financeExports;
   static late final ProjectsApi projects;
   static late final ReportsApi reports;
   static late final TasksApi tasks;
@@ -29,6 +31,7 @@ class AppServices {
     clients = ClientsApi(api);
     dashboard = DashboardApi(api);
     finance = FinanceApi(api);
+    financeExports = FinanceExportService();
     projects = ProjectsApi(api);
     reports = ReportsApi(api);
     tasks = TasksApi(api);

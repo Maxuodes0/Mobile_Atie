@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/finance_dashboard.dart';
+import '../../../data/models/finance_module.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/app_services.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/formatters.dart';
-import '../../../utils/period_range.dart';
-import '../../finance_report_screen.dart';
+import '../../finance/finance_drilldown_screen.dart';
 
 class DashboardKpiGrid extends StatelessWidget {
   final FinanceKpis? kpis;
@@ -16,23 +16,22 @@ class DashboardKpiGrid extends StatelessWidget {
     required this.kpis,
   });
 
-  void _openReport(
+  void _openDetails(
     BuildContext context, {
     required String title,
-    required String reportType,
+    required String metric,
   }) {
     final selection = AppServices.periodFilters.selection.value;
-    final range = computePeriodRange(
-      year: selection.year,
-      quarter: selection.quarter,
-    );
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => FinanceReportScreen(
+        builder: (_) => FinanceDrilldownScreen(
           title: title,
-          reportType: reportType,
-          from: range.from,
-          to: range.to,
+          metric: metric,
+          query: FinanceQuery(
+            year: selection.year,
+            quarter:
+                selection.quarter == null ? 'ALL' : 'Q${selection.quarter}',
+          ),
         ),
       ),
     );
@@ -50,10 +49,11 @@ class DashboardKpiGrid extends StatelessWidget {
         value: formatSar(kpis?.totalProjectValueWithoutVat),
         background: AppTheme.dashboardPaper,
         foreground: AppTheme.dashboardInk,
-        onTap: () => _openReport(
+        onTap: () => _openDetails(
           context,
-          title: context.tr(en: 'Revenue report', ar: 'تقرير الإيرادات'),
-          reportType: 'REVENUE_REPORT',
+          title:
+              context.tr(en: 'Total contract value', ar: 'إجمالي قيمة العقود'),
+          metric: 'contractValue',
         ),
       ),
       _MetricCardData(
@@ -62,10 +62,10 @@ class DashboardKpiGrid extends StatelessWidget {
         value: formatSar(kpis?.totalCollectedAmount),
         background: AppTheme.dashboardMint,
         foreground: AppTheme.dashboardInk,
-        onTap: () => _openReport(
+        onTap: () => _openDetails(
           context,
-          title: context.tr(en: 'Collections report', ar: 'تقرير التحصيل'),
-          reportType: 'COLLECTIONS_REPORT',
+          title: context.tr(en: 'Collected', ar: 'المبالغ المحصلة'),
+          metric: 'collected',
         ),
       ),
       _MetricCardData(
@@ -74,13 +74,10 @@ class DashboardKpiGrid extends StatelessWidget {
         value: formatSar(kpis?.outstandingAmount),
         background: AppTheme.dashboardGraphite,
         foreground: AppTheme.dashboardInk,
-        onTap: () => _openReport(
+        onTap: () => _openDetails(
           context,
-          title: context.tr(
-            en: 'Outstanding report',
-            ar: 'تقرير غير المحصل',
-          ),
-          reportType: 'OUTSTANDING_REPORT',
+          title: context.tr(en: 'Outstanding', ar: 'المبالغ غير المحصلة'),
+          metric: 'uncollected',
         ),
       ),
       _MetricCardData(
@@ -89,10 +86,10 @@ class DashboardKpiGrid extends StatelessWidget {
         value: formatSar(kpis?.totalCosts),
         background: AppTheme.dashboardInk,
         foreground: AppTheme.dashboardPaper,
-        onTap: () => _openReport(
+        onTap: () => _openDetails(
           context,
           title: context.tr(en: 'Project costs', ar: 'تكاليف المشاريع'),
-          reportType: 'PROJECT_COSTS_REPORT',
+          metric: 'costs',
         ),
       ),
     ];

@@ -240,33 +240,6 @@ class DashboardScreenController extends ChangeNotifier {
       latestProjects = List<ProjectSummary>.from(payload.latestProjects!);
     }
 
-    if (finance != null && collections.isNotEmpty) {
-      final selectedQuarter = quarter;
-      final startIndex =
-          selectedQuarter == null ? 0 : ((selectedQuarter.clamp(1, 4) - 1) * 3);
-      final endIndex = selectedQuarter == null
-          ? collections.length
-          : (startIndex + 3).clamp(0, collections.length);
-      final selected = collections.sublist(
-        startIndex.clamp(0, collections.length),
-        endIndex,
-      );
-      final collected = selected.fold<double>(
-        0,
-        (sum, point) => sum + point.collected,
-      );
-      final outstanding = selected.fold<double>(
-        0,
-        (sum, point) => sum + point.uncollected,
-      );
-      finance = FinanceDashboard(
-        kpis: finance!.kpis.copyWith(
-          totalCollectedAmount: collected.toStringAsFixed(2),
-          outstandingAmount: outstanding.toStringAsFixed(2),
-        ),
-      );
-    }
-
     final nextErrors = Map<String, String>.from(sectionErrors);
     for (final section in payload.sections) {
       nextErrors.remove(section);

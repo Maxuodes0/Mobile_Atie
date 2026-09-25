@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/services.dart';
 
 class CookieStore {
   CookieStore() : ready = Future<void>.value() {
@@ -14,9 +15,16 @@ class CookieStore {
   late Future<void> ready;
 
   Future<void> _restore() async {
-    for (final name in _persistedNames) {
-      final value = await _storage.read(key: 'aite.auth.$name');
-      if (value != null && value.isNotEmpty) _cookies[name] = value;
+    try {
+      for (final name in _persistedNames) {
+        final value = await _storage.read(key: 'aite.auth.$name');
+        if (value != null && value.isNotEmpty) _cookies[name] = value;
+      }
+    } on PlatformException {
+      // An unsigned simulator or a temporarily unavailable keychain must not
+      // leave every API request waiting forever on `ready`. No cookie is read
+      // from insecure storage; this launch simply starts signed out.
+      _cookies.clear();
     }
   }
 
@@ -26,7 +34,11 @@ class CookieStore {
     _cookies.clear();
     if (!kIsWeb) {
       for (final name in _persistedNames) {
-        await _storage.delete(key: 'aite.auth.$name');
+        try {
+          await _storage.delete(key: 'aite.auth.$name');
+        } on PlatformException {
+          // The in-memory session has already been cleared.
+        }
       }
     }
   }
@@ -47,12 +59,20 @@ class CookieStore {
       if (value.isEmpty) {
         _cookies.remove(name);
         if (!kIsWeb && _persistedNames.contains(name)) {
-          await _storage.delete(key: 'aite.auth.$name');
+          try {
+            await _storage.delete(key: 'aite.auth.$name');
+          } on PlatformException {
+            // The in-memory cookie has already been removed.
+          }
         }
       } else {
         _cookies[name] = value;
         if (!kIsWeb && _persistedNames.contains(name)) {
-          await _storage.write(key: 'aite.auth.$name', value: value);
+          try {
+            await _storage.write(key: 'aite.auth.$name', value: value);
+          } on PlatformException {
+            // Keep the authenticated cookie in memory for this session only.
+          }
         }
       }
     }

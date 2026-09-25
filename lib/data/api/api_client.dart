@@ -119,6 +119,15 @@ class ApiClient {
     return data;
   }
 
+  /// Uses the same authenticated/cookie-aware request pipeline for downloads.
+  /// Export files must not be fetched via an unauthenticated browser URL.
+  Future<Response<dynamic>> getRaw(
+    String path, {
+    Map<String, dynamic>? query,
+    ResponseType responseType = ResponseType.json,
+  }) =>
+      _request('GET', path, query: query, responseType: responseType);
+
   Future<dynamic> post(
     String path, {
     Object? data,
@@ -163,8 +172,13 @@ class ApiClient {
     bool retryOnAuthFailure = true,
     bool retryOnCsrfFailure = true,
     Map<String, dynamic>? headers,
+    ResponseType responseType = ResponseType.json,
   }) async {
-    final options = Options(method: method, headers: headers);
+    final options = Options(
+      method: method,
+      headers: headers,
+      responseType: responseType,
+    );
     if (!_isSafeMethod(method)) {
       final csrf = await _ensureCsrfToken();
       if (csrf != null && csrf.isNotEmpty) {
@@ -196,6 +210,7 @@ class ApiClient {
           retryOnCsrfFailure: false,
           retryOnAuthFailure: retryOnAuthFailure,
           headers: headers,
+          responseType: responseType,
         );
       }
 
@@ -210,6 +225,7 @@ class ApiClient {
             retryOnAuthFailure: false,
             retryOnCsrfFailure: retryOnCsrfFailure,
             headers: headers,
+            responseType: responseType,
           );
         }
       }
