@@ -547,10 +547,7 @@ class _ProjectRow extends StatelessWidget {
     final amountStr =
         amount == null ? '—' : formatSar(amount.toStringAsFixed(2));
 
-    final direction = Directionality.of(context);
-    final chevron = direction == TextDirection.rtl
-        ? Icons.chevron_left
-        : Icons.chevron_right;
+    const chevron = Icons.chevron_right;
 
     return Material(
       color: Colors.transparent,
@@ -620,7 +617,7 @@ class _ProjectRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Icon(chevron, color: AppTheme.muted),
+              const Icon(chevron, color: AppTheme.muted),
             ],
           ),
         ),

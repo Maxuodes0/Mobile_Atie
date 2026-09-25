@@ -85,7 +85,7 @@ class AuthApi {
   }
 
   Future<void> logout() async {
-    await _api.post('/auth/logout');
+    await _api.logoutAndClear();
   }
 }
 

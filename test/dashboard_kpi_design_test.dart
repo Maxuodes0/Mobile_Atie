@@ -131,5 +131,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('إجمالي قيمة العقود'), findsOneWidget);
     expect(find.text('المبالغ المحصلة'), findsOneWidget);
+    expect(tester.widget<Text>(find.text('›').first).textDirection,
+        TextDirection.ltr);
   });
 }

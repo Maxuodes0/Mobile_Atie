@@ -28,9 +28,10 @@ class DashboardKpiGrid extends StatelessWidget {
           title: title,
           metric: metric,
           query: FinanceQuery(
-            year: selection.year,
-            quarter:
-                selection.quarter == null ? 'ALL' : 'Q${selection.quarter}',
+            year: metric == 'uncollected' ? null : selection.year,
+            quarter: metric == 'uncollected' || selection.quarter == null
+                ? 'ALL'
+                : 'Q${selection.quarter}',
           ),
         ),
       ),
@@ -70,8 +71,11 @@ class DashboardKpiGrid extends StatelessWidget {
       ),
       _MetricCardData(
         title: context.tr(en: 'Outstanding', ar: 'المبالغ غير المحصلة'),
-        caption: context.tr(en: 'Awaiting collection', ar: 'بانتظار التحصيل'),
-        value: formatSar(kpis?.outstandingAmount),
+        caption: context.tr(
+            en: 'All years · awaiting collection',
+            ar: 'كل السنوات · بانتظار التحصيل'),
+        value: formatSar(
+            kpis?.allTimeOutstandingAmount ?? kpis?.outstandingAmount),
         background: AppTheme.dashboardGraphite,
         foreground: AppTheme.dashboardInk,
         onTap: () => _openDetails(
@@ -157,7 +161,6 @@ class _DashboardMetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final direction = Directionality.of(context);
     return Semantics(
       button: true,
       label: '${data.title}: ${data.value}',
@@ -249,11 +252,12 @@ class _DashboardMetricCard extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 7),
                         child: Text(
-                          direction == TextDirection.rtl ? '<' : '>',
+                          '›',
+                          textDirection: TextDirection.ltr,
                           style: TextStyle(
                             color: data.foreground,
                             fontFamily: AppTheme.dashboardFontFamily,
-                            fontSize: 30,
+                            fontSize: 33,
                             height: 0.8,
                             fontWeight: FontWeight.w900,
                           ),

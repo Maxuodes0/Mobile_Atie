@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
+import 'ios_select_field.dart';
 
 class PeriodFiltersBar extends StatelessWidget {
   final int? year; // null = all years
@@ -33,25 +34,21 @@ class PeriodFiltersBar extends StatelessWidget {
       required List<DropdownMenuItem<T>> items,
       required ValueChanged<T?>? onChanged,
     }) {
-      return Container(
-        padding: const EdgeInsetsDirectional.fromSTEB(14, 11, 14, 11),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.border),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<T>(
-            value: value,
-            items: items,
-            onChanged: onChanged,
-            isDense: true,
+      return IosSelectField<T>(
+        initialValue: value,
+        items: items,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Theme.of(context).colorScheme.surface,
+          contentPadding: const EdgeInsetsDirectional.fromSTEB(14, 13, 14, 13),
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            style: const TextStyle(
-              color: AppTheme.ink,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-            ),
+            borderSide: const BorderSide(color: AppTheme.border),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: const BorderSide(color: AppTheme.border),
           ),
         ),
       );

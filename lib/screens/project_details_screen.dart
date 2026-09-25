@@ -231,7 +231,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
           bottom: TabBar(
             isScrollable: true,
-            tabAlignment: TabAlignment.start,
+            tabAlignment: TabAlignment.center,
             indicatorColor: Theme.of(context).colorScheme.secondary,
             labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor:
@@ -272,7 +272,6 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                   operatingCompanyNameEn: project?.operatingCompanyNameEn,
                   status: project?.status ?? fallback?.status ?? '',
                   projectType: project?.projectType ?? 'PAID',
-                  createdAt: project?.createdAt ?? fallback?.createdAt,
                   startDate: project?.startDate,
                   dueDate: project?.dueDate,
                   loading: _projectLoading,

@@ -149,7 +149,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                       : context.tr(
                           en: 'Hello, $userName', ar: 'أهلًا، $userName'),
                   netProfit: formatSar(kpis?.netProfit),
-                  profitMargin: kpis?.profitMargin,
                   onRefresh: () => _controller.load(
                     refreshYears: true,
                     forceRefresh: true,
@@ -333,19 +332,16 @@ class _DashboardScreenState extends State<DashboardScreen>
 class _DashboardHero extends StatelessWidget {
   final String userName;
   final String netProfit;
-  final String? profitMargin;
   final VoidCallback onRefresh;
 
   const _DashboardHero({
     required this.userName,
     required this.netProfit,
-    required this.profitMargin,
     required this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
-    final margin = formatPercent(profitMargin);
     final now = DateTime.now();
     final month = context.tr(
       en: const [
@@ -488,33 +484,6 @@ class _DashboardHero extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      context.tr(en: 'Margin', ar: 'الهامش'),
-                      style: const TextStyle(
-                        color: AppTheme.dashboardMuted,
-                        fontFamily: AppTheme.dashboardFontFamily,
-                        fontFamilyFallback: AppTheme.currencyFontFallback,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      margin,
-                      style: const TextStyle(
-                        color: AppTheme.dashboardPaper,
-                        fontFamily: AppTheme.dashboardFontFamily,
-                        fontFamilyFallback: AppTheme.currencyFontFallback,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

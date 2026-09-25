@@ -55,7 +55,7 @@ class _FinanceQueryBarState extends State<FinanceQueryBar> {
             suffixIcon: IconButton(
               tooltip: context.tr(en: 'Search', ar: 'بحث'),
               onPressed: () => widget.onSearch(_search.text),
-              icon: const Icon(Icons.arrow_forward_rounded),
+              icon: const Icon(Icons.search_rounded),
             ),
           ),
         )),

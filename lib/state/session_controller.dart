@@ -16,11 +16,12 @@ class SessionController {
   final ValueNotifier<AccessSnapshot?> access =
       ValueNotifier<AccessSnapshot?>(null);
   Timer? _accessVersionTimer;
+  Future<void>? _pendingLogout;
 
   SessionController(this._auth, this._api) {
     _api.permissionsVersion.addListener(_handleResponseVersion);
     _accessVersionTimer = Timer.periodic(
-      const Duration(seconds: 3),
+      const Duration(seconds: 60),
       (_) => unawaited(_checkAccessVersion()),
     );
   }
@@ -88,6 +89,8 @@ class SessionController {
     required String email,
     required String password,
   }) async {
+    // A fast second login must not race the previous server-side logout.
+    await _pendingLogout;
     // Avoid reusing cached GET responses when switching accounts.
     _api.clearCache();
     final result = await _auth.login(email: email, password: password);
@@ -103,14 +106,20 @@ class SessionController {
   }
 
   Future<void> logout() async {
-    try {
-      await _auth.logout();
-    } catch (_) {
-      // ignore logout failures; still clear local session
-    }
-    _api.clearSession();
+    // AuthGate switches to the sign-in screen immediately. The server session
+    // is revoked in the background, then local cookies are cleared.
     access.value = null;
     user.value = null;
+    _api.clearCache();
+    _pendingLogout = _completeLogout();
+  }
+
+  Future<void> _completeLogout() async {
+    try {
+      await _auth.logout().timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Local credentials were already cleared before revocation was sent.
+    }
   }
 
   void dispose() {

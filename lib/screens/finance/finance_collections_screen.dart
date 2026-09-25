@@ -4,6 +4,7 @@ import '../../data/models/finance_module.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/app_services.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/ios_select_field.dart';
 import 'finance_filters.dart';
 import 'finance_project_detail_screen.dart';
 import 'finance_results.dart';
@@ -99,40 +100,6 @@ class _FinanceCollectionsScreenState extends State<FinanceCollectionsScreen> {
     if (saved == true) _load();
   }
 
-  Future<void> _delete(Map<String, dynamic> row) async {
-    if (!_canManage) return;
-    final projectId = row['projectId']?.toString();
-    final collectionId = (row['collectionId'] ?? row['id'])?.toString();
-    if (projectId == null || collectionId == null) return;
-    final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text(
-                  context.tr(en: 'Delete collection?', ar: 'حذف التحصيل؟')),
-              content: Text(context.tr(
-                  en: 'This action cannot be undone.',
-                  ar: 'لا يمكن التراجع عن هذا الإجراء.')),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(context.tr(en: 'Cancel', ar: 'إلغاء'))),
-                TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(context.tr(en: 'Delete', ar: 'حذف'))),
-              ],
-            ));
-    if (confirmed != true) return;
-    try {
-      await AppServices.finance.deleteCollection(projectId, collectionId);
-      _load();
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(error.toString()),
-      ));
-    }
-  }
-
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: AppTheme.pageBg,
@@ -185,22 +152,9 @@ class _FinanceCollectionsScreenState extends State<FinanceCollectionsScreen> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(children: [
-                          Expanded(
-                              child: Text(
-                                  financeField(row, ['projectName', 'name']),
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 16))),
-                          if (_canManage)
-                            IconButton(
-                              tooltip: context.tr(
-                                  en: 'Delete collection', ar: 'حذف التحصيل'),
-                              onPressed: () => _delete(row),
-                              icon: const Icon(Icons.delete_outline_rounded,
-                                  color: Colors.redAccent),
-                            ),
-                        ]),
+                        Text(financeField(row, ['projectName', 'name']),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w900, fontSize: 16)),
                         Text(financeField(row, ['clientName']),
                             style: const TextStyle(
                                 color: AppTheme.muted, fontSize: 12)),
@@ -231,7 +185,7 @@ class _FinanceCollectionsScreenState extends State<FinanceCollectionsScreen> {
                                                     row['projectId'].toString(),
                                               )),
                                     ),
-                            icon: const Icon(Icons.arrow_outward_rounded,
+                            icon: const Icon(Icons.chevron_right_rounded,
                                 size: 17),
                             label: Text(context.tr(
                                 en: 'Project finance', ar: 'مالية المشروع')),
@@ -372,7 +326,7 @@ class _CreateCollectionSheetState extends State<_CreateCollectionSheet> {
                             return const LinearProgressIndicator();
                           }
                           final rows = snapshot.data!;
-                          return DropdownButtonFormField<String>(
+                          return IosSelectField<String>(
                             initialValue:
                                 rows.any((row) => row.$1 == _projectId)
                                     ? _projectId
@@ -416,7 +370,7 @@ class _CreateCollectionSheetState extends State<_CreateCollectionSheet> {
                                 en: 'Collection date', ar: 'تاريخ التحصيل')
                             : financeDate(_date))),
                     const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
+                    IosSelectField<String>(
                       initialValue: _method,
                       decoration: InputDecoration(
                           labelText: context.tr(

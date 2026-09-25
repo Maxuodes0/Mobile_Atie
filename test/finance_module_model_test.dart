@@ -85,6 +85,16 @@ void main() {
     );
   });
 
+  test('all-time outstanding is kept separate from the selected year amount',
+      () {
+    final kpis = FinanceKpis.fromJson({
+      'outstandingAmount': '115.00',
+      'allTimeOutstandingAmount': '325.00',
+    });
+    expect(kpis.outstandingAmount, '115.00');
+    expect(kpis.allTimeOutstandingAmount, '325.00');
+  });
+
   test('large and fractional money stays exact during presentation', () {
     expect(
         formatSar('9007199254740993.01'), contains('9,007,199,254,740,993.01'));

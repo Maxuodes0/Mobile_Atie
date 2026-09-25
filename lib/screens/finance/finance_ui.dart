@@ -4,6 +4,7 @@ import '../../data/models/finance_module.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/formatters.dart';
+import '../../widgets/ios_select_field.dart';
 
 String financeMoney(Object? value) => formatSar(value?.toString());
 String financePercent(Object? value) => formatPercent(value?.toString());
@@ -190,7 +191,7 @@ class FinanceMetricCard extends StatelessWidget {
                             color: foreground.withValues(alpha: .7),
                             fontSize: 12)),
                   ),
-                  Icon(Icons.arrow_outward_rounded,
+                  Icon(Icons.chevron_right_rounded,
                       size: 18, color: foreground),
                 ]),
               ],
@@ -247,11 +248,7 @@ class FinanceActionTile extends StatelessWidget {
                               color: AppTheme.muted, fontSize: 12)),
                     ]),
               ),
-              Icon(
-                  context.isArabic
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
-                  color: AppTheme.muted),
+              const Icon(Icons.chevron_right_rounded, color: AppTheme.muted),
             ]),
           ),
         ),
@@ -298,6 +295,7 @@ class FinancePeriodPicker extends StatelessWidget {
   final List<int> availableYears;
   final ValueChanged<int?> onYearChanged;
   final ValueChanged<String> onQuarterChanged;
+  final bool showQuarter;
 
   const FinancePeriodPicker({
     super.key,
@@ -306,6 +304,7 @@ class FinancePeriodPicker extends StatelessWidget {
     required this.availableYears,
     required this.onYearChanged,
     required this.onQuarterChanged,
+    this.showQuarter = true,
   });
 
   @override
@@ -318,7 +317,7 @@ class FinancePeriodPicker extends StatelessWidget {
       ..sort((a, b) => b.compareTo(a));
     return Row(children: [
       Expanded(
-        child: DropdownButtonFormField<int>(
+        child: IosSelectField<int>(
           key: ValueKey('finance-year-${year ?? 0}'),
           initialValue: year ?? 0,
           isExpanded: true,
@@ -335,29 +334,32 @@ class FinancePeriodPicker extends StatelessWidget {
           onChanged: (value) => onYearChanged(value == 0 ? null : value),
         ),
       ),
-      const SizedBox(width: 10),
-      Expanded(
-        child: DropdownButtonFormField<String>(
-          key: ValueKey('finance-quarter-$quarter'),
-          initialValue: quarter,
-          isExpanded: true,
-          decoration: InputDecoration(
-              labelText: context.tr(en: 'Quarter', ar: 'الربع')),
-          items: [
-            DropdownMenuItem(
-                value: 'ALL',
-                child: Text(context.tr(en: 'All quarters', ar: 'كل الأرباع'),
-                    overflow: TextOverflow.ellipsis)),
-            for (var quarter = 1; quarter <= 4; quarter++)
+      if (showQuarter) ...[
+        const SizedBox(width: 10),
+        Expanded(
+          child: IosSelectField<String>(
+            key: ValueKey('finance-quarter-$quarter'),
+            initialValue: quarter,
+            isExpanded: true,
+            decoration: InputDecoration(
+                labelText: context.tr(en: 'Quarter', ar: 'الربع')),
+            items: [
               DropdownMenuItem(
-                  value: 'Q$quarter',
-                  child:
-                      Text(context.tr(en: 'Q$quarter', ar: 'الربع $quarter'))),
-          ],
-          onChanged:
-              year == null ? null : (value) => onQuarterChanged(value ?? 'ALL'),
+                  value: 'ALL',
+                  child: Text(context.tr(en: 'All quarters', ar: 'كل الأرباع'),
+                      overflow: TextOverflow.ellipsis)),
+              for (var quarter = 1; quarter <= 4; quarter++)
+                DropdownMenuItem(
+                    value: 'Q$quarter',
+                    child: Text(
+                        context.tr(en: 'Q$quarter', ar: 'الربع $quarter'))),
+            ],
+            onChanged: year == null
+                ? null
+                : (value) => onQuarterChanged(value ?? 'ALL'),
+          ),
         ),
-      ),
+      ],
     ]);
   }
 }

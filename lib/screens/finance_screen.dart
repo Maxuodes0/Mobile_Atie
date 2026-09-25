@@ -139,8 +139,11 @@ class _FinanceScreenState extends State<FinanceScreen> {
       ),
       (
         id: 'uncollected',
-        value: financeMoney(kpis?.outstandingAmount),
-        caption: context.tr(en: 'Still outstanding', ar: 'قيد التحصيل'),
+        value: financeMoney(
+            kpis?.allTimeOutstandingAmount ?? kpis?.outstandingAmount),
+        caption: context.tr(
+            en: 'All outstanding, across all years',
+            ar: 'كامل المبلغ غير المحصّل لكل السنوات'),
         bg: const Color(0xFFE2DDD7),
         fg: AppTheme.dashboardInk
       ),
@@ -160,14 +163,15 @@ class _FinanceScreenState extends State<FinanceScreen> {
         bg: AppTheme.dashboardInk,
         fg: Colors.white
       ),
-      (
-        id: 'collectionRate',
-        value: financePercent(kpis?.collectionRate),
-        caption:
-            context.tr(en: 'Finance methodology', ar: 'وفق منهجية المالية'),
-        bg: const Color(0xFFB8CEC6),
-        fg: AppTheme.dashboardInk
-      ),
+      if (_query.year == null)
+        (
+          id: 'collectionRate',
+          value: financePercent(kpis?.collectionRate),
+          caption:
+              context.tr(en: 'Finance methodology', ar: 'وفق منهجية المالية'),
+          bg: const Color(0xFFB8CEC6),
+          fg: AppTheme.dashboardInk
+        ),
     ];
 
     return Scaffold(
@@ -237,7 +241,9 @@ class _FinanceScreenState extends State<FinanceScreen> {
                         onTap: () => _open(FinanceDrilldownScreen(
                           metric: metric.id,
                           title: financeMetricTitle(context, metric.id),
-                          query: _query,
+                          query: metric.id == 'uncollected'
+                              ? _query.copyWith(clearYear: true, quarter: 'ALL')
+                              : _query,
                         )),
                       );
                     },

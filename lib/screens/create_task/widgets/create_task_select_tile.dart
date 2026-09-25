@@ -18,10 +18,7 @@ class CreateTaskSelectTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final direction = Directionality.of(context);
-    final chevron = direction == TextDirection.rtl
-        ? Icons.chevron_left
-        : Icons.chevron_right;
+    const chevron = Icons.chevron_right;
 
     return Material(
       color: Colors.transparent,
@@ -63,7 +60,7 @@ class CreateTaskSelectTile extends StatelessWidget {
                 ),
               ),
               if (trailing != null) trailing!,
-              Icon(chevron, color: AppTheme.muted),
+              const Icon(chevron, color: AppTheme.muted),
             ],
           ),
         ),

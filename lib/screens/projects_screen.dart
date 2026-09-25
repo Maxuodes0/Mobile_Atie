@@ -12,6 +12,7 @@ import '../utils/async_request_guard_mixin.dart';
 import '../widgets/project_image.dart';
 import '../widgets/app_page_header.dart';
 import '../widgets/inline_loading_bar.dart';
+import '../widgets/ios_select_field.dart';
 import 'project_details_screen.dart';
 
 class ProjectsScreen extends StatefulWidget {
@@ -395,12 +396,8 @@ class _ProjectCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Icon(
-                              Directionality.of(context) == TextDirection.rtl
-                                  ? Icons.chevron_left_rounded
-                                  : Icons.chevron_right_rounded,
-                              color: AppTheme.muted,
-                            ),
+                            const Icon(Icons.chevron_right_rounded,
+                                color: AppTheme.muted),
                           ],
                         ),
                         if (project.totalCollectedAmount != null &&
@@ -448,7 +445,7 @@ class _ProjectFilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
+    return IosSelectField<String>(
       initialValue: value,
       isExpanded: true,
       decoration: InputDecoration(

@@ -15,6 +15,7 @@ import 'create_task/widgets/create_task_user_picker_sheet.dart';
 import '../widgets/app_card.dart';
 import '../widgets/error_banner.dart';
 import '../widgets/primary_button.dart';
+import '../widgets/ios_select_field.dart';
 
 const int _orgUsersPageSize = 50;
 
@@ -308,7 +309,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: DropdownButtonFormField<String>(
+                              child: IosSelectField<String>(
                                 initialValue: _priority,
                                 decoration: InputDecoration(
                                   labelText: context.tr(
@@ -338,7 +339,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: DropdownButtonFormField<String>(
+                              child: IosSelectField<String>(
                                 initialValue: _section,
                                 decoration: InputDecoration(
                                   labelText:

@@ -34,12 +34,18 @@ class ApiClient {
           handler.next(options);
         },
         onResponse: (response, handler) async {
-          await _captureSetCookie(response.headers);
-          _capturePermissionsVersion(response.headers);
+          if (response.requestOptions.extra['sessionEpoch'] == _sessionEpoch &&
+              response.requestOptions.extra['ignoreSessionCookies'] != true) {
+            await _captureSetCookie(response.headers);
+            _capturePermissionsVersion(response.headers);
+          }
           handler.next(response);
         },
         onError: (err, handler) async {
-          await _captureSetCookie(err.response?.headers);
+          if (err.requestOptions.extra['sessionEpoch'] == _sessionEpoch &&
+              err.requestOptions.extra['ignoreSessionCookies'] != true) {
+            await _captureSetCookie(err.response?.headers);
+          }
           handler.next(err);
         },
       ),
@@ -52,16 +58,38 @@ class ApiClient {
 
   Future<bool>? _refreshing;
   String? _csrfToken;
+  int _sessionEpoch = 0;
 
   final Map<String, _CacheEntry> _getCache = <String, _CacheEntry>{};
   final Map<String, Future<dynamic>> _getInflight = <String, Future<dynamic>>{};
 
   String get baseUrl => _dio.options.baseUrl;
 
-  void clearSession() {
-    unawaited(_cookies.clear());
+  Future<void> clearSession() async {
+    _sessionEpoch += 1;
     _csrfToken = null;
     clearCache();
+    await _cookies.clear();
+  }
+
+  Future<void> logoutAndClear() async {
+    await _cookies.ready;
+    // Snapshot the old session for server revocation, but clear persistent
+    // credentials first so force-closing the app cannot sign it back in.
+    final cookieHeader = _cookies.buildCookieHeader('/auth/logout');
+    final csrf = _cookies.get('csrf_token') ?? _csrfToken;
+    await clearSession();
+    if (cookieHeader.isEmpty) return;
+    await _dio.post<dynamic>(
+      '/auth/logout',
+      options: Options(
+        headers: {
+          'cookie': cookieHeader,
+          if (csrf != null && csrf.isNotEmpty) 'x-csrf-token': csrf,
+        },
+        extra: {'sessionEpoch': _sessionEpoch, 'ignoreSessionCookies': true},
+      ),
+    );
   }
 
   void clearCache() {
@@ -178,6 +206,7 @@ class ApiClient {
       method: method,
       headers: headers,
       responseType: responseType,
+      extra: {'sessionEpoch': _sessionEpoch},
     );
     if (!_isSafeMethod(method)) {
       final csrf = await _ensureCsrfToken();
@@ -244,9 +273,11 @@ class ApiClient {
   }
 
   Future<String?> _rotateCsrfToken() async {
+    final requestEpoch = _sessionEpoch;
     try {
-      final res = await _dio.get<dynamic>('/auth/csrf');
-      await _captureSetCookie(res.headers);
+      final res = await _dio.get<dynamic>('/auth/csrf',
+          options: Options(extra: {'sessionEpoch': requestEpoch}));
+      if (requestEpoch != _sessionEpoch) return null;
       final token =
           (res.data is Map) ? (res.data as Map)['csrfToken']?.toString() : null;
       if (token != null && token.isNotEmpty) {
@@ -265,18 +296,20 @@ class ApiClient {
     if (_refreshing != null) return _refreshing!;
     final completer = Completer<bool>();
     _refreshing = completer.future;
+    final requestEpoch = _sessionEpoch;
     try {
       final csrf = await _ensureCsrfToken();
       final res = await _dio.post<dynamic>(
         '/auth/refresh',
         options: Options(
+          extra: {'sessionEpoch': requestEpoch},
           headers: csrf != null && csrf.isNotEmpty
               ? <String, dynamic>{'x-csrf-token': csrf}
               : null,
         ),
       );
-      await _captureSetCookie(res.headers);
-      completer.complete(res.statusCode != null &&
+      completer.complete(requestEpoch == _sessionEpoch &&
+          res.statusCode != null &&
           res.statusCode! >= 200 &&
           res.statusCode! < 300);
       return await completer.future;

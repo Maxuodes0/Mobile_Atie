@@ -2,6 +2,7 @@ class FinanceKpis {
   final String? totalProjectValueWithoutVat;
   final String? totalCollectedAmount;
   final String? outstandingAmount;
+  final String? allTimeOutstandingAmount;
   final String? totalCosts;
   final String? netProfit;
   final String? profitMargin;
@@ -11,6 +12,7 @@ class FinanceKpis {
     required this.totalProjectValueWithoutVat,
     required this.totalCollectedAmount,
     required this.outstandingAmount,
+    this.allTimeOutstandingAmount,
     required this.totalCosts,
     required this.netProfit,
     required this.profitMargin,
@@ -21,6 +23,7 @@ class FinanceKpis {
     String? totalProjectValueWithoutVat,
     String? totalCollectedAmount,
     String? outstandingAmount,
+    String? allTimeOutstandingAmount,
     String? totalCosts,
     String? netProfit,
     String? profitMargin,
@@ -31,6 +34,8 @@ class FinanceKpis {
           totalProjectValueWithoutVat ?? this.totalProjectValueWithoutVat,
       totalCollectedAmount: totalCollectedAmount ?? this.totalCollectedAmount,
       outstandingAmount: outstandingAmount ?? this.outstandingAmount,
+      allTimeOutstandingAmount:
+          allTimeOutstandingAmount ?? this.allTimeOutstandingAmount,
       totalCosts: totalCosts ?? this.totalCosts,
       netProfit: netProfit ?? this.netProfit,
       profitMargin: profitMargin ?? this.profitMargin,
@@ -52,6 +57,7 @@ class FinanceKpis {
       totalProjectValueWithoutVat: read('totalProjectValueWithoutVat'),
       totalCollectedAmount: read('totalCollectedAmount'),
       outstandingAmount: read('outstandingAmount'),
+      allTimeOutstandingAmount: read('allTimeOutstandingAmount'),
       totalCosts: read('totalCosts'),
       netProfit: read('netProfit'),
       profitMargin: read('profitMargin'),

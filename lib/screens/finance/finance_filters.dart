@@ -4,6 +4,7 @@ import '../../data/models/finance_module.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/app_services.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/ios_select_field.dart';
 import 'finance_ui.dart';
 
 class _FilterOption {
@@ -97,9 +98,9 @@ Future<_FilterOptions> _loadOptions() async {
 Future<FinanceQuery?> showFinanceFilters(
   BuildContext context,
   FinanceQuery query, {
-  bool includeStatus = true,
   bool includeCategory = false,
   bool includeDates = true,
+  bool yearOnly = false,
 }) =>
     showModalBottomSheet<FinanceQuery>(
       context: context,
@@ -110,23 +111,23 @@ Future<FinanceQuery?> showFinanceFilters(
       ),
       builder: (_) => _FinanceFilterSheet(
         query: query,
-        includeStatus: includeStatus,
         includeCategory: includeCategory,
         includeDates: includeDates,
+        yearOnly: yearOnly,
       ),
     );
 
 class _FinanceFilterSheet extends StatefulWidget {
   final FinanceQuery query;
-  final bool includeStatus;
   final bool includeCategory;
   final bool includeDates;
+  final bool yearOnly;
 
   const _FinanceFilterSheet({
     required this.query,
-    required this.includeStatus,
     required this.includeCategory,
     required this.includeDates,
+    required this.yearOnly,
   });
 
   @override
@@ -223,6 +224,7 @@ class _FinanceFilterSheetState extends State<_FinanceFilterSheet> {
                                   : _query.copyWith(year: year)),
                           onQuarterChanged: (quarter) => setState(
                               () => _query = _query.copyWith(quarter: quarter)),
+                          showQuarter: !widget.yearOnly,
                         ),
                       ),
                       if (widget.includeDates) ...[
@@ -290,28 +292,6 @@ class _FinanceFilterSheetState extends State<_FinanceFilterSheet> {
                           ]);
                         },
                       ),
-                      if (widget.includeStatus) ...[
-                        const SizedBox(height: 12),
-                        _OptionField(
-                          title: context.tr(
-                              en: 'Project status', ar: 'حالة المشروع'),
-                          value: _query.status,
-                          options: [
-                            _FilterOption('COMPLETED',
-                                context.tr(en: 'Completed', ar: 'مكتمل')),
-                            _FilterOption('ON_TRACK',
-                                context.tr(en: 'On track', ar: 'على المسار')),
-                            _FilterOption('AT_RISK',
-                                context.tr(en: 'At risk', ar: 'معرّض للخطر')),
-                            _FilterOption('OFF_TRACK',
-                                context.tr(en: 'Off track', ar: 'خارج المسار')),
-                          ],
-                          onChanged: (value) => setState(() => _query =
-                              value == null
-                                  ? _query.copyWith(clearStatus: true)
-                                  : _query.copyWith(status: value)),
-                        ),
-                      ],
                       if (widget.includeCategory) ...[
                         const SizedBox(height: 12),
                         _OptionField(
@@ -411,7 +391,7 @@ class _OptionField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = options.any((option) => option.id == value) ? value : null;
-    return DropdownButtonFormField<String>(
+    return IosSelectField<String>(
       key: ValueKey('$title-${selected ?? ''}'),
       initialValue: selected ?? '',
       isExpanded: true,

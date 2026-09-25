@@ -95,7 +95,6 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
   final String? operatingCompanyNameEn;
   final String status;
   final String projectType;
-  final DateTime? createdAt;
   final DateTime? startDate;
   final DateTime? dueDate;
   final bool loading;
@@ -109,7 +108,6 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
     required this.operatingCompanyNameEn,
     required this.status,
     required this.projectType,
-    required this.createdAt,
     required this.startDate,
     required this.dueDate,
     required this.loading,
@@ -200,10 +198,6 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
           _MetaRow(
             label: context.tr(en: 'Project type', ar: 'نوع المشروع'),
             value: typeLabel,
-          ),
-          _MetaRow(
-            label: context.tr(en: 'Created on', ar: 'تاريخ الإنشاء'),
-            value: fmt(createdAt) ?? '-',
           ),
           if (startDate != null)
             _MetaRow(
@@ -453,10 +447,7 @@ class _TeamMemberRow extends StatelessWidget {
         ? '—'
         : formatSar(computedAmount.toStringAsFixed(2));
 
-    final direction = Directionality.of(context);
-    final chevron = direction == TextDirection.rtl
-        ? Icons.chevron_left
-        : Icons.chevron_right;
+    const chevron = Icons.chevron_right;
 
     return Material(
       color: Colors.transparent,
@@ -548,7 +539,7 @@ class _TeamMemberRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(chevron, color: AppTheme.muted),
+              const Icon(chevron, color: AppTheme.muted),
             ],
           ),
         ),

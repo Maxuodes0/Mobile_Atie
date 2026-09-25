@@ -4,6 +4,7 @@ import '../../data/models/finance_module.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/app_services.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/ios_select_field.dart';
 import 'finance_filters.dart';
 import 'finance_project_detail_screen.dart';
 import 'finance_results.dart';
@@ -72,7 +73,9 @@ class _FinanceDrilldownScreenState extends State<FinanceDrilldownScreen> {
 
   Future<void> _filters() async {
     final changed = await showFinanceFilters(context, _query,
-        includeCategory: widget.metric == 'costs');
+        includeCategory: widget.metric == 'costs',
+        includeDates: widget.metric != 'uncollected',
+        yearOnly: widget.metric == 'uncollected');
     if (changed != null) _change(changed);
   }
 
@@ -107,7 +110,7 @@ class _FinanceDrilldownScreenState extends State<FinanceDrilldownScreen> {
             const SizedBox(height: 12),
             Row(children: [
               Expanded(
-                  child: DropdownButtonFormField<String>(
+                  child: IosSelectField<String>(
                 initialValue: _query.sortField ?? 'date',
                 decoration: InputDecoration(
                     labelText: context.tr(en: 'Sort by', ar: 'ترتيب حسب')),

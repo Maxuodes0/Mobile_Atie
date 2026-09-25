@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/app_services.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/formatters.dart';
+import '../../widgets/ios_select_field.dart';
 import 'finance_filters.dart';
 import 'finance_project_detail_screen.dart';
 import 'finance_results.dart';
@@ -475,7 +476,7 @@ class _FinanceReportDetailScreenState extends State<FinanceReportDetailScreen> {
               ),
               if (groups.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
+                IosSelectField<String>(
                   key: ValueKey('finance-report-group-${_query.groupBy}'),
                   initialValue: _query.groupBy ?? groups.first.$1,
                   decoration: InputDecoration(
@@ -492,7 +493,7 @@ class _FinanceReportDetailScreenState extends State<FinanceReportDetailScreen> {
                 const SizedBox(height: 12),
                 Row(children: [
                   Expanded(
-                      child: DropdownButtonFormField<String>(
+                      child: IosSelectField<String>(
                     key: ValueKey('finance-profit-sort-${_query.sortField}'),
                     initialValue: _query.sortField ?? 'netProfit',
                     decoration: InputDecoration(
@@ -536,7 +537,7 @@ class _FinanceReportDetailScreenState extends State<FinanceReportDetailScreen> {
               ],
               if (_isComparison) ...[
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
+                IosSelectField<String>(
                   key: ValueKey(
                       'finance-report-compare-${_query.quarter}-${_query.compare}'),
                   initialValue: _query.compare ??

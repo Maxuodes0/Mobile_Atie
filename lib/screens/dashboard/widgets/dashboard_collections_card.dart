@@ -7,7 +7,7 @@ import '../../../theme/app_theme.dart';
 import '../../../utils/formatters.dart';
 import '../../../widgets/mini_line_chart.dart';
 
-class DashboardCollectionsCard extends StatelessWidget {
+class DashboardCollectionsCard extends StatefulWidget {
   final FinanceKpis? kpis;
   final List<MonthlyCollectionPoint> collections;
 
@@ -18,9 +18,18 @@ class DashboardCollectionsCard extends StatelessWidget {
   });
 
   @override
+  State<DashboardCollectionsCard> createState() =>
+      _DashboardCollectionsCardState();
+}
+
+class _DashboardCollectionsCardState extends State<DashboardCollectionsCard> {
+  int? _selectedMonth;
+
+  @override
   Widget build(BuildContext context) {
-    final collectedSeries = collections.map((p) => p.collected).toList();
-    final months = collections.map((p) => p.month).toList();
+    final collectedSeries = widget.collections.map((p) => p.collected).toList();
+    final months = widget.collections.map((p) => p.month).toList();
+    final kpis = widget.kpis;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
@@ -94,20 +103,60 @@ class DashboardCollectionsCard extends StatelessWidget {
           const SizedBox(height: 18),
           SizedBox(
             height: 220,
-            child: MiniLineChart(
-              values: collectedSeries,
-              color: AppTheme.dashboardInk,
-              highlightColor: AppTheme.dashboardMint,
-              labels: months,
-              backgroundColor: AppTheme.dashboardPaper,
-              labelStyle: const TextStyle(
+            child: LayoutBuilder(builder: (context, constraints) {
+              final chartWidth =
+                  collectedSeries.length * 68.0 > constraints.maxWidth
+                      ? collectedSeries.length * 68.0
+                      : constraints.maxWidth;
+              return SingleChildScrollView(
+                key: const ValueKey('collection-rhythm-scroll'),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: SizedBox(
+                  width: chartWidth,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapDown: collectedSeries.isEmpty
+                        ? null
+                        : (details) {
+                            final position = ((details.localPosition.dx - 16) /
+                                    (chartWidth - 32)) *
+                                (collectedSeries.length - 1);
+                            setState(() => _selectedMonth = position
+                                .round()
+                                .clamp(0, collectedSeries.length - 1));
+                          },
+                    child: MiniLineChart(
+                      values: collectedSeries,
+                      color: AppTheme.dashboardInk,
+                      highlightColor: AppTheme.dashboardMint,
+                      labels: months,
+                      backgroundColor: AppTheme.dashboardPaper,
+                      labelStyle: const TextStyle(
+                        color: AppTheme.dashboardMuted,
+                        fontFamily: AppTheme.dashboardFontFamily,
+                        fontFamilyFallback: AppTheme.currencyFontFallback,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _selectedMonth != null &&
+                    _selectedMonth! < widget.collections.length
+                ? '${widget.collections[_selectedMonth!].month}: ${formatSar(widget.collections[_selectedMonth!].collected.toStringAsFixed(2))}'
+                : context.tr(
+                    en: 'Swipe to explore; tap a month for its amount',
+                    ar: 'اسحب للاستكشاف واضغط على الشهر لمعرفة المبلغ'),
+            style: const TextStyle(
                 color: AppTheme.dashboardMuted,
-                fontFamily: AppTheme.dashboardFontFamily,
-                fontFamilyFallback: AppTheme.currencyFontFallback,
                 fontSize: 13,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
+                fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 14),
           Row(
@@ -126,7 +175,8 @@ class DashboardCollectionsCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                formatSar(kpis?.outstandingAmount),
+                formatSar(
+                    kpis?.allTimeOutstandingAmount ?? kpis?.outstandingAmount),
                 textDirection: TextDirection.rtl,
                 style: const TextStyle(
                   color: AppTheme.dashboardInk,
