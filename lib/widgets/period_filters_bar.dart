@@ -30,11 +30,13 @@ class PeriodFiltersBar extends StatelessWidget {
     final years = rawYears.toSet().toList()..sort((a, b) => b.compareTo(a));
 
     Widget dropdown<T>({
+      required String title,
       required T? value,
       required List<DropdownMenuItem<T>> items,
       required ValueChanged<T?>? onChanged,
     }) {
       return IosSelectField<T>(
+        sheetTitle: title,
         initialValue: value,
         items: items,
         onChanged: onChanged,
@@ -55,6 +57,7 @@ class PeriodFiltersBar extends StatelessWidget {
     }
 
     final yearDropdown = dropdown<int>(
+      title: context.tr(en: 'Year', ar: 'السنة'),
       value: year,
       items: [
         DropdownMenuItem<int>(
@@ -70,6 +73,7 @@ class PeriodFiltersBar extends StatelessWidget {
 
     final quarterEnabled = year != null;
     final quarterDropdown = dropdown<int>(
+      title: context.tr(en: 'Quarter', ar: 'الربع'),
       value: quarterEnabled ? quarter : null,
       items: [
         DropdownMenuItem<int>(

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../data/models/org_user.dart';
@@ -9,12 +11,14 @@ class CreateTaskUserPickerSheet extends StatefulWidget {
   final List<OrgUser> initialItems;
   final int initialTotal;
   final int pageSize;
+  final String? selectedId;
 
   const CreateTaskUserPickerSheet({
     super.key,
     required this.initialItems,
     required this.initialTotal,
     required this.pageSize,
+    this.selectedId,
   });
 
   @override
@@ -84,94 +88,116 @@ class _CreateTaskUserPickerSheetState extends State<CreateTaskUserPickerSheet> {
 
     final hasMore = _hasMore;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: AppTheme.border,
-                borderRadius: BorderRadius.circular(999),
+    final media = MediaQuery.of(context);
+    final available = math.max(180.0,
+        media.size.height - media.padding.top - media.viewInsets.bottom - 48);
+    final height =
+        math.min(580.0, math.min(media.size.height * .78, available));
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 180),
+      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+      child: SizedBox(
+        height: height,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  context.tr(en: 'Select assignee', ar: 'اختر الشخص'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
               ),
-            ),
-            ListTile(
-              title: Text(
-                context.tr(en: 'Unassigned', ar: 'بدون إسناد'),
-                style: const TextStyle(fontWeight: FontWeight.w800),
+              const SizedBox(height: 8),
+              if (media.viewInsets.bottom == 0) ...[
+                ListTile(
+                  title: Text(
+                    context.tr(en: 'Unassigned', ar: 'بدون إسناد'),
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  subtitle: Text(context.tr(
+                    en: 'Clear selected assignee',
+                    ar: 'إلغاء اختيار الشخص',
+                  )),
+                  trailing: widget.selectedId == null
+                      ? Icon(Icons.check_rounded,
+                          color: Theme.of(context).colorScheme.primary)
+                      : null,
+                  onTap: () => Navigator.of(context).pop(null),
+                ),
+                const Divider(height: 1),
+                const SizedBox(height: 10),
+              ],
+              TextField(
+                controller: _search,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  hintText:
+                      context.tr(en: 'Search team members', ar: 'ابحث عن موظف'),
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                ),
               ),
-              subtitle: Text(context.tr(
-                en: 'Clear selected assignee',
-                ar: 'إلغاء اختيار الشخص',
-              )),
-              onTap: () => Navigator.of(context).pop(null),
-            ),
-            const Divider(height: 1),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _search,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                hintText:
-                    context.tr(en: 'Search team members', ar: 'ابحث عن موظف'),
-                prefixIcon: const Icon(Icons.search, size: 20),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Flexible(
-              child: items.isEmpty
-                  ? Center(
-                      child: _loadingMore && _users.isEmpty
-                          ? const CircularProgressIndicator()
-                          : Text(
-                              context.tr(en: 'No results', ar: 'لا توجد نتائج'),
-                              style: const TextStyle(color: AppTheme.muted),
+              const SizedBox(height: 12),
+              Expanded(
+                child: items.isEmpty
+                    ? Center(
+                        child: _loadingMore && _users.isEmpty
+                            ? const CircularProgressIndicator()
+                            : Text(
+                                context.tr(
+                                    en: 'No results', ar: 'لا توجد نتائج'),
+                                style: const TextStyle(color: AppTheme.muted),
+                              ),
+                      )
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: items.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final u = items[index];
+                          return ListTile(
+                            title: Text(
+                              u.name.isEmpty ? '—' : u.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700),
                             ),
-                    )
-                  : ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: items.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        final u = items[index];
-                        return ListTile(
-                          title: Text(
-                            u.name.isEmpty ? '—' : u.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          subtitle: Text(
-                            u.email,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          onTap: () => Navigator.of(context).pop(u),
-                        );
-                      },
-                    ),
-            ),
-            if (hasMore) ...[
-              const SizedBox(height: 10),
-              _loadingMore
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 6),
-                      child: CircularProgressIndicator(),
-                    )
-                  : OutlinedButton(
-                      onPressed: () => _loadMore(reset: false),
-                      child: Text(context.tr(
-                        en: 'Load more (${_users.length}/$_total)',
-                        ar: 'تحميل المزيد (${_users.length}/$_total)',
-                      )),
-                    ),
+                            subtitle: Text(
+                              u.email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: u.id == widget.selectedId
+                                ? Icon(Icons.check_rounded,
+                                    color:
+                                        Theme.of(context).colorScheme.primary)
+                                : null,
+                            onTap: () => Navigator.of(context).pop(u),
+                          );
+                        },
+                      ),
+              ),
+              if (hasMore && media.viewInsets.bottom == 0) ...[
+                const SizedBox(height: 10),
+                _loadingMore
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 6),
+                        child: CircularProgressIndicator(),
+                      )
+                    : OutlinedButton(
+                        onPressed: () => _loadMore(reset: false),
+                        child: Text(context.tr(
+                          en: 'Load more (${_users.length}/$_total)',
+                          ar: 'تحميل المزيد (${_users.length}/$_total)',
+                        )),
+                      ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

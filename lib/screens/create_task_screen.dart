@@ -150,11 +150,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     final selected = await showModalBottomSheet<ProjectSummary>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => CreateTaskProjectPickerSheet(items: _projects),
+      builder: (_) => CreateTaskProjectPickerSheet(
+        items: _projects,
+        selectedId: _selectedProject?.id,
+      ),
     );
     if (!mounted || selected == null) return;
     setState(() => _selectedProject = selected);
@@ -164,6 +169,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     final selected = await showModalBottomSheet<OrgUser?>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -172,6 +179,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         initialItems: _orgUsers,
         initialTotal: _orgUsersTotal,
         pageSize: _orgUsersPageSize,
+        selectedId: _selectedAssignee?.id,
       ),
     );
     if (!mounted) return;

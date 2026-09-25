@@ -251,8 +251,40 @@ class _FinanceFilterSheetState extends State<_FinanceFilterSheet> {
                       FutureBuilder<_FilterOptions>(
                         future: _options,
                         builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return IosSelectField<String>(
+                              initialValue: null,
+                              items: const [],
+                              onChanged: null,
+                              errorText: context.tr(
+                                en: 'Could not load filter options',
+                                ar: 'تعذّر تحميل خيارات الفلترة',
+                              ),
+                              decoration: InputDecoration(
+                                labelText:
+                                    context.tr(en: 'Filters', ar: 'الفلاتر'),
+                              ),
+                            );
+                          }
                           if (!snapshot.hasData) {
-                            return const LinearProgressIndicator();
+                            return Column(children: [
+                              for (final title in [
+                                context.tr(en: 'Client', ar: 'العميل'),
+                                context.tr(
+                                    en: 'Operating company',
+                                    ar: 'الشركة المشغلة'),
+                                context.tr(en: 'Project', ar: 'المشروع'),
+                              ]) ...[
+                                IosSelectField<String>(
+                                  initialValue: null,
+                                  items: const [],
+                                  onChanged: null,
+                                  loading: true,
+                                  decoration: InputDecoration(labelText: title),
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                            ]);
                           }
                           final options = snapshot.data!;
                           return Column(children: [
@@ -297,6 +329,7 @@ class _FinanceFilterSheetState extends State<_FinanceFilterSheet> {
                         _OptionField(
                           title: context.tr(
                               en: 'Cost category', ar: 'فئة التكلفة'),
+                          searchable: false,
                           value: _query.costCategory,
                           options: [
                             if (_query.costCategory != null &&
@@ -381,17 +414,20 @@ class _OptionField extends StatelessWidget {
   final String title;
   final String? value;
   final List<_FilterOption> options;
+  final bool searchable;
   final ValueChanged<String?> onChanged;
   const _OptionField(
       {required this.title,
       required this.value,
       required this.options,
+      this.searchable = true,
       required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     final selected = options.any((option) => option.id == value) ? value : null;
     return IosSelectField<String>(
+      searchable: searchable,
       key: ValueKey('$title-${selected ?? ''}'),
       initialValue: selected ?? '',
       isExpanded: true,

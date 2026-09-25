@@ -323,10 +323,20 @@ class _CreateCollectionSheetState extends State<_CreateCollectionSheet> {
                             );
                           }
                           if (!snapshot.hasData) {
-                            return const LinearProgressIndicator();
+                            return IosSelectField<String>(
+                              initialValue: null,
+                              items: const [],
+                              onChanged: null,
+                              loading: true,
+                              decoration: InputDecoration(
+                                labelText:
+                                    context.tr(en: 'Project', ar: 'المشروع'),
+                              ),
+                            );
                           }
                           final rows = snapshot.data!;
                           return IosSelectField<String>(
+                            searchable: true,
                             initialValue:
                                 rows.any((row) => row.$1 == _projectId)
                                     ? _projectId

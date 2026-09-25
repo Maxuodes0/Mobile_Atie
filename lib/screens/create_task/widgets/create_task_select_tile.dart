@@ -18,18 +18,17 @@ class CreateTaskSelectTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const chevron = Icons.chevron_right;
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 12),
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 14, 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
-            borderRadius: BorderRadius.circular(14),
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppTheme.border),
           ),
           child: Row(
@@ -60,7 +59,9 @@ class CreateTaskSelectTile extends StatelessWidget {
                 ),
               ),
               if (trailing != null) trailing!,
-              const Icon(chevron, color: AppTheme.muted),
+              const SizedBox(width: 8),
+              const Icon(Icons.keyboard_arrow_down_rounded,
+                  size: 20, color: AppTheme.muted),
             ],
           ),
         ),
