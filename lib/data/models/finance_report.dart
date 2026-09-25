@@ -37,7 +37,8 @@ class FinanceReport {
         : const <String, dynamic>{};
     final totalAmount = summary['totalAmount'];
     if (totalAmount != null && parseFinancialValue(totalAmount) == null) {
-      throw const FormatException('Financial report contains an invalid total.');
+      throw const FormatException(
+          'Financial report contains an invalid total.');
     }
 
     int toInt(dynamic v) {

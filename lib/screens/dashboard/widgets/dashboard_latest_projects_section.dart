@@ -23,7 +23,11 @@ class DashboardLatestProjectsSection extends StatelessWidget {
         Text(
           context.tr(en: 'Latest projects', ar: 'أحدث المشاريع'),
           style: const TextStyle(
-            fontSize: 18,
+            color: AppTheme.dashboardInk,
+            fontFamily: AppTheme.dashboardFontFamily,
+            fontFamilyFallback: AppTheme.currencyFontFallback,
+            fontSize: 31,
+            height: 0.95,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -33,7 +37,13 @@ class DashboardLatestProjectsSection extends StatelessWidget {
             en: 'Projects added most recently',
             ar: 'آخر المشاريع المضافة خلال الفترة الأخيرة',
           ),
-          style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+          style: const TextStyle(
+            color: AppTheme.dashboardMuted,
+            fontFamily: AppTheme.dashboardFontFamily,
+            fontFamilyFallback: AppTheme.currencyFontFallback,
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         const SizedBox(height: 12),
         if (projects.isEmpty)
@@ -42,11 +52,11 @@ class DashboardLatestProjectsSection extends StatelessWidget {
               en: 'No projects in the last 3 months',
               ar: 'لا توجد مشاريع خلال آخر 3 أشهر',
             ),
-            style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+            style: const TextStyle(color: AppTheme.muted, fontSize: 14),
           )
         else
           SizedBox(
-            height: 282,
+            height: 328,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: projects.length,

@@ -25,26 +25,19 @@ class LatestProjectCard extends StatelessWidget {
     final statusColor = projectStatusColor(project.status);
 
     return SizedBox(
-      width: 240,
+      width: 286,
       child: Material(
         color: Colors.transparent,
         child: Ink(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0D0F1115),
-                blurRadius: 18,
-                offset: Offset(0, 8),
-              ),
-            ],
+            color: AppTheme.dashboardPaper,
+            borderRadius: BorderRadius.circular(30),
           ),
           child: InkWell(
             onTap: onOpen,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(30),
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -52,7 +45,7 @@ class LatestProjectCard extends StatelessWidget {
                     aspectRatio: 16 / 9,
                     child: ProjectImage(
                       url: project.projectImage,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -60,7 +53,14 @@ class LatestProjectCard extends StatelessWidget {
                     project.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                      color: AppTheme.dashboardInk,
+                      fontFamily: AppTheme.dashboardFontFamily,
+                      fontFamilyFallback: AppTheme.currencyFontFallback,
+                      fontSize: 20,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -68,7 +68,13 @@ class LatestProjectCard extends StatelessWidget {
                         context.tr(en: 'No client', ar: 'بدون عميل'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+                    style: const TextStyle(
+                      color: AppTheme.dashboardMuted,
+                      fontFamily: AppTheme.dashboardFontFamily,
+                      fontFamilyFallback: AppTheme.currencyFontFallback,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Container(
@@ -84,8 +90,8 @@ class LatestProjectCard extends StatelessWidget {
                       statusLabel,
                       style: TextStyle(
                         color: statusColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),

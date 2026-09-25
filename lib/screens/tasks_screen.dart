@@ -164,12 +164,13 @@ class _TasksScreenState extends State<TasksScreen> {
       child: RefreshIndicator(
         onRefresh: () => _load(reset: true),
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 116),
           children: [
             AppPageHeader(
               title: context.tr(en: 'Tasks', ar: 'المهام'),
               subtitle: context.tr(
                   en: 'My tasks across projects', ar: 'مهامي عبر المشاريع'),
+              showLogout: false,
             ),
             InlineLoadingBar(visible: _refreshing),
             const SizedBox(height: 16),
@@ -224,7 +225,7 @@ class _TasksScreenState extends State<TasksScreen> {
             if (items.isEmpty)
               Text(
                 context.tr(en: 'No tasks found', ar: 'لا توجد مهام'),
-                style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+                style: const TextStyle(color: AppTheme.muted, fontSize: 14),
               )
             else
               ...items.map(

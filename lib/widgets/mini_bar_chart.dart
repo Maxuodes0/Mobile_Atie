@@ -19,13 +19,17 @@ class MiniBarChart extends StatelessWidget {
     if (values.isEmpty) {
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF2F3F5),
-          borderRadius: BorderRadius.circular(14),
+          color: AppTheme.softSurface,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Center(
           child: Text(
             context.tr(en: 'No data', ar: 'لا توجد بيانات'),
-            style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+            style: const TextStyle(
+              color: AppTheme.muted,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       );
@@ -51,9 +55,9 @@ class _MiniBarChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     final bg = Paint()
-      ..color = const Color(0xFFF2F3F5)
+      ..color = AppTheme.softSurface
       ..style = PaintingStyle.fill;
-    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(14));
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(20));
     canvas.drawRRect(rrect, bg);
 
     final maxV = values.reduce(math.max);

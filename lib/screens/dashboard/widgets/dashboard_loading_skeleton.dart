@@ -22,7 +22,7 @@ class _DashboardLoadingSkeletonState extends State<DashboardLoadingSkeleton>
       vsync: this,
       duration: const Duration(milliseconds: 850),
     )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 0.48, end: 0.9).animate(
+    _pulse = Tween<double>(begin: 0.48, end: 0.88).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
@@ -36,172 +36,67 @@ class _DashboardLoadingSkeletonState extends State<DashboardLoadingSkeleton>
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: AppTheme.primary,
+      color: AppTheme.dashboardCanvas,
       child: SafeArea(
         bottom: false,
         child: FadeTransition(
           opacity: _pulse,
           child: ListView(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.fromLTRB(18, 24, 18, 120),
             children: const [
-              _HeroSkeleton(),
-              _FilterSkeleton(),
-              _ContentSkeleton(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroSkeleton extends StatelessWidget {
-  const _HeroSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 236,
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 26),
-      decoration: const BoxDecoration(
-        color: AppTheme.primary,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
-      ),
-      child: Column(
-        children: [
-          const Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _SkeletonBlock(height: 18, width: 118),
-                    SizedBox(height: 7),
-                    _SkeletonBlock(height: 11, width: 172),
-                  ],
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SkeletonBlock(height: 34, width: 238),
+                        SizedBox(height: 7),
+                        _SkeletonBlock(height: 34, width: 202),
+                        SizedBox(height: 13),
+                        _SkeletonBlock(height: 27, width: 112),
+                      ],
+                    ),
+                  ),
+                  _SkeletonCircle(size: 50),
+                ],
               ),
-              _SkeletonCircle(size: 44),
-              SizedBox(width: 8),
-              _SkeletonCircle(size: 44),
+              SizedBox(height: 38),
+              _SkeletonCard(height: 112, color: AppTheme.dashboardInk),
+              SizedBox(height: 22),
+              Row(
+                children: [
+                  Expanded(child: _SkeletonCard(height: 50)),
+                  SizedBox(width: 10),
+                  Expanded(child: _SkeletonCard(height: 50)),
+                ],
+              ),
+              SizedBox(height: 30),
+              _SkeletonBlock(height: 28, width: 188),
+              SizedBox(height: 14),
+              _SkeletonCard(height: 202),
+              SizedBox(height: 12),
+              _SkeletonCard(
+                height: 220,
+                color: AppTheme.dashboardMint,
+              ),
+              SizedBox(height: 12),
+              _SkeletonCard(
+                height: 202,
+                color: AppTheme.dashboardGraphite,
+              ),
+              SizedBox(height: 12),
+              _SkeletonCard(height: 202, color: AppTheme.dashboardInk),
+              SizedBox(height: 18),
+              _SkeletonCard(height: 390),
+              SizedBox(height: 12),
+              _SkeletonCard(
+                height: 218,
+                color: AppTheme.dashboardMint,
+              ),
             ],
           ),
-          const Spacer(),
-          const _SkeletonBlock(height: 11, width: 68),
-          const SizedBox(height: 12),
-          const _SkeletonBlock(height: 38, width: 210),
-          const SizedBox(height: 14),
-          Container(
-            width: 104,
-            height: 28,
-            decoration: BoxDecoration(
-              color: AppTheme.accent.withOpacitySafe(0.5),
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FilterSkeleton extends StatelessWidget {
-  const _FilterSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: AppTheme.primary,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16, 18, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _SkeletonBlock(
-              height: 14,
-              width: 98,
-              color: Color(0x55FFFFFF),
-            ),
-            SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _SkeletonBlock(
-                    height: 48,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: _SkeletonBlock(
-                    height: 48,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ContentSkeleton extends StatelessWidget {
-  const _ContentSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 22, 16, 28),
-      decoration: const BoxDecoration(
-        color: AppTheme.pageBg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SkeletonBlock(height: 20, width: 112),
-          SizedBox(height: 7),
-          _SkeletonBlock(height: 11, width: 196),
-          SizedBox(height: 14),
-          _SkeletonGrid(),
-          SizedBox(height: 18),
-          _SkeletonCard(height: 220),
-          SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: _SkeletonCard(height: 220)),
-              SizedBox(width: 12),
-              Expanded(child: _SkeletonCard(height: 220)),
-            ],
-          ),
-          SizedBox(height: 18),
-          _SkeletonBlock(height: 20, width: 120),
-          SizedBox(height: 12),
-          _SkeletonCard(height: 250),
-        ],
-      ),
-    );
-  }
-}
-
-class _SkeletonGrid extends StatelessWidget {
-  const _SkeletonGrid();
-
-  @override
-  Widget build(BuildContext context) {
-    final cardWidth = MediaQuery.sizeOf(context).width * 0.72;
-    return SizedBox(
-      height: 158,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: 3,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, __) => SizedBox(
-          width: cardWidth,
-          child: const _SkeletonCard(),
         ),
       ),
     );
@@ -209,24 +104,21 @@ class _SkeletonGrid extends StatelessWidget {
 }
 
 class _SkeletonCard extends StatelessWidget {
-  final double? height;
+  final double height;
+  final Color color;
 
-  const _SkeletonCard({this.height});
+  const _SkeletonCard({
+    required this.height,
+    this.color = AppTheme.dashboardPaper,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D0F1115),
-            blurRadius: 18,
-            offset: Offset(0, 8),
-          ),
-        ],
+        color: color,
+        borderRadius: BorderRadius.circular(30),
       ),
     );
   }
@@ -243,7 +135,7 @@ class _SkeletonCircle extends StatelessWidget {
       width: size,
       height: size,
       decoration: const BoxDecoration(
-        color: Color(0x99FFFFFF),
+        color: AppTheme.dashboardPaper,
         shape: BoxShape.circle,
       ),
     );
@@ -253,13 +145,8 @@ class _SkeletonCircle extends StatelessWidget {
 class _SkeletonBlock extends StatelessWidget {
   final double height;
   final double? width;
-  final Color color;
 
-  const _SkeletonBlock({
-    required this.height,
-    this.width,
-    this.color = const Color(0xFFD9D7D3),
-  });
+  const _SkeletonBlock({required this.height, this.width});
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +154,7 @@ class _SkeletonBlock extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: color,
+        color: AppTheme.dashboardGraphite.withOpacitySafe(0.35),
         borderRadius: BorderRadius.circular(12),
       ),
     );

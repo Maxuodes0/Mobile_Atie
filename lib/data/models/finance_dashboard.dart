@@ -17,6 +17,25 @@ class FinanceKpis {
     required this.profitMargin,
   });
 
+  FinanceKpis copyWith({
+    String? totalProjectValueWithoutVat,
+    String? totalCollectedAmount,
+    String? outstandingAmount,
+    String? totalCosts,
+    String? netProfit,
+    String? profitMargin,
+  }) {
+    return FinanceKpis(
+      totalProjectValueWithoutVat:
+          totalProjectValueWithoutVat ?? this.totalProjectValueWithoutVat,
+      totalCollectedAmount: totalCollectedAmount ?? this.totalCollectedAmount,
+      outstandingAmount: outstandingAmount ?? this.outstandingAmount,
+      totalCosts: totalCosts ?? this.totalCosts,
+      netProfit: netProfit ?? this.netProfit,
+      profitMargin: profitMargin ?? this.profitMargin,
+    );
+  }
+
   factory FinanceKpis.fromJson(Map<String, dynamic> json) {
     String? read(String key) {
       final raw = json[key];

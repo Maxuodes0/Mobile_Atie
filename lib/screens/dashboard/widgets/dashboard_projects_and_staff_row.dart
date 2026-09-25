@@ -4,8 +4,6 @@ import '../../../data/models/dashboard_summary.dart';
 import '../../../data/models/project_status_count.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
-import '../../../widgets/role_bar_chart.dart';
-import 'dashboard_chart_card.dart';
 
 class DashboardProjectsAndStaffRow extends StatelessWidget {
   final DashboardSummary? summary;
@@ -20,178 +18,193 @@ class DashboardProjectsAndStaffRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final totalProjects = statusCounts.fold<int>(0, (a, s) => a + s.count);
-
-    final roleCounts = <String, int>{
-      for (final rc in (summary?.userRoleCounts ?? const [])) rc.role: rc.count,
-    };
-    final employees = roleCounts['EMPLOYEE'] ?? 0;
-    final freelancers = roleCounts['FREELANCER'] ?? 0;
-    final managers = (roleCounts['PROGRAM_MANAGER'] ?? 0) +
-        (roleCounts['PROJECT_MANAGER'] ?? 0);
-    final totalStaff = employees + freelancers + managers;
+    final clientCount = summary?.clientCount ?? 0;
+    final operatingCompanyCount = summary?.operatingCompanyCount ?? 0;
 
     return Column(
       children: [
-        _ProjectsOverviewCard(
-          totalProjects: totalProjects,
-        ),
+        _ProjectCountCard(totalProjects: totalProjects),
         const SizedBox(height: 12),
-        DashboardChartCard(
-          title: context.tr(en: 'Team members', ar: 'عدد الموظفين'),
-          value: totalStaff.toString(),
-          subtitle: context.tr(en: 'By role', ar: 'حسب الدور'),
-          chart: SizedBox(
-            height: 140,
-            child: RoleBarChart(
-              items: [
-                RoleBarDatum(
-                  label: context.tr(en: 'Employee', ar: 'موظف'),
-                  value: employees,
-                  color: const Color(0xFF3B82F6),
-                ),
-                RoleBarDatum(
-                  label: context.tr(en: 'Freelancer', ar: 'فريلانسر'),
-                  value: freelancers,
-                  color: const Color(0xFFF59E0B),
-                ),
-                RoleBarDatum(
-                  label: context.tr(en: 'Management', ar: 'إدارة'),
-                  value: managers,
-                  color: const Color(0xFF111827),
-                ),
-              ],
-            ),
-          ),
+        _BusinessNetworkCard(
+          clientCount: clientCount,
+          operatingCompanyCount: operatingCompanyCount,
         ),
       ],
     );
   }
 }
 
-class _ProjectsOverviewCard extends StatelessWidget {
-  static const Color _accent = Color(0xFF527BFF);
-
+class _ProjectCountCard extends StatelessWidget {
   final int totalProjects;
 
-  const _ProjectsOverviewCard({required this.totalProjects});
+  const _ProjectCountCard({required this.totalProjects});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 218,
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+      decoration: BoxDecoration(
+        color: AppTheme.dashboardMint,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.tr(en: 'Project portfolio', ar: 'محفظة المشاريع'),
+            style: const TextStyle(
+              color: AppTheme.dashboardInk,
+              fontFamily: AppTheme.dashboardFontFamily,
+              fontFamilyFallback: AppTheme.currencyFontFallback,
+              fontSize: 28,
+              height: 0.95,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const Spacer(),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text(
+                  context.tr(
+                    en: 'Projects in the selected period',
+                    ar: 'مشاريع الفترة المحددة',
+                  ),
+                  style: TextStyle(
+                    color: AppTheme.dashboardInk.withOpacitySafe(0.5),
+                    fontFamily: AppTheme.dashboardFontFamily,
+                    fontFamilyFallback: AppTheme.currencyFontFallback,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                totalProjects.toString(),
+                style: const TextStyle(
+                  color: AppTheme.dashboardInk,
+                  fontFamily: AppTheme.dashboardFontFamily,
+                  fontSize: 84,
+                  height: 0.74,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -3,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BusinessNetworkCard extends StatelessWidget {
+  final int clientCount;
+  final int operatingCompanyCount;
+
+  const _BusinessNetworkCard({
+    required this.clientCount,
+    required this.operatingCompanyCount,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.dashboardGraphite,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppTheme.border.withOpacitySafe(0.75)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D0F1115),
-            blurRadius: 18,
-            offset: Offset(0, 8),
-          ),
-        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: _accent.withOpacitySafe(0.12),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: const Icon(
-                        Icons.work_outline_rounded,
-                        color: _accent,
-                        size: 25,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.tr(en: 'Project count', ar: 'عدد المشاريع'),
-                            style: const TextStyle(
-                              color: AppTheme.ink,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            context.tr(en: 'By status', ar: 'حسب الحالة'),
-                            style: const TextStyle(
-                              color: AppTheme.muted,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                totalProjects.toString(),
-                style: const TextStyle(
-                  color: AppTheme.ink,
-                  fontSize: 38,
-                  height: 1,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 34),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: totalProjects > 0 ? 1 : 0,
-              minHeight: 7,
-              color: _accent,
-              backgroundColor: _accent.withOpacitySafe(0.12),
+          Text(
+            context.tr(
+              en: 'Business network',
+              ar: 'شبكة الأعمال',
+            ),
+            style: const TextStyle(
+              color: AppTheme.dashboardInk,
+              fontFamily: AppTheme.dashboardFontFamily,
+              fontFamilyFallback: AppTheme.currencyFontFallback,
+              fontSize: 28,
+              height: 0.95,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 24),
           Row(
             children: [
-              Text(
-                context.tr(en: 'Total projects', ar: 'إجمالي المشاريع'),
-                style: const TextStyle(
-                  color: AppTheme.muted,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: _NetworkMetric(
+                  label: context.tr(en: 'Clients', ar: 'العملاء'),
+                  value: clientCount,
                 ),
               ),
-              const Spacer(),
-              Text(
-                context.tr(
-                  en: '$totalProjects projects',
-                  ar: '$totalProjects مشروع',
-                ),
-                style: const TextStyle(
-                  color: _accent,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
+              Container(
+                width: 1,
+                height: 82,
+                color: AppTheme.dashboardInk.withOpacitySafe(0.18),
+              ),
+              Expanded(
+                child: _NetworkMetric(
+                  label: context.tr(
+                    en: 'Operators',
+                    ar: 'الشركات المشغلة',
+                  ),
+                  value: operatingCompanyCount,
                 ),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _NetworkMetric extends StatelessWidget {
+  final String label;
+  final int value;
+
+  const _NetworkMetric({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value.toString(),
+          style: const TextStyle(
+            color: AppTheme.dashboardInk,
+            fontFamily: AppTheme.dashboardFontFamily,
+            fontSize: 59,
+            height: 0.86,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -2,
+          ),
+        ),
+        const SizedBox(height: 11),
+        Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AppTheme.dashboardInk.withOpacitySafe(0.62),
+            fontFamily: AppTheme.dashboardFontFamily,
+            fontFamilyFallback: AppTheme.currencyFontFallback,
+            fontSize: 17,
+            height: 1,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ],
     );
   }
 }

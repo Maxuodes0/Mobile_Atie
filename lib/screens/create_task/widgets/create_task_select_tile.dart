@@ -55,7 +55,7 @@ class CreateTaskSelectTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: AppTheme.muted,
-                          fontSize: 12,
+                          fontSize: 14,
                         ),
                       ),
                     ],

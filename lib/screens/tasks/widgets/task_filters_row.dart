@@ -22,7 +22,7 @@ class TaskFiltersRow extends StatelessWidget {
         selected: selected,
         onSelected: (_) => onChanged(itemValue),
         labelStyle: TextStyle(
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w700,
           color: selected ? Colors.white : AppTheme.ink,
         ),

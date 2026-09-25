@@ -153,7 +153,11 @@ class FinanceScreenController extends ChangeNotifier {
         if (_isRequestStale(requestTicket)) return;
 
         financeData = results[0] as FinanceDashboard;
-        nextYears = results[1] as List<int>;
+        nextYears = <int>{
+          DateTime.now().year,
+          ...(results[1] as List<int>),
+        }.toList()
+          ..sort((a, b) => b.compareTo(a));
 
         if (effectiveYear != null &&
             nextYears.isNotEmpty &&

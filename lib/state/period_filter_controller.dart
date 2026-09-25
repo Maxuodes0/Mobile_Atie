@@ -13,7 +13,7 @@ class PeriodFilterSelection {
 class PeriodFilterController {
   final ValueNotifier<PeriodFilterSelection> selection =
       ValueNotifier<PeriodFilterSelection>(
-    const PeriodFilterSelection(),
+    PeriodFilterSelection(year: DateTime.now().year),
   );
 
   int? get year => selection.value.year;

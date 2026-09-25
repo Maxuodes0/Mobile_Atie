@@ -9,6 +9,15 @@ import '../../data/models/project_summary.dart';
 import '../../services/app_services.dart';
 import '../../utils/period_range.dart';
 
+class _DashboardFetchResult {
+  final DashboardMobileSummary? payload;
+  final Object? error;
+
+  const _DashboardFetchResult.success(this.payload) : error = null;
+
+  const _DashboardFetchResult.failure(this.error) : payload = null;
+}
+
 class DashboardScreenController extends ChangeNotifier {
   static const sectionYears = 'years';
   static const sectionFinance = 'finance';
@@ -101,7 +110,12 @@ class DashboardScreenController extends ChangeNotifier {
   }
 
   List<String> _primarySectionsForLoad({required bool refreshYears}) {
-    final sections = <String>[sectionFinance];
+    // The web dashboard derives collected/outstanding cards from the monthly
+    // collection series (collection date), while contract value and costs use
+    // project start date. Load both together so mobile renders the same audited
+    // figures on its first paint instead of briefly showing finance-module
+    // intersection totals.
+    final sections = <String>[sectionFinance, sectionCollections];
     if (refreshYears || availableYears.isEmpty) {
       sections.insert(0, sectionYears);
     }
@@ -110,7 +124,6 @@ class DashboardScreenController extends ChangeNotifier {
 
   List<String> _heavySectionsForLoad() {
     return const <String>[
-      sectionCollections,
       sectionStatusCounts,
       sectionSummary,
       sectionLatestProjects,
@@ -132,6 +145,27 @@ class DashboardScreenController extends ChangeNotifier {
       cacheTtl: cacheTtl,
       forceRefresh: forceRefresh,
     );
+  }
+
+  Future<_DashboardFetchResult> _fetchSectionsSafely({
+    required int? year,
+    required PeriodRange range,
+    required List<String> sections,
+    required Duration cacheTtl,
+    required bool forceRefresh,
+  }) async {
+    try {
+      final payload = await _fetchSections(
+        year: year,
+        range: range,
+        sections: sections,
+        cacheTtl: cacheTtl,
+        forceRefresh: forceRefresh,
+      );
+      return _DashboardFetchResult.success(payload);
+    } catch (error) {
+      return _DashboardFetchResult.failure(error);
+    }
   }
 
   void _setSectionsLoading(Iterable<String> sections) {
@@ -176,7 +210,11 @@ class DashboardScreenController extends ChangeNotifier {
     if (payload.availableYears != null) {
       final previousYear = year;
       final previousQuarter = quarter;
-      availableYears = List<int>.from(payload.availableYears!);
+      availableYears = <int>{
+        DateTime.now().year,
+        ...payload.availableYears!,
+      }.toList()
+        ..sort((a, b) => b.compareTo(a));
       if (year != null && !availableYears.contains(year)) {
         year = null;
         quarter = null;
@@ -200,6 +238,33 @@ class DashboardScreenController extends ChangeNotifier {
     }
     if (payload.latestProjects != null) {
       latestProjects = List<ProjectSummary>.from(payload.latestProjects!);
+    }
+
+    if (finance != null && collections.isNotEmpty) {
+      final selectedQuarter = quarter;
+      final startIndex =
+          selectedQuarter == null ? 0 : ((selectedQuarter.clamp(1, 4) - 1) * 3);
+      final endIndex = selectedQuarter == null
+          ? collections.length
+          : (startIndex + 3).clamp(0, collections.length);
+      final selected = collections.sublist(
+        startIndex.clamp(0, collections.length),
+        endIndex,
+      );
+      final collected = selected.fold<double>(
+        0,
+        (sum, point) => sum + point.collected,
+      );
+      final outstanding = selected.fold<double>(
+        0,
+        (sum, point) => sum + point.uncollected,
+      );
+      finance = FinanceDashboard(
+        kpis: finance!.kpis.copyWith(
+          totalCollectedAmount: collected.toStringAsFixed(2),
+          outstandingAmount: outstanding.toStringAsFixed(2),
+        ),
+      );
     }
 
     final nextErrors = Map<String, String>.from(sectionErrors);
@@ -244,6 +309,17 @@ class DashboardScreenController extends ChangeNotifier {
     final primarySections = _primarySectionsForLoad(refreshYears: refreshYears);
     final heavySections = _heavySectionsForLoad();
 
+    // Start secondary dashboard queries immediately. The primary KPI payload
+    // can still paint first, but total load time is no longer primary + heavy.
+    _setSectionsLoading(heavySections);
+    final heavyFuture = _fetchSectionsSafely(
+      year: effectiveYear,
+      range: range,
+      sections: heavySections,
+      cacheTtl: const Duration(seconds: 45),
+      forceRefresh: forceRefresh,
+    );
+
     try {
       final summaryPayload = await _fetchSections(
         year: effectiveYear,
@@ -260,28 +336,6 @@ class DashboardScreenController extends ChangeNotifier {
       loading = false;
       updating = false;
       _safeNotify();
-
-      if (heavySections.isEmpty) return;
-      _setSectionsLoading(heavySections);
-
-      try {
-        final heavySummary = await _fetchSections(
-          year: effectiveYear,
-          range: range,
-          sections: heavySections,
-          cacheTtl: const Duration(seconds: 45),
-          forceRefresh: forceRefresh,
-        );
-        if (!_canApplyRequest(requestTicket)) return;
-        _mergeSummary(heavySummary);
-        _safeNotify();
-      } catch (e) {
-        if (!_canApplyRequest(requestTicket)) return;
-        final message = errorMessageOf(e);
-        _setSectionsError(heavySections, message);
-      } finally {
-        if (_canApplyRequest(requestTicket)) _setSectionsIdle(heavySections);
-      }
     } catch (e) {
       if (!_canApplyRequest(requestTicket)) return;
       error = errorMessageOf(e);
@@ -289,6 +343,19 @@ class DashboardScreenController extends ChangeNotifier {
       updating = false;
       _safeNotify();
     }
+
+    final heavyResult = await heavyFuture;
+    if (!_canApplyRequest(requestTicket)) return;
+    if (heavyResult.payload != null) {
+      _mergeSummary(heavyResult.payload!);
+      _safeNotify();
+    } else if (heavyResult.error != null) {
+      _setSectionsError(
+        heavySections,
+        errorMessageOf(heavyResult.error!),
+      );
+    }
+    _setSectionsIdle(heavySections);
   }
 
   Future<void> retrySections(List<String> sections) async {

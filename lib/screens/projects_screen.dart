@@ -30,6 +30,8 @@ class _ProjectsScreenState extends State<ProjectsScreen>
   bool _updating = false;
   bool _loadingMore = false;
   String? _error;
+  String _statusFilter = 'ALL';
+  String _collectionFilter = 'ALL';
   List<ProjectSummary> _projects = const [];
   PageMeta _meta = const PageMeta(total: 0, limit: _pageSize, offset: 0);
 
@@ -109,11 +111,18 @@ class _ProjectsScreenState extends State<ProjectsScreen>
   }
 
   List<ProjectSummary> get _filtered {
-    final q = _search.text.trim();
-    if (q.isEmpty) return _projects;
-    return _projects
-        .where((p) => p.name.toLowerCase().contains(q.toLowerCase()))
-        .toList();
+    final q = _search.text.trim().toLowerCase();
+    return _projects.where((p) {
+      if (_statusFilter != 'ALL' && p.status != _statusFilter) return false;
+      final collection = (p.collectionStatus ?? '').trim().toUpperCase();
+      if (_collectionFilter != 'ALL' && collection != _collectionFilter) {
+        return false;
+      }
+      if (q.isEmpty) return true;
+      return p.name.toLowerCase().contains(q) ||
+          (p.clientName ?? '').toLowerCase().contains(q) ||
+          (p.operatingCompanyName ?? '').toLowerCase().contains(q);
+    }).toList(growable: false);
   }
 
   @override
@@ -126,7 +135,7 @@ class _ProjectsScreenState extends State<ProjectsScreen>
       child: RefreshIndicator(
         onRefresh: () => _load(reset: true, forceRefresh: true),
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 116),
           children: [
             AppPageHeader(
               title: context.tr(en: 'Projects', ar: 'المشاريع'),
@@ -134,6 +143,7 @@ class _ProjectsScreenState extends State<ProjectsScreen>
                 en: 'Track projects and team progress',
                 ar: 'تابع تقدم المشاريع وأعضاء الفريق',
               ),
+              showLogout: false,
             ),
             InlineLoadingBar(visible: _updating),
             const SizedBox(height: 16),
@@ -150,10 +160,59 @@ class _ProjectsScreenState extends State<ProjectsScreen>
                 prefixIconColor: AppTheme.muted,
               ),
             ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _ProjectFilterDropdown(
+                    value: _statusFilter,
+                    label: context.tr(en: 'Status', ar: 'الحالة'),
+                    items: const [
+                      'ALL',
+                      'ON_TRACK',
+                      'AT_RISK',
+                      'OFF_TRACK',
+                      'COMPLETED',
+                      'CANCELLED',
+                    ],
+                    itemLabel: (value) => value == 'ALL'
+                        ? context.tr(en: 'All statuses', ar: 'كل الحالات')
+                        : projectStatusLabel(
+                            value,
+                            languageCode:
+                                Localizations.localeOf(context).languageCode,
+                          ),
+                    onChanged: (value) => setState(() => _statusFilter = value),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _ProjectFilterDropdown(
+                    value: _collectionFilter,
+                    label: context.tr(en: 'Collection', ar: 'التحصيل'),
+                    items: const [
+                      'ALL',
+                      'FULLY_COLLECTED',
+                      'PARTIALLY_COLLECTED',
+                      'NOT_COLLECTED',
+                    ],
+                    itemLabel: (value) => value == 'ALL'
+                        ? context.tr(en: 'All collections', ar: 'كل التحصيلات')
+                        : collectionStatusLabel(
+                            value,
+                            languageCode:
+                                Localizations.localeOf(context).languageCode,
+                          ),
+                    onChanged: (value) =>
+                        setState(() => _collectionFilter = value),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             if (_filtered.isEmpty)
               Text(context.tr(en: 'No projects found', ar: 'لا توجد مشاريع'),
-                  style: const TextStyle(color: AppTheme.muted, fontSize: 12))
+                  style: const TextStyle(color: AppTheme.muted, fontSize: 14))
             else
               ..._filtered.map(
                 (p) => _ProjectCard(
@@ -230,14 +289,14 @@ class _ProjectCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(color: AppTheme.border),
           ),
           child: InkWell(
             onTap: onOpen,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -257,15 +316,60 @@ class _ProjectCard extends StatelessWidget {
                           project.name,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
+                        if ((project.operatingCompanyName ?? '')
+                            .trim()
+                            .isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.business_outlined,
+                                size: 13,
+                                color: AppTheme.muted,
+                              ),
+                              const SizedBox(width: 5),
+                              Expanded(
+                                child: Text(
+                                  project.operatingCompanyName!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppTheme.muted,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (project.projectValueWithoutVat != null) ...[
+                          const SizedBox(height: 7),
+                          Text(
+                            context.tr(
+                              en: 'Value: ${formatSar(project.projectValueWithoutVat!.toStringAsFixed(2))}',
+                              ar: 'القيمة: ${formatSar(project.projectValueWithoutVat!.toStringAsFixed(2))}',
+                            ),
+                            style: const TextStyle(
+                              color: AppTheme.ink,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 6),
                         Text(
                           project.clientName ??
                               context.tr(en: 'No client', ar: 'بدون عميل'),
                           style: const TextStyle(
                             color: AppTheme.muted,
-                            fontSize: 12,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -291,12 +395,11 @@ class _ProjectCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: Icon(
-                                Icons.chevron_left,
-                                color: AppTheme.muted,
-                              ),
+                            Icon(
+                              Directionality.of(context) == TextDirection.rtl
+                                  ? Icons.chevron_left_rounded
+                                  : Icons.chevron_right_rounded,
+                              color: AppTheme.muted,
                             ),
                           ],
                         ),
@@ -310,8 +413,8 @@ class _ProjectCard extends StatelessWidget {
                             ),
                             style: const TextStyle(
                               color: AppTheme.muted,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -324,6 +427,53 @@ class _ProjectCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ProjectFilterDropdown extends StatelessWidget {
+  final String value;
+  final String label;
+  final List<String> items;
+  final String Function(String value) itemLabel;
+  final ValueChanged<String> onChanged;
+
+  const _ProjectFilterDropdown({
+    required this.value,
+    required this.label,
+    required this.items,
+    required this.itemLabel,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<String>(
+      initialValue: value,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: label,
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(12, 11, 10, 11),
+      ),
+      items: items
+          .map(
+            (item) => DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                itemLabel(item),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          )
+          .toList(growable: false),
+      onChanged: (next) {
+        if (next != null) onChanged(next);
+      },
     );
   }
 }
@@ -358,8 +508,8 @@ class _ProjectStatusBadge extends StatelessWidget {
             label,
             style: TextStyle(
               color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],

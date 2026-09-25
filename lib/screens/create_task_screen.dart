@@ -8,6 +8,7 @@ import '../data/models/project_summary.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
+import '../utils/formatters.dart';
 import 'create_task/widgets/create_task_project_picker_sheet.dart';
 import 'create_task/widgets/create_task_select_tile.dart';
 import 'create_task/widgets/create_task_user_picker_sheet.dart';
@@ -181,7 +182,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     final locale = Localizations.localeOf(context);
     final dueText = _dueDate == null
         ? '—'
-        : intl.DateFormat.yMMMd(locale.toString()).format(_dueDate!.toLocal());
+        : toLatinDigits(
+            intl.DateFormat.yMMMd(locale.toString())
+                .format(_dueDate!.toLocal()),
+          );
 
     return Scaffold(
       appBar: AppBar(title: Text(context.tr(en: 'Add task', ar: 'إضافة مهمة'))),
@@ -206,7 +210,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             color: AppTheme.muted,
-                            fontSize: 12,
+                            fontSize: 14,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -234,7 +238,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             color: AppTheme.muted,
-                            fontSize: 12,
+                            fontSize: 14,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -272,7 +276,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             color: AppTheme.muted,
-                            fontSize: 12,
+                            fontSize: 14,
                           ),
                         ),
                         const SizedBox(height: 12),

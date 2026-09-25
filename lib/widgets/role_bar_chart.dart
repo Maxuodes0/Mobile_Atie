@@ -29,23 +29,27 @@ class RoleBarChart extends StatelessWidget {
     if (items.isEmpty || maxV <= 0) {
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF2F3F5),
-          borderRadius: BorderRadius.circular(14),
+          color: AppTheme.softSurface,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Center(
           child: Text(
             context.tr(en: 'No data', ar: 'لا توجد بيانات'),
-            style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+            style: const TextStyle(
+              color: AppTheme.muted,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       );
     }
 
     return Container(
-      padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 12, 10),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F3F5),
-        borderRadius: BorderRadius.circular(14),
+        color: AppTheme.softSurface,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -77,7 +81,7 @@ class _BarColumn extends StatelessWidget {
         Text(
           item.value.toString(),
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 15,
             fontWeight: FontWeight.w900,
             color: AppTheme.ink,
           ),
@@ -91,7 +95,7 @@ class _BarColumn extends StatelessWidget {
               widthFactor: 0.55,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: item.color.withOpacitySafe(0.9),
+                  color: item.color,
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -105,7 +109,7 @@ class _BarColumn extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: AppTheme.muted,
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: FontWeight.w800,
           ),
           textAlign: TextAlign.center,

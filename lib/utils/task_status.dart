@@ -17,12 +17,12 @@ String taskStatusLabel(String status, {String languageCode = 'ar'}) {
 Color taskStatusColor(String status) {
   switch (status) {
     case 'done':
-      return const Color(0xFF10B981);
+      return const Color(0xFF6F8F83);
     case 'in_progress':
-      return const Color(0xFF3B82F6);
+      return const Color(0xFF687887);
     case 'pending':
     default:
-      return const Color(0xFFF59E0B);
+      return const Color(0xFF9A8468);
   }
 }
 
@@ -43,12 +43,12 @@ String taskPriorityLabel(String? priority, {String languageCode = 'ar'}) {
 Color taskPriorityColor(String? priority) {
   switch (priority) {
     case 'high':
-      return const Color(0xFFEF4444);
+      return const Color(0xFF9A6D6D);
     case 'medium':
-      return const Color(0xFFF59E0B);
+      return const Color(0xFF9A8468);
     case 'low':
-      return const Color(0xFF6B7280);
+      return const Color(0xFF687887);
     default:
-      return const Color(0xFF9CA3AF);
+      return const Color(0xFF777772);
   }
 }

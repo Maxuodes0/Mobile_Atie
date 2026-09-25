@@ -5,8 +5,11 @@ class ProjectSummary {
   final String? collectionStatus;
   final double? totalCollectedAmount;
   final String? clientName;
+  final String? operatingCompanyName;
   final String? projectImage;
   final DateTime? createdAt;
+  final DateTime? startDate;
+  final double? projectValueWithoutVat;
 
   const ProjectSummary({
     required this.id,
@@ -15,13 +18,20 @@ class ProjectSummary {
     required this.collectionStatus,
     required this.totalCollectedAmount,
     required this.clientName,
+    this.operatingCompanyName,
     required this.projectImage,
     required this.createdAt,
+    this.startDate,
+    this.projectValueWithoutVat,
   });
 
   factory ProjectSummary.fromJson(Map<String, dynamic> json) {
     final client = json['client'];
     final clientName = client is Map ? client['name']?.toString() : null;
+    final operatingCompany = json['operatingCompany'];
+    final operatingCompanyName = operatingCompany is Map
+        ? operatingCompany['name']?.toString()
+        : json['operatingCompanyName']?.toString();
 
     DateTime? parseDate(dynamic v) {
       if (v == null) return null;
@@ -50,8 +60,11 @@ class ProjectSummary {
           ? parseNumber(json['totalCollectedAmount'])
           : null,
       clientName: clientName,
+      operatingCompanyName: operatingCompanyName,
       projectImage: json['projectImage']?.toString(),
       createdAt: parseDate(json['createdAt']),
+      startDate: parseDate(json['startDate']),
+      projectValueWithoutVat: parseNumber(json['projectValueWithoutVat']),
     );
   }
 }

@@ -8,6 +8,7 @@ import '../data/models/task_notes_result.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_services.dart';
 import '../theme/app_theme.dart';
+import '../utils/formatters.dart';
 import '../utils/task_status.dart';
 import '../widgets/error_banner.dart';
 
@@ -151,7 +152,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
     final due = task.dueDate == null
         ? null
-        : DateFormat.yMMMd(locale.toString()).format(task.dueDate!);
+        : toLatinDigits(
+            DateFormat.yMMMd(locale.toString()).format(task.dueDate!),
+          );
 
     if (_loading) {
       return const Scaffold(
@@ -391,7 +394,7 @@ class _Pill extends StatelessWidget {
         label,
         style: TextStyle(
           color: color,
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -409,7 +412,9 @@ class _NoteCard extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     final created = note.createdAt.millisecondsSinceEpoch == 0
         ? null
-        : DateFormat.yMMMd(locale.toString()).add_jm().format(note.createdAt);
+        : toLatinDigits(
+            DateFormat.yMMMd(locale.toString()).add_jm().format(note.createdAt),
+          );
 
     final author = (note.authorName ?? '').trim().isEmpty
         ? context.tr(en: 'User', ar: 'مستخدم')
@@ -454,7 +459,7 @@ class _NoteCard extends StatelessWidget {
                         created,
                         style: const TextStyle(
                           color: AppTheme.muted,
-                          fontSize: 11,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

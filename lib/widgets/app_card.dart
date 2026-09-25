@@ -10,8 +10,8 @@ class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16),
-    this.borderRadius = const BorderRadius.all(Radius.circular(18)),
+    this.padding = const EdgeInsets.all(20),
+    this.borderRadius = const BorderRadius.all(Radius.circular(24)),
   });
 
   @override

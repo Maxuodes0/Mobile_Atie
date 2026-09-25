@@ -21,15 +21,15 @@ String projectStatusLabel(String status, {String languageCode = 'ar'}) {
 Color projectStatusColor(String status) {
   switch (status) {
     case 'ON_TRACK':
-      return const Color(0xFF4F9E8D);
+      return const Color(0xFF6F8F83);
     case 'AT_RISK':
-      return const Color(0xFFF59E0B);
+      return const Color(0xFF9A8468);
     case 'COMPLETED':
-      return const Color(0xFF3B82F6);
+      return const Color(0xFF687887);
     case 'CANCELLED':
-      return const Color(0xFF6B7280);
+      return const Color(0xFF777772);
     default:
-      return const Color(0xFFEF4444);
+      return const Color(0xFF9A6D6D);
   }
 }
 

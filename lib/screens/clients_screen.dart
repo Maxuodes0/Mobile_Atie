@@ -92,97 +92,106 @@ class _ClientsScreenState extends State<ClientsScreen>
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const SafeArea(child: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        backgroundColor: AppTheme.pageBg,
+        body: SafeArea(child: Center(child: CircularProgressIndicator())),
+      );
     }
 
     final clients = _filteredClients;
     final averageValue = _clients.isEmpty ? 0.0 : _totalValue / _clients.length;
 
-    return SafeArea(
-      child: RefreshIndicator(
-        onRefresh: () => _load(forceRefresh: true),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          children: [
-            AppPageHeader(
-              title: context.tr(en: 'Clients', ar: 'العملاء'),
-              subtitle: context.tr(
-                en: 'Client list and project statistics',
-                ar: 'قائمة العملاء وإحصائيات المشاريع',
-              ),
-            ),
-            InlineLoadingBar(visible: _updating),
-            const SizedBox(height: 16),
-            if (_error != null) ...[
-              ErrorBanner(message: _error!),
-              const SizedBox(height: 12),
-            ],
-            SizedBox(
-              height: 132,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _StatisticCard(
-                    title:
-                        context.tr(en: 'Total clients', ar: 'إجمالي العملاء'),
-                    value: _clients.length.toString(),
-                    icon: Icons.groups_rounded,
-                    color: AppTheme.accent,
-                  ),
-                  _StatisticCard(
-                    title:
-                        context.tr(en: 'Total projects', ar: 'إجمالي المشاريع'),
-                    value: _totalProjects.toString(),
-                    icon: Icons.folder_copy_rounded,
-                    color: const Color(0xFF4F7CAC),
-                  ),
-                  _StatisticCard(
-                    title: context.tr(
-                      en: 'Value excluding VAT',
-                      ar: 'القيمة بدون الضريبة',
-                    ),
-                    value: _formatSar(_totalValue, context),
-                    icon: Icons.account_balance_wallet_rounded,
-                    color: const Color(0xFFB7791F),
-                    wide: true,
-                  ),
-                  _StatisticCard(
-                    title: context.tr(
-                      en: 'Average client value',
-                      ar: 'متوسط قيمة العميل',
-                    ),
-                    value: _formatSar(averageValue, context),
-                    icon: Icons.insights_rounded,
-                    color: const Color(0xFF7C5CBF),
-                    wide: true,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: context.tr(en: 'Search clients', ar: 'ابحث عن عميل'),
-                prefixIcon: const Icon(Icons.search, size: 20),
-                prefixIconColor: AppTheme.muted,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (clients.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 28),
-                child: Center(
-                  child: Text(
-                    context.tr(en: 'No clients found', ar: 'لا يوجد عملاء'),
-                    style: const TextStyle(color: AppTheme.muted),
-                  ),
+    return Scaffold(
+      backgroundColor: AppTheme.pageBg,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () => _load(forceRefresh: true),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+            children: [
+              AppPageHeader(
+                title: context.tr(en: 'Clients', ar: 'العملاء'),
+                subtitle: context.tr(
+                  en: 'Client list and project statistics',
+                  ar: 'قائمة العملاء وإحصائيات المشاريع',
                 ),
-              )
-            else
-              ...clients.map((client) => _ClientCard(client: client)),
-          ],
+                showLogout: false,
+                showBack: Navigator.of(context).canPop(),
+              ),
+              InlineLoadingBar(visible: _updating),
+              const SizedBox(height: 16),
+              if (_error != null) ...[
+                ErrorBanner(message: _error!),
+                const SizedBox(height: 12),
+              ],
+              SizedBox(
+                height: 150,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _StatisticCard(
+                      title:
+                          context.tr(en: 'Total clients', ar: 'إجمالي العملاء'),
+                      value: _clients.length.toString(),
+                      icon: Icons.groups_rounded,
+                      color: AppTheme.ink,
+                    ),
+                    _StatisticCard(
+                      title: context.tr(
+                          en: 'Total projects', ar: 'إجمالي المشاريع'),
+                      value: _totalProjects.toString(),
+                      icon: Icons.folder_copy_rounded,
+                      color: AppTheme.accent,
+                    ),
+                    _StatisticCard(
+                      title: context.tr(
+                        en: 'Value excluding VAT',
+                        ar: 'القيمة بدون الضريبة',
+                      ),
+                      value: _formatSar(_totalValue, context),
+                      icon: Icons.account_balance_wallet_rounded,
+                      color: AppTheme.ink,
+                      wide: true,
+                    ),
+                    _StatisticCard(
+                      title: context.tr(
+                        en: 'Average client value',
+                        ar: 'متوسط قيمة العميل',
+                      ),
+                      value: _formatSar(averageValue, context),
+                      icon: Icons.insights_rounded,
+                      color: AppTheme.accent,
+                      wide: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText:
+                      context.tr(en: 'Search clients', ar: 'ابحث عن عميل'),
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  prefixIconColor: AppTheme.muted,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (clients.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 28),
+                  child: Center(
+                    child: Text(
+                      context.tr(en: 'No clients found', ar: 'لا يوجد عملاء'),
+                      style: const TextStyle(color: AppTheme.muted),
+                    ),
+                  ),
+                )
+              else
+                ...clients.map((client) => _ClientCard(client: client)),
+            ],
+          ),
         ),
       ),
     );
@@ -209,10 +218,10 @@ class _StatisticCard extends StatelessWidget {
     return Container(
       width: wide ? 210 : 160,
       margin: const EdgeInsetsDirectional.only(end: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -230,17 +239,16 @@ class _StatisticCard extends StatelessWidget {
                 child: Icon(icon, color: color, size: 19),
               ),
               const Spacer(),
-              Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: AppTheme.muted.withOpacitySafe(0.45),
-                size: 13,
-              ),
             ],
           ),
           const Spacer(),
           Text(
             title,
-            style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+            style: const TextStyle(
+              color: AppTheme.muted,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 5),
           Text(
@@ -248,7 +256,7 @@ class _StatisticCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textDirection: TextDirection.ltr,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
           ),
         ],
       ),
@@ -268,7 +276,7 @@ class _ClientCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppTheme.border),
       ),
       child: Row(
@@ -284,8 +292,8 @@ class _ClientCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -394,7 +402,11 @@ class _ClientMetric extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label,
-            style: const TextStyle(color: AppTheme.muted, fontSize: 11),
+            style: const TextStyle(
+              color: AppTheme.muted,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),

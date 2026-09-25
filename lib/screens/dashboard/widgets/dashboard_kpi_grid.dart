@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/finance_dashboard.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/app_services.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/formatters.dart';
+import '../../../utils/period_range.dart';
+import '../../finance_report_screen.dart';
 
-class DashboardKpiGrid extends StatefulWidget {
+class DashboardKpiGrid extends StatelessWidget {
   final FinanceKpis? kpis;
 
   const DashboardKpiGrid({
@@ -13,162 +16,259 @@ class DashboardKpiGrid extends StatefulWidget {
     required this.kpis,
   });
 
-  @override
-  State<DashboardKpiGrid> createState() => _DashboardKpiGridState();
-}
-
-class _DashboardKpiGridState extends State<DashboardKpiGrid> {
-  late final PageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(viewportFraction: 0.84);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  void _openReport(
+    BuildContext context, {
+    required String title,
+    required String reportType,
+  }) {
+    final selection = AppServices.periodFilters.selection.value;
+    final range = computePeriodRange(
+      year: selection.year,
+      quarter: selection.quarter,
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => FinanceReportScreen(
+          title: title,
+          reportType: reportType,
+          from: range.from,
+          to: range.to,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final cards = <Widget>[
-      _DashboardMetricCard(
-        title: context.tr(en: 'Revenue excl. VAT', ar: 'إيرادات بدون ضريبة'),
-        value: formatSar(widget.kpis?.totalProjectValueWithoutVat),
-        icon: Icons.trending_up,
-        accent: const Color(0xFF4F9E8D),
+    final cards = <_MetricCardData>[
+      _MetricCardData(
+        title: context.tr(
+          en: 'Total contract value',
+          ar: 'إجمالي قيمة العقود',
+        ),
+        caption: context.tr(en: 'Revenue', ar: 'الإيرادات'),
+        value: formatSar(kpis?.totalProjectValueWithoutVat),
+        background: AppTheme.dashboardPaper,
+        foreground: AppTheme.dashboardInk,
+        onTap: () => _openReport(
+          context,
+          title: context.tr(en: 'Revenue report', ar: 'تقرير الإيرادات'),
+          reportType: 'REVENUE_REPORT',
+        ),
       ),
-      _DashboardMetricCard(
-        title: context.tr(en: 'Collected', ar: 'المحصّل'),
-        value: formatSar(widget.kpis?.totalCollectedAmount),
-        icon: Icons.account_balance_wallet_outlined,
-        accent: const Color(0xFF3B82F6),
+      _MetricCardData(
+        title: context.tr(en: 'Collected', ar: 'المبالغ المحصلة'),
+        caption: context.tr(en: 'Cash received', ar: 'المبالغ المستلمة'),
+        value: formatSar(kpis?.totalCollectedAmount),
+        background: AppTheme.dashboardMint,
+        foreground: AppTheme.dashboardInk,
+        onTap: () => _openReport(
+          context,
+          title: context.tr(en: 'Collections report', ar: 'تقرير التحصيل'),
+          reportType: 'COLLECTIONS_REPORT',
+        ),
       ),
-      _DashboardMetricCard(
-        title: context.tr(en: 'Outstanding', ar: 'غير محصّل'),
-        value: formatSar(widget.kpis?.outstandingAmount),
-        icon: Icons.pending_actions,
-        accent: const Color(0xFFEF4444),
+      _MetricCardData(
+        title: context.tr(en: 'Outstanding', ar: 'المبالغ غير المحصلة'),
+        caption: context.tr(en: 'Awaiting collection', ar: 'بانتظار التحصيل'),
+        value: formatSar(kpis?.outstandingAmount),
+        background: AppTheme.dashboardGraphite,
+        foreground: AppTheme.dashboardInk,
+        onTap: () => _openReport(
+          context,
+          title: context.tr(
+            en: 'Outstanding report',
+            ar: 'تقرير غير المحصل',
+          ),
+          reportType: 'OUTSTANDING_REPORT',
+        ),
       ),
-      _DashboardMetricCard(
-        title: context.tr(en: 'Total costs', ar: 'إجمالي التكاليف'),
-        value: formatSar(widget.kpis?.totalCosts),
-        icon: Icons.payments_outlined,
-        accent: const Color(0xFFF59E0B),
+      _MetricCardData(
+        title: context.tr(en: 'Project costs', ar: 'تكاليف المشاريع'),
+        caption: context.tr(en: 'Total spending', ar: 'إجمالي المصروفات'),
+        value: formatSar(kpis?.totalCosts),
+        background: AppTheme.dashboardInk,
+        foreground: AppTheme.dashboardPaper,
+        onTap: () => _openReport(
+          context,
+          title: context.tr(en: 'Project costs', ar: 'تكاليف المشاريع'),
+          reportType: 'PROJECT_COSTS_REPORT',
+        ),
       ),
     ];
 
-    return SizedBox(
-      height: 158,
-      child: PageView.builder(
-        controller: _pageController,
-        padEnds: false,
-        itemCount: cards.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsetsDirectional.only(end: 12),
-            child: cards[index],
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final cardWidth = (availableWidth * 0.84).clamp(276.0, 348.0);
+
+        return SizedBox(
+          height: 220,
+          child: ListView.separated(
+            key: const ValueKey('dashboard-kpi-scroll'),
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            clipBehavior: Clip.none,
+            itemCount: cards.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              return SizedBox(
+                width: cardWidth,
+                child: _DashboardMetricCard(
+                  key: ValueKey('dashboard-kpi-card-$index'),
+                  data: cards[index],
+                  index: index + 1,
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
 
-class _DashboardMetricCard extends StatelessWidget {
+class _MetricCardData {
   final String title;
+  final String caption;
   final String value;
-  final IconData icon;
-  final Color accent;
+  final Color background;
+  final Color foreground;
+  final VoidCallback onTap;
+
+  const _MetricCardData({
+    required this.title,
+    required this.caption,
+    required this.value,
+    required this.background,
+    required this.foreground,
+    required this.onTap,
+  });
+}
+
+class _DashboardMetricCard extends StatelessWidget {
+  final _MetricCardData data;
+  final int index;
 
   const _DashboardMetricCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.accent,
+    super.key,
+    required this.data,
+    required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D0F1115),
-            blurRadius: 18,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppTheme.muted,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 31,
-                      child: FittedBox(
-                        alignment: AlignmentDirectional.centerStart,
-                        fit: BoxFit.scaleDown,
+    final direction = Directionality.of(context);
+    return Semantics(
+      button: true,
+      label: '${data.title}: ${data.value}',
+      child: Material(
+        color: data.background,
+        borderRadius: BorderRadius.circular(30),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: data.onTap,
+          child: SizedBox(
+            width: double.infinity,
+            height: 220,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
                         child: Text(
-                          value,
-                          textDirection: TextDirection.rtl,
-                          style: const TextStyle(
-                            color: AppTheme.ink,
-                            fontSize: 25,
+                          data.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: data.foreground,
+                            fontFamily: AppTheme.dashboardFontFamily,
+                            fontFamilyFallback: AppTheme.currencyFontFallback,
+                            fontSize: 27,
+                            height: 0.95,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
+                      const SizedBox(width: 12),
+                      Text(
+                        index.toString().padLeft(2, '0'),
+                        style: TextStyle(
+                          color: data.foreground.withOpacitySafe(0.42),
+                          fontFamily: AppTheme.dashboardFontFamily,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Text(
+                    data.caption,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: data.foreground.withOpacitySafe(0.54),
+                      fontFamily: AppTheme.dashboardFontFamily,
+                      fontFamilyFallback: AppTheme.currencyFontFallback,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 7),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 66,
+                          child: FittedBox(
+                            alignment: AlignmentDirectional.centerStart,
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              data.value,
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                color: data.foreground,
+                                fontFamily: AppTheme.dashboardFontFamily,
+                                fontFamilyFallback:
+                                    AppTheme.currencyFontFallback,
+                                fontSize: 60,
+                                height: 0.9,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1.7,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 7),
+                        child: Text(
+                          direction == TextDirection.rtl ? '<' : '>',
+                          style: TextStyle(
+                            color: data.foreground,
+                            fontFamily: AppTheme.dashboardFontFamily,
+                            fontSize: 30,
+                            height: 0.8,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
-              Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  color: accent.withOpacitySafe(0.12),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, color: accent, size: 24),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Container(
-            height: 3,
-            width: 58,
-            decoration: BoxDecoration(
-              color: accent,
-              borderRadius: BorderRadius.circular(3),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -213,74 +213,111 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
         _collections.fold<double>(0, (a, c) => a + c.collectedAmount);
     final projectCost = _resolveProjectCost(project, _team);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () => _load(forceRefresh: true),
-          child: ListView(
-            padding: const EdgeInsets.all(16),
+    Widget tabBody(List<Widget> children) {
+      return RefreshIndicator(
+        onRefresh: () => _load(forceRefresh: true),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+          children: children,
+        ),
+      );
+    }
+
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+          bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            indicatorColor: Theme.of(context).colorScheme.secondary,
+            labelColor: Theme.of(context).colorScheme.primary,
+            unselectedLabelColor:
+                Theme.of(context).colorScheme.onSurfaceVariant,
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.info_outline_rounded, size: 19),
+                text: context.tr(en: 'Overview', ar: 'نظرة عامة'),
+              ),
+              Tab(
+                icon: const Icon(Icons.groups_outlined, size: 19),
+                text: context.tr(en: 'Team', ar: 'الفريق'),
+              ),
+              Tab(
+                icon: const Icon(Icons.receipt_long_outlined, size: 19),
+                text: context.tr(en: 'Costs', ar: 'التكاليف'),
+              ),
+              Tab(
+                icon: const Icon(Icons.payments_outlined, size: 19),
+                text: context.tr(en: 'Collections', ar: 'التحصيل'),
+              ),
+            ],
+          ),
+        ),
+        body: SafeArea(
+          child: TabBarView(
             children: [
-              if (_error != null) ...[
-                ErrorBanner(message: _error!),
-                const SizedBox(height: 12),
-              ],
-              ProjectDetailsHeaderCard(
-                imageUrl: project?.projectImage ?? fallback?.projectImage,
-                name: project?.name ?? fallback?.name ?? '',
-                client: project?.clientName ?? fallback?.clientName,
-                operatingCompanyName: project?.operatingCompanyName,
-                operatingCompanyNameEn: project?.operatingCompanyNameEn,
-                status: project?.status ?? fallback?.status ?? '',
-                projectType: project?.projectType ?? 'PAID',
-                createdAt: project?.createdAt ?? fallback?.createdAt,
-                startDate: project?.startDate,
-                dueDate: project?.dueDate,
-                loading: _projectLoading,
-              ),
-              const SizedBox(height: 14),
-              ProjectDetailsSectionCard(
-                title: context.tr(en: 'Project value', ar: 'قيمة المشروع'),
-                child: ProjectValueSection(
+              tabBody([
+                if (_error != null) ...[
+                  ErrorBanner(message: _error!),
+                  const SizedBox(height: 12),
+                ],
+                ProjectDetailsHeaderCard(
+                  imageUrl: project?.projectImage ?? fallback?.projectImage,
+                  name: project?.name ?? fallback?.name ?? '',
+                  client: project?.clientName ?? fallback?.clientName,
+                  operatingCompanyName: project?.operatingCompanyName,
+                  operatingCompanyNameEn: project?.operatingCompanyNameEn,
+                  status: project?.status ?? fallback?.status ?? '',
+                  projectType: project?.projectType ?? 'PAID',
+                  createdAt: project?.createdAt ?? fallback?.createdAt,
+                  startDate: project?.startDate,
+                  dueDate: project?.dueDate,
                   loading: _projectLoading,
-                  valueWithoutVat: project?.projectValueWithoutVat,
-                  valueWithVat: project?.projectValueWithVat,
                 ),
-              ),
-              const SizedBox(height: 14),
-              ProjectDetailsSectionCard(
-                title: context.tr(en: 'Project team', ar: 'فريق المشروع'),
-                child: ProjectTeamSection(
-                  loading: _projectLoading && _team.isEmpty,
-                  error: _teamError,
-                  items: _team,
-                  roleLabels: _roleLabels,
+                const SizedBox(height: 14),
+                ProjectDetailsSectionCard(
+                  title: context.tr(en: 'Project value', ar: 'قيمة المشروع'),
+                  child: ProjectValueSection(
+                    loading: _projectLoading,
+                    valueWithoutVat: project?.projectValueWithoutVat,
+                    valueWithVat: project?.projectValueWithVat,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              ProjectDetailsSectionCard(
-                title: context.tr(en: 'Project costs', ar: 'تكاليف المشروع'),
-                child: ProjectCostSection(
-                  loading: _projectLoading && _team.isEmpty,
-                  totalCost: projectCost,
+              ]),
+              tabBody([
+                ProjectDetailsSectionCard(
+                  title: context.tr(en: 'Project team', ar: 'فريق المشروع'),
+                  child: ProjectTeamSection(
+                    loading: _projectLoading && _team.isEmpty,
+                    error: _teamError,
+                    items: _team,
+                    roleLabels: _roleLabels,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              ProjectDetailsSectionCard(
-                title: context.tr(en: 'Collections', ar: 'التحصيل'),
-                child: ProjectCollectionsSection(
-                  loading: _projectLoading && _collections.isEmpty,
-                  error: _collectionsError,
-                  totalCollected: totalCollected,
-                  items: _collections,
+              ]),
+              tabBody([
+                ProjectDetailsSectionCard(
+                  title: context.tr(en: 'Project costs', ar: 'تكاليف المشروع'),
+                  child: ProjectCostSection(
+                    loading: _projectLoading && _team.isEmpty,
+                    totalCost: projectCost,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              if (_projectLoading)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8),
-                  child: Center(child: CircularProgressIndicator()),
+              ]),
+              tabBody([
+                ProjectDetailsSectionCard(
+                  title: context.tr(en: 'Collections', ar: 'التحصيل'),
+                  child: ProjectCollectionsSection(
+                    loading: _projectLoading && _collections.isEmpty,
+                    error: _collectionsError,
+                    totalCollected: totalCollected,
+                    items: _collections,
+                  ),
                 ),
+              ]),
             ],
           ),
         ),

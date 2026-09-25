@@ -36,13 +36,17 @@ class MiniDonutChart extends StatelessWidget {
     if (total <= 0) {
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF2F3F5),
-          borderRadius: BorderRadius.circular(14),
+          color: AppTheme.softSurface,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Center(
           child: Text(
             context.tr(en: 'No data', ar: 'لا توجد بيانات'),
-            style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+            style: const TextStyle(
+              color: AppTheme.muted,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       );
@@ -78,10 +82,10 @@ class _DonutPainter extends CustomPainter {
 
     final rect = Offset.zero & size;
     final bg = Paint()
-      ..color = const Color(0xFFF2F3F5)
+      ..color = AppTheme.softSurface
       ..style = PaintingStyle.fill;
     canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, const Radius.circular(14)), bg);
+        RRect.fromRectAndRadius(rect, const Radius.circular(20)), bg);
 
     final shortest = math.min(size.width, size.height);
     final pad = math.max(10.0, strokeWidth);
@@ -92,7 +96,7 @@ class _DonutPainter extends CustomPainter {
     final arcRect = Rect.fromCircle(center: center, radius: radius);
 
     final track = Paint()
-      ..color = const Color(0xFFE5E7EB)
+      ..color = AppTheme.chartTrack
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;

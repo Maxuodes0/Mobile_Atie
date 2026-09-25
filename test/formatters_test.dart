@@ -10,4 +10,10 @@ void main() {
     expect(formatted, isNot(contains('ر.س')));
     expect(formatted, contains('1,234.5'));
   });
+
+  test('Arabic UI keeps Latin digits for money and localized dates', () {
+    expect(formatSar('1234.50', locale: 'ar'), contains('1,234.50'));
+    expect(toLatinDigits('١٧ سبتمبر ٢٠٢٦'), '17 سبتمبر 2026');
+    expect(toLatinDigits('۱۷ سبتمبر ۲۰۲۶'), '17 سبتمبر 2026');
+  });
 }

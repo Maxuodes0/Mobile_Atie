@@ -21,17 +21,11 @@ class DashboardChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D0F1115),
-            blurRadius: 18,
-            offset: Offset(0, 8),
-          ),
-        ],
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,14 +38,18 @@ class DashboardChartCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
+                      style: const TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
                       style: const TextStyle(
                         color: AppTheme.muted,
-                        fontSize: 12,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -62,7 +60,10 @@ class DashboardChartCard extends StatelessWidget {
                 children: [
                   Text(
                     value,
-                    style: const TextStyle(fontWeight: FontWeight.w900),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   if (secondaryValue != null) ...[
                     const SizedBox(height: 4),
@@ -70,8 +71,8 @@ class DashboardChartCard extends StatelessWidget {
                       secondaryValue!,
                       style: const TextStyle(
                         color: AppTheme.muted,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -79,7 +80,7 @@ class DashboardChartCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
           ClipRRect(
             borderRadius: BorderRadius.circular(14),
             child: chart,

@@ -71,12 +71,16 @@ class _FinanceReportScreenState extends State<FinanceReportScreen> {
     String fmtDate(dynamic v) {
       if (v == null) return '—';
       if (v is DateTime) {
-        return DateFormat.yMMMd(locale.toString()).format(v.toLocal());
+        return toLatinDigits(
+          DateFormat.yMMMd(locale.toString()).format(v.toLocal()),
+        );
       }
       final s = v.toString().trim();
       final parsed = DateTime.tryParse(s);
       if (parsed != null) {
-        return DateFormat.yMMMd(locale.toString()).format(parsed.toLocal());
+        return toLatinDigits(
+          DateFormat.yMMMd(locale.toString()).format(parsed.toLocal()),
+        );
       }
       return s.isEmpty ? '—' : s;
     }
@@ -151,7 +155,9 @@ class _SummaryCard extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     final generated = generatedAt == null
         ? null
-        : DateFormat.yMMMd(locale.toString()).format(generatedAt!.toLocal());
+        : toLatinDigits(
+            DateFormat.yMMMd(locale.toString()).format(generatedAt!.toLocal()),
+          );
 
     return AppCard(
       padding: const EdgeInsets.all(16),
@@ -205,7 +211,7 @@ class _MetaRow extends StatelessWidget {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
           ),
         ],
       ),
@@ -322,7 +328,7 @@ class _ReportRowCard extends StatelessWidget {
                   statusLabel,
                   style: TextStyle(
                     color: statusColor,
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: FontWeight.w800,
                   ),
                 ),

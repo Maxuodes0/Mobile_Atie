@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../data/models/task_item.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
+import '../../../utils/formatters.dart';
 import '../../../utils/task_status.dart';
 
 class TaskCard extends StatelessWidget {
@@ -35,22 +36,24 @@ class TaskCard extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     final due = task.dueDate == null
         ? null
-        : DateFormat.yMMMd(locale.toString()).format(task.dueDate!);
+        : toLatinDigits(
+            DateFormat.yMMMd(locale.toString()).format(task.dueDate!),
+          );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Material(
         color: Colors.transparent,
         child: Ink(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(color: AppTheme.border),
           ),
           child: InkWell(
             onTap: onOpen,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -69,7 +72,10 @@ class TaskCard extends StatelessWidget {
                     children: [
                       Text(
                         task.title,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -77,7 +83,8 @@ class TaskCard extends StatelessWidget {
                             context.tr(en: 'No project', ar: 'بدون مشروع'),
                         style: const TextStyle(
                           color: AppTheme.muted,
-                          fontSize: 12,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       if (due != null) ...[
@@ -86,7 +93,8 @@ class TaskCard extends StatelessWidget {
                           context.tr(en: 'Due: $due', ar: 'الاستحقاق: $due'),
                           style: const TextStyle(
                             color: AppTheme.muted,
-                            fontSize: 12,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -159,8 +167,8 @@ class _TaskChip extends StatelessWidget {
         label,
         style: TextStyle(
           color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

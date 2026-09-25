@@ -72,7 +72,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final locale = Localizations.localeOf(context);
     String fmtDate(DateTime? d) => d == null
         ? '—'
-        : intl.DateFormat.yMMMd(locale.toString()).format(d.toLocal());
+        : toLatinDigits(
+            intl.DateFormat.yMMMd(locale.toString()).format(d.toLocal()),
+          );
 
     final profile = _profile;
     final summary = _summary;
@@ -254,7 +256,7 @@ class _HeaderCard extends StatelessWidget {
         child: Text(
           text,
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -359,7 +361,7 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               v.isEmpty ? '—' : v,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
             ),
           ),
         ],
@@ -584,14 +586,14 @@ class _ProjectRow extends StatelessWidget {
                                 : item.role!.trim(),
                             style: const TextStyle(
                               color: AppTheme.muted,
-                              fontSize: 12,
+                              fontSize: 14,
                             ),
                           ),
                         ),
                         Text(
                           amountStr,
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -612,7 +614,7 @@ class _ProjectRow extends StatelessWidget {
                   chipLabel,
                   style: TextStyle(
                     color: chipColor,
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: FontWeight.w800,
                   ),
                 ),

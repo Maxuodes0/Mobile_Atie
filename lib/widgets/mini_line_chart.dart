@@ -9,6 +9,8 @@ class MiniLineChart extends StatelessWidget {
   final Color color;
   final Color? highlightColor;
   final List<String>? labels;
+  final Color backgroundColor;
+  final TextStyle? labelStyle;
 
   const MiniLineChart({
     super.key,
@@ -16,6 +18,8 @@ class MiniLineChart extends StatelessWidget {
     required this.color,
     this.highlightColor,
     this.labels,
+    this.backgroundColor = AppTheme.softSurface,
+    this.labelStyle,
   });
 
   @override
@@ -23,13 +27,17 @@ class MiniLineChart extends StatelessWidget {
     if (values.isEmpty) {
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF2F3F5),
-          borderRadius: BorderRadius.circular(14),
+          color: AppTheme.softSurface,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Center(
           child: Text(
             context.tr(en: 'No data', ar: 'لا توجد بيانات'),
-            style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+            style: const TextStyle(
+              color: AppTheme.muted,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       );
@@ -48,11 +56,13 @@ class MiniLineChart extends StatelessWidget {
             labels: labels,
             progress: progress,
             textDirection: Directionality.of(context),
-            labelStyle: const TextStyle(
-              color: AppTheme.muted,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-            ),
+            backgroundColor: backgroundColor,
+            labelStyle: labelStyle ??
+                const TextStyle(
+                  color: AppTheme.muted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
           ),
           child: const SizedBox.expand(),
         );
@@ -69,6 +79,7 @@ class _MiniLineChartPainter extends CustomPainter {
   final double progress;
   final TextDirection textDirection;
   final TextStyle labelStyle;
+  final Color backgroundColor;
 
   _MiniLineChartPainter({
     required this.values,
@@ -78,16 +89,17 @@ class _MiniLineChartPainter extends CustomPainter {
     required this.progress,
     required this.textDirection,
     required this.labelStyle,
+    required this.backgroundColor,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     final bg = Paint()
-      ..color = const Color(0xFFF5F1EB)
+      ..color = backgroundColor
       ..style = PaintingStyle.fill;
 
-    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(14));
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(20));
     canvas.drawRRect(rrect, bg);
 
     final labelsCount =
@@ -114,7 +126,7 @@ class _MiniLineChartPainter extends CustomPainter {
     }
 
     final gridPaint = Paint()
-      ..color = const Color(0xFFD9D4CD)
+      ..color = AppTheme.chartTrack
       ..strokeWidth = 1;
     for (var i = 0; i < 4; i++) {
       final y = topInset + (h / 3) * i;
@@ -132,7 +144,7 @@ class _MiniLineChartPainter extends CustomPainter {
     final line = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.2
+      ..strokeWidth = 4
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
@@ -141,7 +153,7 @@ class _MiniLineChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          highlightColor.withOpacitySafe(0.18),
+          highlightColor.withOpacitySafe(0.08),
           color.withOpacitySafe(0.0),
         ],
       ).createShader(rect)
@@ -262,7 +274,7 @@ class _MiniLineChartPainter extends CustomPainter {
         text: '\u2066\u20C1\u00A0${compactValue(value)}\u2069',
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.w900,
           fontFamilyFallback: ['AiteSaudiRiyal'],
         ),
@@ -302,6 +314,8 @@ class _MiniLineChartPainter extends CustomPainter {
     if (oldDelegate.highlightColor != highlightColor) return true;
     if (oldDelegate.progress != progress) return true;
     if (oldDelegate.textDirection != textDirection) return true;
+    if (oldDelegate.backgroundColor != backgroundColor) return true;
+    if (oldDelegate.labelStyle != labelStyle) return true;
     if (oldDelegate.values.length != values.length) return true;
     if ((oldDelegate.labels?.length ?? 0) != (labels?.length ?? 0)) return true;
     for (var i = 0; i < values.length; i++) {

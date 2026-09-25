@@ -120,7 +120,9 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     String? fmt(DateTime? date) => date == null
         ? null
-        : intl.DateFormat.yMMMd(locale.toString()).format(date.toLocal());
+        : toLatinDigits(
+            intl.DateFormat.yMMMd(locale.toString()).format(date.toLocal()),
+          );
 
     final statusLabel = projectStatusLabel(
       status,
@@ -174,7 +176,7 @@ class ProjectDetailsHeaderCard extends StatelessWidget {
                   statusLabel,
                   style: TextStyle(
                     color: statusColor,
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -317,7 +319,9 @@ class ProjectCollectionsSection extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     String fmtDate(DateTime? date) => date == null
         ? '—'
-        : intl.DateFormat.yMMMd(locale.toString()).format(date.toLocal());
+        : toLatinDigits(
+            intl.DateFormat.yMMMd(locale.toString()).format(date.toLocal()),
+          );
 
     if (loading) {
       return const Center(child: CircularProgressIndicator());
@@ -359,7 +363,7 @@ class ProjectCollectionsSection extends StatelessWidget {
                 child: Text(
                   fmtDate(collection.collectedDate),
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -367,7 +371,7 @@ class ProjectCollectionsSection extends StatelessWidget {
               Text(
                 formatSar(collection.collectedAmount.toStringAsFixed(2)),
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -410,7 +414,7 @@ class _MetaRow extends StatelessWidget {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -512,7 +516,7 @@ class _TeamMemberRow extends StatelessWidget {
                             chipLabel,
                             style: TextStyle(
                               color: chipColor,
-                              fontSize: 12,
+                              fontSize: 14,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -527,14 +531,14 @@ class _TeamMemberRow extends StatelessWidget {
                             roleLabel,
                             style: const TextStyle(
                               color: AppTheme.muted,
-                              fontSize: 12,
+                              fontSize: 14,
                             ),
                           ),
                         ),
                         Text(
                           amountText,
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w900,
                           ),
                         ),

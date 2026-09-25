@@ -3,15 +3,19 @@ import 'package:intl/intl.dart';
 const String sarSymbol = '\u20C1';
 
 String _localizedNumber(double value, String pattern, String? locale) {
-  final activeLocale = locale ?? Intl.defaultLocale ?? 'en_US';
-  final text = NumberFormat(pattern, activeLocale).format(value);
-  if (!activeLocale.startsWith('ar')) return text;
-  const digits = '٠١٢٣٤٥٦٧٨٩';
-  return text.replaceAllMapped(RegExp(r'[0-9,.]'), (match) {
+  // Financial figures intentionally use Latin digits in both app languages.
+  return NumberFormat(pattern, 'en_US').format(value);
+}
+
+/// Keeps localized labels/month names while displaying every digit as 0-9.
+String toLatinDigits(String value) {
+  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
+  const easternArabic = '۰۱۲۳۴۵۶۷۸۹';
+  return value.replaceAllMapped(RegExp('[٠-٩۰-۹]'), (match) {
     final char = match[0]!;
-    if (char == ',') return '٬';
-    if (char == '.') return '٫';
-    return digits[int.parse(char)];
+    final arabicIndex = arabicIndic.indexOf(char);
+    if (arabicIndex >= 0) return arabicIndex.toString();
+    return easternArabic.indexOf(char).toString();
   });
 }
 

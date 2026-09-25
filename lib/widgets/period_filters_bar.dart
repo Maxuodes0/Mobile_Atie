@@ -34,10 +34,10 @@ class PeriodFiltersBar extends StatelessWidget {
       required ValueChanged<T?>? onChanged,
     }) {
       return Container(
-        padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 12, 6),
+        padding: const EdgeInsetsDirectional.fromSTEB(14, 11, 14, 11),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppTheme.border),
         ),
         child: DropdownButtonHideUnderline(
@@ -46,7 +46,12 @@ class PeriodFiltersBar extends StatelessWidget {
             items: items,
             onChanged: onChanged,
             isDense: true,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(20),
+            style: const TextStyle(
+              color: AppTheme.ink,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
       );

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../services/app_services.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
-import 'clients_screen.dart';
+import '../widgets/app_bottom_navigation_bar.dart';
 import 'dashboard_screen.dart';
-import 'finance_screen.dart';
+import 'more_screen.dart';
 import 'projects_screen.dart';
 import 'tasks_screen.dart';
 
@@ -26,15 +26,10 @@ class _AppShellState extends State<AppShell> {
     final isAdmin = role == 'ADMIN';
     final isProgramManager = role == 'PROGRAM_MANAGER';
     final canSeeAdminDashboard = isAdmin || isProgramManager;
-    final canSeeFinance = isAdmin || isProgramManager;
-    final canSeeClients =
-        isAdmin || isProgramManager || role == 'PROJECT_MANAGER';
-
     final items = <_NavItem>[
       if (canSeeAdminDashboard)
         _NavItem(
           pageBuilder: (isActive) => DashboardScreen(isActive: isActive),
-          backgroundColor: AppTheme.primary,
           destination: NavigationDestination(
             icon: const Icon(Icons.dashboard_outlined),
             selectedIcon: const Icon(Icons.dashboard),
@@ -49,15 +44,6 @@ class _AppShellState extends State<AppShell> {
           label: context.tr(en: 'Projects', ar: 'المشاريع'),
         ),
       ),
-      if (canSeeClients)
-        _NavItem(
-          pageBuilder: (_) => const ClientsScreen(),
-          destination: NavigationDestination(
-            icon: const Icon(Icons.groups_outlined),
-            selectedIcon: const Icon(Icons.groups),
-            label: context.tr(en: 'Clients', ar: 'العملاء'),
-          ),
-        ),
       _NavItem(
         pageBuilder: (_) => const TasksScreen(),
         destination: NavigationDestination(
@@ -66,15 +52,14 @@ class _AppShellState extends State<AppShell> {
           label: context.tr(en: 'Tasks', ar: 'المهام'),
         ),
       ),
-      if (canSeeFinance)
-        _NavItem(
-          pageBuilder: (isActive) => FinanceScreen(isActive: isActive),
-          destination: NavigationDestination(
-            icon: const Icon(Icons.pie_chart_outline),
-            selectedIcon: const Icon(Icons.pie_chart),
-            label: context.tr(en: 'Finance', ar: 'المالية'),
-          ),
+      _NavItem(
+        pageBuilder: (_) => const MoreScreen(),
+        destination: NavigationDestination(
+          icon: const Icon(Icons.grid_view_outlined),
+          selectedIcon: const Icon(Icons.grid_view_rounded),
+          label: context.tr(en: 'More', ar: 'المزيد'),
         ),
+      ),
     ];
 
     return items;
@@ -99,13 +84,13 @@ class _AppShellState extends State<AppShell> {
       return nav[index].pageBuilder(index == effectiveIndex);
     }, growable: false);
     return Scaffold(
-      backgroundColor: nav[effectiveIndex].backgroundColor,
-      extendBody: true,
+      backgroundColor: AppTheme.pageBg,
+      extendBody: false,
       body: IndexedStack(index: effectiveIndex, children: pages),
-      bottomNavigationBar: _FloatingNavigationBar(
-        items: nav,
+      bottomNavigationBar: AppBottomNavigationBar(
+        destinations: nav.map((item) => item.destination).toList(),
         selectedIndex: effectiveIndex,
-        onSelected: (value) => setState(() {
+        onDestinationSelected: (value) => setState(() {
           _index = value;
           _builtIndexes.add(value);
         }),
@@ -114,97 +99,12 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-class _FloatingNavigationBar extends StatelessWidget {
-  static const _background = AppTheme.primary;
-  static const _selectedBackground = AppTheme.accent;
-
-  final List<_NavItem> items;
-  final int selectedIndex;
-  final ValueChanged<int> onSelected;
-
-  const _FloatingNavigationBar({
-    required this.items,
-    required this.selectedIndex,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(18, 8, 18, 12),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: _background,
-          borderRadius: BorderRadius.circular(38),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x29000000),
-              blurRadius: 22,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          height: 72,
-          child: Row(
-            children: List<Widget>.generate(items.length, (index) {
-              final destination = items[index].destination;
-              final isSelected = index == selectedIndex;
-
-              return Expanded(
-                child: Semantics(
-                  button: true,
-                  selected: isSelected,
-                  label: destination.label,
-                  child: Tooltip(
-                    message: destination.label,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(36),
-                      onTap: () => onSelected(index),
-                      child: Center(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.easeOutCubic,
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? _selectedBackground
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: IconTheme(
-                            data: const IconThemeData(
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            child: isSelected
-                                ? (destination.selectedIcon ?? destination.icon)
-                                : destination.icon,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }, growable: false),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _NavItem {
   final Widget Function(bool isActive) pageBuilder;
   final NavigationDestination destination;
-  final Color backgroundColor;
 
   _NavItem({
     required this.pageBuilder,
     required this.destination,
-    this.backgroundColor = AppTheme.pageBg,
   });
 }

@@ -73,11 +73,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
   }
 
-  Future<void> _logout() async {
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    await AppServices.session.logout();
-  }
-
   Widget _reveal(int order, Widget child) {
     const totalItems = 6;
     final start = (order / totalItems) * 0.58;
@@ -137,7 +132,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     final userName = AppServices.session.user.value?.name.trim();
 
     return ColoredBox(
-      color: AppTheme.primary,
+      color: AppTheme.dashboardCanvas,
       child: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -159,7 +154,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                     refreshYears: true,
                     forceRefresh: true,
                   ),
-                  onLogout: _logout,
                 ),
               ),
               _reveal(
@@ -186,11 +180,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ),
               Container(
-                decoration: const BoxDecoration(
-                  color: AppTheme.pageBg,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                ),
-                padding: const EdgeInsets.fromLTRB(16, 22, 16, 24),
+                color: AppTheme.dashboardCanvas,
+                padding: const EdgeInsets.fromLTRB(18, 26, 18, 120),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -202,10 +193,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                       2,
                       _SectionHeading(
                         title: context.tr(
-                            en: 'Performance summary', ar: 'ملخص الأداء'),
+                            en: 'Business overview', ar: 'نظرة عامة'),
                         subtitle: context.tr(
-                          en: 'Key financial indicators for the selected period',
-                          ar: 'أهم المؤشرات المالية للفترة المحددة',
+                          en: 'The numbers that matter for this period',
+                          ar: 'أهم أرقام الأعمال للفترة المحددة',
                         ),
                       ),
                     ),
@@ -263,8 +254,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                         projectsAndStaffError != null)
                       DashboardSectionErrorCard(
                         title: context.tr(
-                          en: 'Could not load project and team statistics',
-                          ar: 'تعذر تحميل إحصاءات المشاريع والموظفين',
+                          en: 'Could not load project and business statistics',
+                          ar: 'تعذر تحميل إحصاءات المشاريع وشبكة الأعمال',
                         ),
                         message: projectsAndStaffError,
                         onRetry: () => _controller.retrySections(
@@ -344,28 +335,56 @@ class _DashboardHero extends StatelessWidget {
   final String netProfit;
   final String? profitMargin;
   final VoidCallback onRefresh;
-  final VoidCallback onLogout;
 
   const _DashboardHero({
     required this.userName,
     required this.netProfit,
     required this.profitMargin,
     required this.onRefresh,
-    required this.onLogout,
   });
 
   @override
   Widget build(BuildContext context) {
     final margin = formatPercent(profitMargin);
+    final now = DateTime.now();
+    final month = context.tr(
+      en: const [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ][now.month - 1],
+      ar: const [
+        'يناير',
+        'فبراير',
+        'مارس',
+        'أبريل',
+        'مايو',
+        'يونيو',
+        'يوليو',
+        'أغسطس',
+        'سبتمبر',
+        'أكتوبر',
+        'نوفمبر',
+        'ديسمبر',
+      ][now.month - 1],
+    );
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 26),
-      decoration: const BoxDecoration(
-        color: AppTheme.primary,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
-      ),
+      padding: const EdgeInsets.fromLTRB(18, 22, 18, 30),
+      color: AppTheme.dashboardCanvas,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
@@ -375,20 +394,43 @@ class _DashboardHero extends StatelessWidget {
                       userName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppTheme.dashboardInk.withOpacitySafe(0.55),
+                        fontFamily: AppTheme.dashboardFontFamily,
+                        fontFamilyFallback: AppTheme.currencyFontFallback,
                         fontSize: 17,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 10),
                     Text(
                       context.tr(
-                        en: 'Here is a quick look at your work',
-                        ar: 'هذه نظرة سريعة على أعمالك',
+                        en: 'Aite\nBusiness Insights',
+                        ar: 'آيت\nمؤشرات الأعمال',
                       ),
-                      style:
-                          const TextStyle(color: Colors.white70, fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppTheme.dashboardInk,
+                        fontFamily: AppTheme.dashboardFontFamily,
+                        fontFamilyFallback: AppTheme.currencyFontFallback,
+                        fontSize: 43,
+                        height: 0.82,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '${now.day} $month',
+                      style: const TextStyle(
+                        color: AppTheme.dashboardMuted,
+                        fontFamily: AppTheme.dashboardFontFamily,
+                        fontFamilyFallback: AppTheme.currencyFontFallback,
+                        fontSize: 30,
+                        height: 0.95,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ],
                 ),
@@ -398,65 +440,83 @@ class _DashboardHero extends StatelessWidget {
                 tooltip: context.tr(en: 'Refresh data', ar: 'تحديث البيانات'),
                 onPressed: onRefresh,
               ),
-              const SizedBox(width: 8),
-              _HeroAction(
-                icon: Icons.logout_rounded,
-                tooltip: context.tr(en: 'Log out', ar: 'تسجيل الخروج'),
-                onPressed: onLogout,
-              ),
             ],
           ),
-          const SizedBox(height: 24),
-          Text(
-            context.tr(en: 'Net profit', ar: 'صافي الربح'),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 48,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                netProfit,
-                textDirection: TextDirection.rtl,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 40,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1.2,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 42),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
             decoration: BoxDecoration(
-              color: AppTheme.accent,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.accent.withOpacitySafe(0.24),
-                  blurRadius: 12,
-                  offset: const Offset(0, 5),
+              color: AppTheme.dashboardInk,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.tr(en: 'Net profit', ar: 'صافي الربح'),
+                        style: const TextStyle(
+                          color: AppTheme.dashboardPaper,
+                          fontFamily: AppTheme.dashboardFontFamily,
+                          fontFamilyFallback: AppTheme.currencyFontFallback,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 9),
+                      SizedBox(
+                        height: 42,
+                        child: FittedBox(
+                          alignment: AlignmentDirectional.centerStart,
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            netProfit,
+                            textDirection: TextDirection.rtl,
+                            style: const TextStyle(
+                              color: AppTheme.dashboardMint,
+                              fontFamily: AppTheme.dashboardFontFamily,
+                              fontFamilyFallback: AppTheme.currencyFontFallback,
+                              fontSize: 42,
+                              height: 0.9,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      context.tr(en: 'Margin', ar: 'الهامش'),
+                      style: const TextStyle(
+                        color: AppTheme.dashboardMuted,
+                        fontFamily: AppTheme.dashboardFontFamily,
+                        fontFamilyFallback: AppTheme.currencyFontFallback,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      margin,
+                      style: const TextStyle(
+                        color: AppTheme.dashboardPaper,
+                        fontFamily: AppTheme.dashboardFontFamily,
+                        fontFamilyFallback: AppTheme.currencyFontFallback,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-            child: Text(
-              context.tr(
-                en: 'Profit margin $margin',
-                ar: 'هامش الربح $margin',
-              ),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w900,
-              ),
             ),
           ),
         ],
@@ -481,15 +541,15 @@ class _HeroAction extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: Colors.white.withOpacitySafe(0.12),
+        color: AppTheme.dashboardPaper,
         shape: const CircleBorder(),
         child: InkWell(
           onTap: onPressed,
           customBorder: const CircleBorder(),
           child: SizedBox(
-            width: 44,
-            height: 44,
-            child: Icon(icon, color: Colors.white, size: 21),
+            width: 50,
+            height: 50,
+            child: Icon(icon, color: AppTheme.dashboardInk, size: 24),
           ),
         ),
       ),
@@ -509,22 +569,28 @@ class _DashboardFilterBand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: AppTheme.primary,
+      color: AppTheme.dashboardCanvas,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
+        padding: const EdgeInsets.fromLTRB(18, 4, 18, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.tune_rounded, color: Colors.white, size: 18),
+                const Icon(
+                  Icons.tune_rounded,
+                  color: AppTheme.dashboardInk,
+                  size: 21,
+                ),
                 const SizedBox(width: 7),
                 Text(
                   context.tr(en: 'Time period', ar: 'الفترة الزمنية'),
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                    color: AppTheme.dashboardInk,
+                    fontFamily: AppTheme.dashboardFontFamily,
+                    fontFamilyFallback: AppTheme.currencyFontFallback,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
@@ -560,14 +626,24 @@ class _SectionHeading extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            fontSize: 18,
+            color: AppTheme.dashboardInk,
+            fontFamily: AppTheme.dashboardFontFamily,
+            fontFamilyFallback: AppTheme.currencyFontFallback,
+            fontSize: 31,
+            height: 0.95,
             fontWeight: FontWeight.w900,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(color: AppTheme.muted, fontSize: 12),
+          style: const TextStyle(
+            color: AppTheme.dashboardMuted,
+            fontFamily: AppTheme.dashboardFontFamily,
+            fontFamilyFallback: AppTheme.currencyFontFallback,
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ],
     );
