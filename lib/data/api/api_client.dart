@@ -10,7 +10,9 @@ import 'cookie_store.dart';
 class ApiClient {
   ApiClient({
     String? baseUrl,
-  })  : _cookies = CookieStore(),
+    CookieStore? cookieStore,
+    HttpClientAdapter? httpClientAdapter,
+  })  : _cookies = cookieStore ?? CookieStore(),
         _dio = Dio(
           BaseOptions(
             baseUrl: _normalizeBaseUrl(baseUrl ?? AppConfig.apiBaseUrl),
@@ -23,6 +25,7 @@ class ApiClient {
             },
           ),
         ) {
+    if (httpClientAdapter != null) _dio.httpClientAdapter = httpClientAdapter;
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -64,6 +67,14 @@ class ApiClient {
   final Map<String, Future<dynamic>> _getInflight = <String, Future<dynamic>>{};
 
   String get baseUrl => _dio.options.baseUrl;
+
+  /// A cold launch has no persisted access token. Skip the guaranteed 401 on
+  /// /auth/me and refresh directly when a secure refresh cookie is present.
+  Future<bool> restoreStoredSession() async {
+    await _cookies.ready;
+    if ((_cookies.get('refresh_token') ?? '').isEmpty) return false;
+    return _tryRefreshSession();
+  }
 
   Future<void> clearSession() async {
     _sessionEpoch += 1;

@@ -6,6 +6,11 @@ class AuthApi {
 
   AuthApi(this._api);
 
+  Future<User?> restore() async {
+    if (!await _api.restoreStoredSession()) return null;
+    return me();
+  }
+
   Future<AuthLoginResult> login({
     required String email,
     required String password,

@@ -74,10 +74,10 @@ class SessionController {
   Future<void> restore() async {
     restoring.value = true;
     try {
-      user.value = await _auth.me();
+      user.value = await _auth.restore();
       // A slow permissions request must not keep the launch screen visible.
       // The shell can render immediately and react when access arrives.
-      unawaited(_loadAccessSafely());
+      if (user.value != null) unawaited(_loadAccessSafely());
     } catch (_) {
       user.value = null;
     } finally {

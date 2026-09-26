@@ -3,8 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/services.dart';
 
 class CookieStore {
-  CookieStore() : ready = Future<void>.value() {
-    if (!kIsWeb) ready = _restore();
+  CookieStore({bool restoreFromStorage = true}) : ready = Future<void>.value() {
+    if (!kIsWeb && restoreFromStorage) ready = _restore();
   }
 
   static const _storage = FlutterSecureStorage(

@@ -11,7 +11,7 @@ import 'dashboard/dashboard_screen_controller.dart';
 import 'dashboard/widgets/dashboard_collections_card.dart';
 import 'dashboard/widgets/dashboard_kpi_grid.dart';
 import 'dashboard/widgets/dashboard_latest_projects_section.dart';
-import 'dashboard/widgets/dashboard_loading_skeleton.dart';
+import 'dashboard/widgets/dashboard_section_skeleton.dart';
 import 'dashboard/widgets/dashboard_projects_and_staff_row.dart';
 import 'dashboard/widgets/dashboard_section_error_card.dart';
 import 'project_details_screen.dart';
@@ -32,7 +32,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     with SingleTickerProviderStateMixin {
   late final DashboardScreenController _controller;
   late final AnimationController _introController;
-  bool _introStarted = false;
 
   @override
   void initState() {
@@ -44,6 +43,9 @@ class _DashboardScreenState extends State<DashboardScreen>
     _controller = DashboardScreenController();
     _controller.addListener(_onControllerChanged);
     _controller.setActive(widget.isActive);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _introController.forward();
+    });
   }
 
   @override
@@ -65,12 +67,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   void _onControllerChanged() {
     if (!mounted) return;
     setState(() {});
-    if (!_controller.loading && !_introStarted) {
-      _introStarted = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _introController.forward();
-      });
-    }
   }
 
   Widget _reveal(int order, Widget child) {
@@ -111,10 +107,6 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (_controller.loading) {
-      return const DashboardLoadingSkeleton();
-    }
-
     final financeError =
         _controller.sectionErrors[DashboardScreenController.sectionFinance];
     final collectionsError =
@@ -130,6 +122,26 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     final kpis = _controller.finance?.kpis;
     final userName = AppServices.session.user.value?.name.trim();
+    final financePending = _controller.finance == null &&
+        _controller.updatingSections.contains(
+          DashboardScreenController.sectionFinance,
+        );
+    final collectionsPending = _controller.updatingSections.contains(
+          DashboardScreenController.sectionCollections,
+        ) &&
+        _controller.collections.isEmpty;
+    final projectsAndStaffPending = (_controller.updatingSections.contains(
+              DashboardScreenController.sectionStatusCounts,
+            ) ||
+            _controller.updatingSections.contains(
+              DashboardScreenController.sectionSummary,
+            )) &&
+        _controller.statusCounts.isEmpty &&
+        _controller.summary == null;
+    final latestProjectsPending = _controller.latestProjects.isEmpty &&
+        _controller.updatingSections.contains(
+          DashboardScreenController.sectionLatestProjects,
+        );
 
     return ColoredBox(
       color: AppTheme.dashboardCanvas,
@@ -162,7 +174,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                   child: PeriodFiltersBar(
                     year: _controller.year,
                     quarter: _controller.quarter,
-                    availableYears: List<int>.from(_controller.availableYears),
+                    availableYears: <int>{
+                      DateTime.now().year,
+                      ..._controller.availableYears,
+                    }.toList(),
                     onYearChanged: (y) {
                       _controller.updateSharedFilter(
                         year: y,
@@ -211,6 +226,22 @@ class _DashboardScreenState extends State<DashboardScreen>
                           const [DashboardScreenController.sectionFinance],
                         ),
                       )
+                    else if (financePending)
+                      const DashboardSectionSkeleton(height: 220)
+                    else if (_controller.finance == null)
+                      DashboardSectionErrorCard(
+                        title: context.tr(
+                          en: 'Financial indicators are unavailable',
+                          ar: 'المؤشرات المالية غير متاحة',
+                        ),
+                        message: context.tr(
+                          en: 'Try loading this section again.',
+                          ar: 'حاول تحميل هذا القسم مرة أخرى.',
+                        ),
+                        onRetry: () => _controller.retrySections(
+                          const [DashboardScreenController.sectionFinance],
+                        ),
+                      )
                     else
                       _reveal(
                         2,
@@ -234,6 +265,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                           const [DashboardScreenController.sectionCollections],
                         ),
                       )
+                    else if (collectionsPending ||
+                        (_controller.finance == null && financePending))
+                      const DashboardSectionSkeleton(height: 360)
                     else
                       _reveal(
                         3,
@@ -248,9 +282,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         ),
                       ),
                     const SizedBox(height: 12),
-                    if (_controller.summary == null &&
-                        _controller.statusCounts.isEmpty &&
-                        projectsAndStaffError != null)
+                    if (projectsAndStaffError != null)
                       DashboardSectionErrorCard(
                         title: context.tr(
                           en: 'Could not load project and business statistics',
@@ -264,6 +296,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                           ],
                         ),
                       )
+                    else if (projectsAndStaffPending)
+                      const DashboardSectionSkeleton(height: 360)
                     else
                       _reveal(
                         4,
@@ -295,6 +329,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                           ],
                         ),
                       )
+                    else if (latestProjectsPending)
+                      const DashboardSectionSkeleton(height: 220)
                     else
                       _reveal(
                         5,

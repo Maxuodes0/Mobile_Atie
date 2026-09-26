@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../data/api/dashboard_api.dart';
 import '../../data/models/dashboard_mobile_summary.dart';
 import '../../data/models/dashboard_summary.dart';
 import '../../data/models/finance_dashboard.dart';
@@ -7,6 +8,7 @@ import '../../data/models/monthly_collection_point.dart';
 import '../../data/models/project_status_count.dart';
 import '../../data/models/project_summary.dart';
 import '../../services/app_services.dart';
+import '../../state/period_filter_controller.dart';
 import '../../utils/period_range.dart';
 
 class _DashboardFetchResult {
@@ -48,12 +50,18 @@ class DashboardScreenController extends ChangeNotifier {
   bool _hasLoaded = false;
   bool _pendingReload = false;
   bool _disposed = false;
+  final DashboardApi _dashboardApi;
+  final PeriodFilterController _periodFilters;
 
-  DashboardScreenController() {
-    final shared = AppServices.periodFilters.selection.value;
+  DashboardScreenController({
+    DashboardApi? dashboardApi,
+    PeriodFilterController? periodFilters,
+  })  : _dashboardApi = dashboardApi ?? AppServices.dashboard,
+        _periodFilters = periodFilters ?? AppServices.periodFilters {
+    final shared = _periodFilters.selection.value;
     year = shared.year;
     quarter = shared.quarter;
-    AppServices.periodFilters.selection.addListener(_onSharedFilterChanged);
+    _periodFilters.selection.addListener(_onSharedFilterChanged);
   }
 
   Future<void> setActive(bool active) async {
@@ -76,7 +84,7 @@ class DashboardScreenController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    AppServices.periodFilters.selection.removeListener(_onSharedFilterChanged);
+    _periodFilters.selection.removeListener(_onSharedFilterChanged);
     super.dispose();
   }
 
@@ -87,7 +95,7 @@ class DashboardScreenController extends ChangeNotifier {
   bool _canApplyRequest(int ticket) => !_disposed && ticket == _requestTicket;
 
   void _onSharedFilterChanged() {
-    final shared = AppServices.periodFilters.selection.value;
+    final shared = _periodFilters.selection.value;
     if (year == shared.year && quarter == shared.quarter) return;
     year = shared.year;
     quarter = shared.quarter;
@@ -103,7 +111,7 @@ class DashboardScreenController extends ChangeNotifier {
     required int? year,
     required int? quarter,
   }) {
-    AppServices.periodFilters.setSelection(
+    _periodFilters.setSelection(
       year: year,
       quarter: quarter,
     );
@@ -137,7 +145,7 @@ class DashboardScreenController extends ChangeNotifier {
     required Duration cacheTtl,
     required bool forceRefresh,
   }) {
-    return AppServices.dashboard.mobileSummary(
+    return _dashboardApi.mobileSummary(
       year: year,
       from: range.from,
       to: range.to,
@@ -270,6 +278,8 @@ class DashboardScreenController extends ChangeNotifier {
     }
     _safeNotify();
 
+    final requestedYear = year;
+    final requestedQuarter = quarter;
     final shouldUseYear = year != null &&
         (availableYears.isEmpty || availableYears.contains(year));
     final effectiveYear = shouldUseYear ? year : null;
@@ -282,42 +292,46 @@ class DashboardScreenController extends ChangeNotifier {
     final primarySections = _primarySectionsForLoad(refreshYears: refreshYears);
     final heavySections = _heavySectionsForLoad();
 
-    // Start secondary dashboard queries immediately. The primary KPI payload
-    // can still paint first, but total load time is no longer primary + heavy.
-    _setSectionsLoading(heavySections);
-    final heavyFuture = _fetchSectionsSafely(
+    _setSectionsLoading([...primarySections, ...heavySections]);
+
+    // Each critical section can paint as soon as it arrives. In particular,
+    // a slow years or collections query must not hold up the finance cards.
+    await Future.wait(primarySections.map((section) async {
+      final result = await _fetchSectionsSafely(
+        year: effectiveYear,
+        range: range,
+        sections: [section],
+        cacheTtl: const Duration(seconds: 60),
+        forceRefresh: forceRefresh,
+      );
+      if (!_canApplyRequest(requestTicket)) return;
+      if (result.payload != null) {
+        _mergeSummary(result.payload!);
+      } else if (result.error != null) {
+        _setSectionsError([section], errorMessageOf(result.error!));
+      }
+      if (loading) loading = false;
+      _setSectionsIdle([section]);
+    }));
+    if (!_canApplyRequest(requestTicket)) return;
+
+    if (year == requestedYear && quarter == requestedQuarter) {
+      year = effectiveYear;
+      quarter = effectiveQuarter;
+    }
+    loading = false;
+    updating = false;
+    _safeNotify();
+
+    // Defer the secondary database work so it cannot contend with the first
+    // financial paint. These cards remain independently skeletonized below.
+    final heavyResult = await _fetchSectionsSafely(
       year: effectiveYear,
       range: range,
       sections: heavySections,
       cacheTtl: const Duration(seconds: 45),
       forceRefresh: forceRefresh,
     );
-
-    try {
-      final summaryPayload = await _fetchSections(
-        year: effectiveYear,
-        range: range,
-        sections: primarySections,
-        cacheTtl: const Duration(seconds: 60),
-        forceRefresh: forceRefresh,
-      );
-      if (!_canApplyRequest(requestTicket)) return;
-
-      _mergeSummary(summaryPayload);
-      year = effectiveYear;
-      quarter = effectiveQuarter;
-      loading = false;
-      updating = false;
-      _safeNotify();
-    } catch (e) {
-      if (!_canApplyRequest(requestTicket)) return;
-      error = errorMessageOf(e);
-      loading = false;
-      updating = false;
-      _safeNotify();
-    }
-
-    final heavyResult = await heavyFuture;
     if (!_canApplyRequest(requestTicket)) return;
     if (heavyResult.payload != null) {
       _mergeSummary(heavyResult.payload!);
